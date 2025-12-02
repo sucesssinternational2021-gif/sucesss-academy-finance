@@ -1,150 +1,221 @@
-  <!DOCTYPE html>
+<!-- 
+    FILE: index.html
+    PURPOSE: Login page for GitSucesss
+    LINKS TO: dashboard.html (after login)
+    FEATURES: Login form, GitHub OAuth button, success message
+    USERNAME: successinternational2021-gif (auto-filled)
+-->
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sucesss Model International Academy</title>
-    <link rel="stylesheet" href="css/auth.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <title>Login - GitSucesss</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            color: #c9d1d9;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .login-container {
+            background: #21262d;
+            border-radius: 12px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #30363d;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo h1 {
+            color: #f0f6fc;
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        .logo span {
+            color: #58a6ff;
+        }
+        .logo p {
+            color: #8b949e;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #c9d1d9;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+        .login-btn:hover {
+            background: #2ea043;
+        }
+        .github-login {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            margin-top: 15px;
+        }
+        .github-login:hover {
+            background: #30363d;
+        }
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+            color: #8b949e;
+        }
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #30363d;
+        }
+        .divider span {
+            background: #21262d;
+            padding: 0 15px;
+            position: relative;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #8b949e;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+        .success-message {
+            background: rgba(35, 134, 54, 0.1);
+            border: 1px solid rgba(35, 134, 54, 0.4);
+            color: #3fb950;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        .success-message.show {
+            display: block;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
-        <div class="login-header">
-            <div class="school-brand">
-                <div class="logo-container">
-                    <i class="fas fa-graduation-cap"></i>
-                    <div class="school-name">
-                        <h1>Sucesss Model International Academy</h1>
-                        <p class="motto">"Excellence in Education, Success in Life"</p>
-                    </div>
-                </div>
-                <p class="system-name">School Finance & Management System</p>
-            </div>
+        <div class="logo">
+            <h1>Git<span>Sucesss</span></h1>
+            <p>successinternational2021-gif</p>
         </div>
         
-        <div class="login-main">
-            <div class="login-card">
-                <div class="card-header">
-                    <h2><i class="fas fa-lock"></i> Secure Login</h2>
-                    <p>Access your school management dashboard</p>
-                </div>
-                
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label for="email"><i class="fas fa-envelope"></i> Email</label>
-                        <input type="email" id="email" placeholder="admin@sucesss.com" required value="admin@sucesss.com">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="password"><i class="fas fa-key"></i> Password</label>
-                        <div class="password-container">
-                            <input type="password" id="password" placeholder="Enter password" required value="admin123">
-                            <button type="button" class="toggle-password" id="togglePassword"><i class="fas fa-eye"></i></button>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="academicYear"><i class="fas fa-calendar-alt"></i> Academic Year</label>
-                        <select id="academicYear" required>
-                            <option value="">Select Year</option>
-                            <option value="2024-2025" selected>2024-2025</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-options">
-                        <label class="checkbox">
-                            <input type="checkbox" id="rememberMe" checked>
-                            <span>Remember me</span>
-                        </label>
-                        <a href="#" class="forgot-link" id="forgotPassword">Forgot Password?</a>
-                    </div>
-                    
-                    <button type="submit" class="login-btn">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span>Login to Dashboard</span>
-                    </button>
-                    
-                    <div class="demo-credentials">
-                        <h4><i class="fas fa-info-circle"></i> Demo Credentials</h4>
-                        <div class="credential-list">
-                            <div class="credential"><strong>Admin:</strong> admin@sucesss.com / admin123</div>
-                            <div class="credential"><strong>Accountant:</strong> accountant@sucesss.com / account123</div>
-                            <div class="credential"><strong>Teacher:</strong> teacher@sucesss.com / teacher123</div>
-                        </div>
-                    </div>
-                </form>
+        <div class="success-message" id="successMessage">
+            ✅ Login successful! Redirecting...
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username or Email</label>
+                <input type="text" id="username" placeholder="Enter your username or email" required>
             </div>
             
-            <div class="system-features">
-                <div class="features-header">
-                    <h3><i class="fas fa-star"></i> System Features</h3>
-                    <p>Complete school finance management</p>
-                </div>
-                
-                <div class="features-grid">
-                    <div class="feature">
-                        <div class="feature-icon"><i class="fas fa-money-check-alt"></i></div>
-                        <h4>Fee Management</h4>
-                        <p>Track all fee payments automatically</p>
-                    </div>
-                    
-                    <div class="feature">
-                        <div class="feature-icon"><i class="fas fa-user-graduate"></i></div>
-                        <h4>Student Records</h4>
-                        <p>Comprehensive student database</p>
-                    </div>
-                    
-                    <div class="feature">
-                        <div class="feature-icon"><i class="fas fa-chalkboard-teacher"></i></div>
-                        <h4>Staff Management</h4>
-                        <p>Teacher records and salary processing</p>
-                    </div>
-                    
-                    <div class="feature">
-                        <div class="feature-icon"><i class="fas fa-chart-pie"></i></div>
-                        <h4>Financial Reports</h4>
-                        <p>Generate detailed reports</p>
-                    </div>
-                    
-                    <div class="feature">
-                        <div class="feature-icon"><i class="fas fa-print"></i></div>
-                        <h4>Receipt Printing</h4>
-                        <p>A4 and POS receipt generation</p>
-                    </div>
-                    
-                    <div class="feature">
-                        <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
-                        <h4>Responsive Design</h4>
-                        <p>Access from any device</p>
-                    </div>
-                </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required>
             </div>
+            
+            <button type="submit" class="login-btn">Sign In</button>
+        </form>
+        
+        <div class="divider">
+            <span>OR</span>
         </div>
         
-        <div class="technical-info">
-            <p><i class="fas fa-database"></i> Powered by Firebase</p>
-            <p><i class="fas fa-cloud"></i> Hosted on GitHub Pages</p>
-            <p><i class="fas fa-code"></i> Sucesss Academy v1.0</p>
+        <a href="dashboard.html">
+            <button class="login-btn github-login">
+                <svg style="width:20px;height:20px;vertical-align:middle;margin-right:8px;" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"/>
+                </svg>
+                Continue with GitHub
+            </button>
+        </a>
+        
+        <div class="footer">
+            <p>By signing in, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a></p>
+            <p style="margin-top: 10px;">
+                <a href="dashboard.html">Go to Dashboard</a> • 
+                <a href="error.html">Need Help?</a>
+            </p>
         </div>
     </div>
 
     <script>
-        // Simple login for testing
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('Login successful! Welcome to Sucesss Academy.');
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple validation
+            if (username && password) {
+                const successMsg = document.getElementById('successMessage');
+                successMsg.classList.add('show');
+                
+                // Simulate login process
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+            }
         });
         
-        // Toggle password visibility
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordInput = document.getElementById('password');
-            const type = passwordInput.type === 'password' ? 'text' : 'password';
-            passwordInput.type = type;
-            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+        // Auto-fill for testing
+        window.addEventListener('load', function() {
+            document.getElementById('username').value = 'successinternational2021-gif';
         });
     </script>
 </body>
-</html>       
+</html>
