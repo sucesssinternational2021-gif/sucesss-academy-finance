@@ -1,0 +1,347 @@
+<!-- 
+    FILE: index.html
+    PURPOSE: Login page for Sucesss Academy Finance System
+    REDIRECTS TO: finance-dashboard.html (after login)
+    FEATURES: Login form, auto-fill for testing
+    USERNAME: finance.admin (auto-filled)
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sucesss Academy Finance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo h1 {
+            color: #2c3e50;
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+        .logo .sucesss {
+            color: #3498db;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .logo .academy {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .logo .finance {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .logo p {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            color: #2c3e50;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .login-btn:hover {
+            background: #219653;
+        }
+        .login-btn:active {
+            transform: translateY(1px);
+        }
+        .demo-login {
+            background: #3498db;
+            margin-top: 15px;
+        }
+        .demo-login:hover {
+            background: #2980b9;
+        }
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+            color: #7f8c8d;
+        }
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e9ecef;
+        }
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            color: #7f8c8d;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .success-message {
+            background: rgba(39, 174, 96, 0.1);
+            border: 1px solid rgba(39, 174, 96, 0.3);
+            color: #27ae60;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        .success-message.show {
+            display: block;
+        }
+        .school-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+        .system-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+        .system-info h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .system-info p {
+            color: #7f8c8d;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .sucesss-badge {
+            background: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .test-credentials {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .test-credentials h4 {
+            color: #856404;
+            margin-bottom: 5px;
+        }
+        .test-credentials p {
+            color: #856404;
+            margin: 5px 0;
+        }
+        .test-credentials code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <div class="school-icon">🏫</div>
+            <h1><span class="sucesss">Sucesss</span> <span class="academy">Academy</span> <span class="finance">Finance</span> <span class="sucesss-badge">v2.1</span></h1>
+            <p>School Financial Management System</p>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            ✅ Login successful! Redirecting to Sucesss Finance Dashboard...
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter your username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="login-btn">
+                🔐 Sign In to Finance System
+            </button>
+        </form>
+        
+        <div class="divider">
+            <span>OR</span>
+        </div>
+        
+        <button class="login-btn demo-login" onclick="useDemoCredentials()">
+            🎓 Use Demo Account
+        </button>
+        
+        <div class="test-credentials">
+            <h4>📋 Test Credentials</h4>
+            <p><strong>Username:</strong> <code>finance.admin</code></p>
+            <p><strong>Password:</strong> <code>sucesss2024</code></p>
+            <p style="margin-top: 10px; font-size: 12px;">Click "Use Demo Account" to auto-fill</p>
+        </div>
+        
+        <div class="system-info">
+            <h4>📊 Sucesss Academy Finance System</h4>
+            <p>This system is for authorized staff of Sucesss Academy International only. Access financial dashboard, student records, and payment management tools.</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 <span class="sucesss">Sucesss</span> Academy International • <a href="mailto:finance@sucesssacademy.edu">Need Help?</a></p>
+            <p style="margin-top: 10px;">
+                <a href="finance-dashboard.html">Go to Dashboard</a> • 
+                <a href="error.html">System Status</a> •
+                <a href="reports.html">View Reports</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple validation
+            if (username && password) {
+                const successMsg = document.getElementById('successMessage');
+                successMsg.classList.add('show');
+                
+                // Simulate login process
+                setTimeout(() => {
+                    window.location.href = 'finance-dashboard.html';
+                }, 1500);
+            }
+        });
+        
+        function useDemoCredentials() {
+            document.getElementById('username').value = 'finance.admin';
+            document.getElementById('password').value = 'sucesss2024';
+            
+            const successMsg = document.getElementById('successMessage');
+            successMsg.textContent = '✅ Sucesss Academy demo credentials loaded! Click "Sign In" to continue.';
+            successMsg.classList.add('show');
+            
+            // Auto-submit after 1 second
+            setTimeout(() => {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }, 1000);
+        }
+        
+        // Auto-fill for testing
+        window.addEventListener('load', function() {
+            // Auto-fill demo credentials after 2 seconds
+            setTimeout(() => {
+                document.getElementById('username').value = 'finance.admin';
+                document.getElementById('password').value = 'sucesss2024';
+                
+                // Show welcome message
+                const welcomeMsg = 'Welcome to Sucesss Academy Finance System. Demo credentials loaded.';
+                console.log(welcomeMsg);
+            }, 2000);
+        });
+        
+        // Enter key to submit
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
+        
+        // Add some visual effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add pulsing animation to school icon
+            const icon = document.querySelector('.school-icon');
+            setInterval(() => {
+                icon.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    icon.style.transform = 'scale(1)';
+                }, 500);
+            }, 3000);
+            
+            // Log system access
+            console.log('🔐 Sucesss Academy Finance System Login Page');
+            console.log('📍 Access: https://sucesssacademy.edu/finance');
+            console.log('👥 Authorized Personnel Only');
+        });
+    </script>
+</body>
+</html>
