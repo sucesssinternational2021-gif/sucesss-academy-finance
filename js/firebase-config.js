@@ -1,15 +1,15 @@
 // ============================================
-// FIREBASE CONFIG - Success Model International Academy
+// FIREBASE CONFIG - Sucesss Model International Academy
 // ============================================
 
-// REPLACE WITH YOUR ACTUAL FIREBASE CONFIG FROM CONSOLE
+// REPLACE WITH YOUR ACTUAL FIREBASE CONFIG
 const firebaseConfig = {
-    apiKey: "AIzaSyC-Xz6BftZJf96JDZu...", // Your complete key
-    authDomain: "success-academy.firebaseapp.com",
-    projectId: "success-academy",
-    storageBucket: "success-academy.appspot.com",
-    messagingSenderId: "123456789012", // Your number
-    appId: "1:123456789012:web:abcdef1234567890abcdef" // Your app ID
+    apiKey: "AIzaSyC-Xz6BftZJf96JDZu...",
+    authDomain: "sucesss-academy.firebaseapp.com",
+    projectId: "sucesss-academy",
+    storageBucket: "sucesss-academy.appspot.com",
+    messagingSenderId: "123456789012",
+    appId: "1:123456789012:web:abcdef1234567890abcdef"
 };
 
 // ============================================
@@ -19,7 +19,7 @@ const firebaseConfig = {
 // Initialize Firebase
 if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
-    console.log("✅ Firebase initialized for Success Academy");
+    console.log("✅ Firebase initialized for Sucesss Academy");
 }
 
 // Make services available globally
@@ -34,4 +34,4 @@ if (typeof firebase !== 'undefined') {
     });
 }
 
-console.log("🚀 Firebase configuration loaded");
+console.log("🚀 Firebase configuration loaded for Sucesss Academy");
