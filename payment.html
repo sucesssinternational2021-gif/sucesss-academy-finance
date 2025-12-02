@@ -3,29 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Portal - Success Model International Academy</title>
+    <title>Payment Portal - Sucesss Academy Finance</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
-
+        
         body {
-            background-color: #f0f4f8;
-            color: #333;
-            line-height: 1.6;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
         }
-
-        /* Header Styles */
+        
+        /* Header */
         .header {
-            background: linear-gradient(135deg, #1a5f7a 0%, #2c3e50 100%);
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
             color: white;
             padding: 20px 0;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-
+        
         .header-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -34,16 +33,16 @@
             justify-content: space-between;
             align-items: center;
         }
-
+        
         .logo {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-
+        
         .logo-icon {
             background: white;
-            color: #1a5f7a;
+            color: #2c3e50;
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -52,35 +51,76 @@
             justify-content: center;
             font-weight: bold;
             font-size: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-
+        
         .school-name h1 {
             font-size: 24px;
             margin-bottom: 5px;
         }
-
+        
+        .school-name .sucesss {
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        .school-name .academy {
+            color: white;
+            font-weight: 600;
+        }
+        
+        .school-name .finance {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
         .school-name p {
             font-size: 14px;
             opacity: 0.9;
         }
-
+        
         .user-info {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-
+        
         .user-avatar {
             width: 40px;
             height: 40px;
-            background: #57cc99;
+            background: #27ae60;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            color: white;
         }
-
+        
+        .nav-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
         /* Main Content */
         .container {
             max-width: 1200px;
@@ -90,129 +130,161 @@
             grid-template-columns: 1fr 350px;
             gap: 30px;
         }
-
-        /* Payment Summary */
-        .payment-summary {
+        
+        /* Student Info Card */
+        .student-card {
             background: white;
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
             margin-bottom: 30px;
         }
-
-        .payment-summary h2 {
-            color: #1a5f7a;
+        
+        .student-card h2 {
+            color: #2c3e50;
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 2px solid #f0f4f8;
         }
-
-        .student-info {
+        
+        .student-info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
-            padding: 20px;
+        }
+        
+        .info-item {
+            padding: 15px;
             background: #f8fafc;
             border-radius: 10px;
         }
-
+        
         .info-item h4 {
             color: #666;
             font-size: 14px;
             margin-bottom: 5px;
             text-transform: uppercase;
         }
-
+        
         .info-item p {
             font-size: 18px;
             font-weight: 600;
-            color: #333;
+            color: #2c3e50;
         }
-
-        /* Outstanding Fees */
+        
+        /* Fees Table */
+        .fees-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .fees-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f4f8;
+        }
+        
         .fees-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
-
+        
         .fees-table th {
-            background: #1a5f7a;
+            background: #2c3e50;
             color: white;
             padding: 15px;
             text-align: left;
+            font-weight: 500;
         }
-
+        
         .fees-table td {
             padding: 15px;
             border-bottom: 1px solid #eee;
         }
-
+        
         .fees-table tr:hover {
             background: #f8fafc;
         }
-
+        
         .amount {
             font-weight: bold;
-            color: #1a5f7a;
+            color: #2c3e50;
         }
-
+        
         .status-paid {
-            color: #28a745;
+            color: #27ae60;
             background: #d4edda;
             padding: 5px 10px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
         }
-
+        
         .status-pending {
-            color: #dc3545;
-            background: #f8d7da;
+            color: #e74c3c;
+            background: #fadbd8;
             padding: 5px 10px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
         }
-
+        
+        .status-overdue {
+            color: #c0392b;
+            background: #f2d7d5;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
         /* Payment Methods */
         .payment-methods {
             background: white;
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
         }
-
+        
         .payment-methods h2 {
-            color: #1a5f7a;
+            color: #2c3e50;
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 2px solid #f0f4f8;
         }
-
-        .method {
+        
+        .methods-grid {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .method-card {
             display: flex;
             align-items: center;
             gap: 15px;
             padding: 20px;
-            margin-bottom: 15px;
             border: 2px solid #e9ecef;
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s;
         }
-
-        .method:hover {
-            border-color: #1a5f7a;
-            background: #f8fafc;
-        }
-
-        .method.selected {
-            border-color: #1a5f7a;
+        
+        .method-card:hover {
+            border-color: #3498db;
             background: #f0f9ff;
         }
-
+        
+        .method-card.selected {
+            border-color: #3498db;
+            background: #f0f9ff;
+        }
+        
         .method-icon {
             width: 50px;
             height: 50px;
@@ -222,18 +294,20 @@
             align-items: center;
             justify-content: center;
             font-size: 24px;
+            color: #2c3e50;
         }
-
+        
         .method-info h3 {
             font-size: 16px;
             margin-bottom: 5px;
+            color: #2c3e50;
         }
-
+        
         .method-info p {
             font-size: 14px;
             color: #666;
         }
-
+        
         /* Payment Form */
         .payment-form {
             background: white;
@@ -241,46 +315,53 @@
             padding: 30px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
         }
-
+        
+        .payment-form h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f4f8;
+        }
+        
         .form-group {
             margin-bottom: 20px;
         }
-
+        
         .form-group label {
             display: block;
             margin-bottom: 8px;
             color: #555;
             font-weight: 500;
         }
-
+        
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 14px;
             border: 2px solid #e9ecef;
             border-radius: 8px;
             font-size: 16px;
             transition: border-color 0.3s;
         }
-
+        
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #1a5f7a;
+            border-color: #3498db;
         }
-
+        
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
-
+        
         .card-icons {
             display: flex;
             gap: 10px;
             margin-top: 10px;
         }
-
+        
         .card-icon {
             width: 40px;
             height: 25px;
@@ -292,7 +373,7 @@
             font-size: 12px;
             color: #666;
         }
-
+        
         /* Payment Summary Sidebar */
         .payment-sidebar {
             background: white;
@@ -303,30 +384,30 @@
             top: 30px;
             height: fit-content;
         }
-
+        
         .total-amount {
             text-align: center;
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 2px solid #f0f4f8;
         }
-
+        
         .total-amount h3 {
             color: #666;
             margin-bottom: 10px;
             font-size: 16px;
         }
-
+        
         .total {
             font-size: 36px;
             font-weight: bold;
-            color: #1a5f7a;
+            color: #2c3e50;
         }
-
+        
         .fee-breakdown {
             margin-bottom: 30px;
         }
-
+        
         .breakdown-item {
             display: flex;
             justify-content: space-between;
@@ -334,45 +415,64 @@
             padding-bottom: 10px;
             border-bottom: 1px dashed #eee;
         }
-
+        
         .pay-button {
             width: 100%;
             padding: 18px;
-            background: linear-gradient(135deg, #57cc99 0%, #1a5f7a 100%);
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
             color: white;
             border: none;
             border-radius: 10px;
             font-size: 18px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.3s;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
         }
-
+        
         .pay-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(87, 204, 153, 0.3);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
         }
-
+        
         .pay-button:active {
             transform: translateY(0);
         }
-
+        
         .secure-notice {
             text-align: center;
             margin-top: 20px;
             font-size: 14px;
             color: #666;
         }
-
+        
         .secure-notice i {
-            color: #28a745;
+            color: #27ae60;
             margin-right: 5px;
         }
-
+        
+        .help-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .help-box h4 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .help-box p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
         /* Footer */
         .footer {
             background: #2c3e50;
@@ -380,7 +480,7 @@
             padding: 30px 0;
             margin-top: 50px;
         }
-
+        
         .footer-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -389,12 +489,13 @@
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 30px;
         }
-
+        
         .footer-section h3 {
             margin-bottom: 20px;
             font-size: 18px;
+            color: #27ae60;
         }
-
+        
         .footer-section p,
         .footer-section a {
             color: #bdc3c7;
@@ -402,11 +503,11 @@
             display: block;
             text-decoration: none;
         }
-
+        
         .footer-section a:hover {
             color: white;
         }
-
+        
         .copyright {
             text-align: center;
             padding-top: 30px;
@@ -415,7 +516,7 @@
             color: #95a5a6;
             font-size: 14px;
         }
-
+        
         /* Modal */
         .modal {
             display: none;
@@ -429,7 +530,7 @@
             align-items: center;
             justify-content: center;
         }
-
+        
         .modal-content {
             background: white;
             padding: 40px;
@@ -438,20 +539,25 @@
             max-width: 500px;
             width: 90%;
         }
-
+        
         .modal-icon {
             font-size: 60px;
-            color: #57cc99;
+            color: #27ae60;
             margin-bottom: 20px;
         }
-
+        
         .modal h2 {
-            color: #1a5f7a;
+            color: #2c3e50;
             margin-bottom: 15px;
         }
-
+        
+        .modal p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
         .close-modal {
-            background: #1a5f7a;
+            background: #2c3e50;
             color: white;
             border: none;
             padding: 12px 30px;
@@ -460,8 +566,8 @@
             cursor: pointer;
             margin-top: 20px;
         }
-
-        /* Responsive Design */
+        
+        /* Responsive */
         @media (max-width: 992px) {
             .container {
                 grid-template-columns: 1fr;
@@ -471,7 +577,7 @@
                 position: static;
             }
         }
-
+        
         @media (max-width: 768px) {
             .header-container {
                 flex-direction: column;
@@ -483,7 +589,7 @@
                 grid-template-columns: 1fr;
             }
             
-            .student-info {
+            .student-info-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -495,17 +601,27 @@
     <header class="header">
         <div class="header-container">
             <div class="logo">
-                <div class="logo-icon">SMIA</div>
+                <div class="logo-icon">SAF</div>
                 <div class="school-name">
-                    <h1>Success Model International Academy</h1>
-                    <p>Financial Management System</p>
+                    <h1>
+                        <span class="sucesss">Sucesss</span>
+                        <span class="academy">Academy</span>
+                        <span class="finance">Finance</span>
+                    </h1>
+                    <p>Payment Processing Portal</p>
                 </div>
             </div>
-            <div class="user-info">
-                <div class="user-avatar">JS</div>
-                <div>
-                    <div style="font-weight: bold;">John Student</div>
-                    <div style="font-size: 14px;">Grade 12 | Student ID: SMIA2023001</div>
+            
+            <div class="nav-controls">
+                <button class="back-btn" onclick="window.location.href='finance-dashboard.html'">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+                <div class="user-info">
+                    <div class="user-avatar">FA</div>
+                    <div>
+                        <div style="font-weight: bold;">Finance Admin</div>
+                        <div style="font-size: 14px;">Administrator</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -515,29 +631,32 @@
     <div class="container">
         <!-- Left Column: Payment Details -->
         <div class="left-column">
-            <!-- Payment Summary -->
-            <div class="payment-summary">
-                <h2><i class="fas fa-receipt"></i> Outstanding Fees Summary</h2>
-                
-                <div class="student-info">
+            <!-- Student Information -->
+            <div class="student-card">
+                <h2><i class="fas fa-user-graduate"></i> Student Information</h2>
+                <div class="student-info-grid">
                     <div class="info-item">
                         <h4>Student Name</h4>
-                        <p>John Student</p>
+                        <p>Alex Johnson</p>
                     </div>
                     <div class="info-item">
                         <h4>Student ID</h4>
-                        <p>SMIA2023001</p>
-                    </div>
-                    <div class="info-item">
-                        <h4>Academic Year</h4>
-                        <p>2023-2024</p>
+                        <p>SA2024001</p>
                     </div>
                     <div class="info-item">
                         <h4>Grade Level</h4>
                         <p>Grade 12</p>
                     </div>
+                    <div class="info-item">
+                        <h4>Academic Year</h4>
+                        <p>2023-2024</p>
+                    </div>
                 </div>
+            </div>
 
+            <!-- Outstanding Fees -->
+            <div class="fees-section">
+                <h2><i class="fas fa-receipt"></i> Outstanding Fees</h2>
                 <table class="fees-table">
                     <thead>
                         <tr>
@@ -550,33 +669,33 @@
                     <tbody>
                         <tr>
                             <td>Tuition Fee - Term 3</td>
-                            <td>2024-03-15</td>
+                            <td>Mar 15, 2024</td>
                             <td><span class="status-pending">Pending</span></td>
-                            <td class="amount">$1,500.00</td>
+                            <td class="amount">$1,200.00</td>
+                        </tr>
+                        <tr>
+                            <td>Examination Fee</td>
+                            <td>Mar 10, 2024</td>
+                            <td><span class="status-overdue">Overdue</span></td>
+                            <td class="amount">$150.00</td>
                         </tr>
                         <tr>
                             <td>Laboratory Fee</td>
-                            <td>2024-03-20</td>
+                            <td>Mar 20, 2024</td>
                             <td><span class="status-pending">Pending</span></td>
-                            <td class="amount">$200.00</td>
+                            <td class="amount">$100.00</td>
                         </tr>
                         <tr>
                             <td>Library Fee</td>
-                            <td>2024-02-28</td>
+                            <td>Feb 28, 2024</td>
                             <td><span class="status-paid">Paid</span></td>
                             <td class="amount">$50.00</td>
                         </tr>
                         <tr>
                             <td>Sports Fee</td>
-                            <td>2024-03-10</td>
-                            <td><span class="status-pending">Pending</span></td>
-                            <td class="amount">$100.00</td>
-                        </tr>
-                        <tr>
-                            <td>Technology Fee</td>
-                            <td>2024-03-05</td>
-                            <td><span class="status-pending">Pending</span></td>
-                            <td class="amount">$150.00</td>
+                            <td>Mar 05, 2024</td>
+                            <td><span class="status-overdue">Overdue</span></td>
+                            <td class="amount">$75.00</td>
                         </tr>
                     </tbody>
                 </table>
@@ -585,42 +704,42 @@
             <!-- Payment Methods -->
             <div class="payment-methods">
                 <h2><i class="fas fa-credit-card"></i> Select Payment Method</h2>
-                
-                <div class="method" onclick="selectMethod('card')" id="card-method">
-                    <div class="method-icon">
-                        <i class="fas fa-credit-card"></i>
+                <div class="methods-grid">
+                    <div class="method-card" onclick="selectMethod('card')" id="card-method">
+                        <div class="method-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="method-info">
+                            <h3>Credit/Debit Card</h3>
+                            <p>Visa, MasterCard, American Express</p>
+                        </div>
                     </div>
-                    <div class="method-info">
-                        <h3>Credit/Debit Card</h3>
-                        <p>Visa, MasterCard, American Express</p>
-                    </div>
-                </div>
 
-                <div class="method" onclick="selectMethod('bank')" id="bank-method">
-                    <div class="method-icon">
-                        <i class="fas fa-university"></i>
+                    <div class="method-card" onclick="selectMethod('bank')" id="bank-method">
+                        <div class="method-icon">
+                            <i class="fas fa-university"></i>
+                        </div>
+                        <div class="method-info">
+                            <h3>Bank Transfer</h3>
+                            <p>Direct bank transfer to school account</p>
+                        </div>
                     </div>
-                    <div class="method-info">
-                        <h3>Bank Transfer</h3>
-                        <p>Direct bank transfer to school account</p>
-                    </div>
-                </div>
 
-                <div class="method" onclick="selectMethod('mobile')" id="mobile-method">
-                    <div class="method-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <div class="method-info">
-                        <h3>Mobile Money</h3>
-                        <p>Pay via mobile money services</p>
+                    <div class="method-card" onclick="selectMethod('mobile')" id="mobile-method">
+                        <div class="method-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="method-info">
+                            <h3>Mobile Money</h3>
+                            <p>Pay via mobile money services</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Card Payment Form -->
+            <!-- Payment Form -->
             <div class="payment-form" id="card-form">
-                <h2><i class="fas fa-file-invoice-dollar"></i> Card Details</h2>
-                
+                <h2><i class="fas fa-file-invoice-dollar"></i> Payment Details</h2>
                 <form id="paymentForm">
                     <div class="form-group">
                         <label for="card-number">Card Number</label>
@@ -645,12 +764,12 @@
 
                     <div class="form-group">
                         <label for="card-name">Name on Card</label>
-                        <input type="text" id="card-name" placeholder="John Student">
+                        <input type="text" id="card-name" placeholder="Alex Johnson">
                     </div>
 
                     <div class="form-group">
                         <label for="email-receipt">Email for Receipt</label>
-                        <input type="email" id="email-receipt" placeholder="student@smia.edu" value="john.student@smia.edu">
+                        <input type="email" id="email-receipt" placeholder="alex.johnson@sucesss.edu" value="alex.johnson@sucesss.edu">
                     </div>
                 </form>
             </div>
@@ -660,50 +779,47 @@
         <div class="payment-sidebar">
             <div class="total-amount">
                 <h3>TOTAL PAYABLE AMOUNT</h3>
-                <div class="total">$1,950.00</div>
+                <div class="total">$1,525.00</div>
             </div>
 
             <div class="fee-breakdown">
                 <h3>Fee Breakdown</h3>
                 <div class="breakdown-item">
                     <span>Tuition Fee</span>
-                    <span class="amount">$1,500.00</span>
+                    <span class="amount">$1,200.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span>Examination Fee</span>
+                    <span class="amount">$150.00</span>
                 </div>
                 <div class="breakdown-item">
                     <span>Laboratory Fee</span>
-                    <span class="amount">$200.00</span>
-                </div>
-                <div class="breakdown-item">
-                    <span>Sports Fee</span>
                     <span class="amount">$100.00</span>
                 </div>
                 <div class="breakdown-item">
-                    <span>Technology Fee</span>
-                    <span class="amount">$150.00</span>
+                    <span>Sports Fee</span>
+                    <span class="amount">$75.00</span>
                 </div>
-                <div class="breakdown-item" style="border-bottom: 2px solid #1a5f7a; padding-top: 10px;">
+                <div class="breakdown-item" style="border-bottom: 2px solid #2c3e50; padding-top: 10px;">
                     <span style="font-weight: bold;">Total</span>
-                    <span class="amount" style="font-size: 20px;">$1,950.00</span>
+                    <span class="amount" style="font-size: 20px;">$1,525.00</span>
                 </div>
             </div>
 
             <button class="pay-button" onclick="processPayment()">
-                <i class="fas fa-lock"></i> PAY SECURELY
+                <i class="fas fa-lock"></i> PROCESS PAYMENT
             </button>
 
             <div class="secure-notice">
                 <i class="fas fa-shield-alt"></i>
-                <span>Your payment is secure and encrypted</span>
+                <span>256-bit SSL Encryption | PCI DSS Compliant</span>
             </div>
 
-            <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px;">
-                <h4 style="color: #666; margin-bottom: 10px;">Need Help?</h4>
-                <p style="font-size: 14px; color: #666; margin-bottom: 5px;">
-                    <i class="fas fa-phone" style="color: #1a5f7a;"></i> Finance Office: (123) 456-7890
-                </p>
-                <p style="font-size: 14px; color: #666;">
-                    <i class="fas fa-envelope" style="color: #1a5f7a;"></i> finance@smia.edu
-                </p>
+            <div class="help-box">
+                <h4><i class="fas fa-question-circle"></i> Need Help?</h4>
+                <p><i class="fas fa-phone"></i> Finance Office: (555) 123-4567</p>
+                <p><i class="fas fa-envelope"></i> finance@sucesss.edu</p>
+                <p><i class="fas fa-clock"></i> Mon-Fri: 8:00 AM - 4:00 PM</p>
             </div>
         </div>
     </div>
@@ -715,10 +831,10 @@
                 <i class="fas fa-check-circle"></i>
             </div>
             <h2>Payment Successful!</h2>
-            <p>Your payment of <strong>$1,950.00</strong> has been processed successfully.</p>
-            <p>A receipt has been sent to your email: <strong>john.student@smia.edu</strong></p>
-            <p>Transaction ID: <strong>SMIA-TXN-20240315-001</strong></p>
-            <button class="close-modal" onclick="closeModal()">Continue</button>
+            <p>Payment of <strong>$1,525.00</strong> processed successfully.</p>
+            <p>Receipt sent to: <strong>alex.johnson@sucesss.edu</strong></p>
+            <p>Transaction ID: <strong>SAF-TXN-20240315-001</strong></p>
+            <button class="close-modal" onclick="closeModal()">Return to Dashboard</button>
         </div>
     </div>
 
@@ -726,30 +842,30 @@
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-section">
-                <h3>Success Model International Academy</h3>
-                <p>Excellence in Education Since 1995</p>
+                <h3>Sucesss Academy Finance</h3>
+                <p>Secure Financial Management System</p>
                 <p>123 Education Boulevard</p>
                 <p>Academic City, AC 12345</p>
             </div>
             
             <div class="footer-section">
                 <h3>Quick Links</h3>
-                <a href="dashboard.html">Dashboard</a>
-                <a href="fees.html">Fee Structure</a>
+                <a href="finance-dashboard.html">Dashboard</a>
+                <a href="payment.html">Payment Portal</a>
                 <a href="receipts.html">Payment Receipts</a>
-                <a href="support.html">Support</a>
+                <a href="fees.html">Fee Structure</a>
             </div>
             
             <div class="footer-section">
-                <h3>Contact Information</h3>
-                <p><i class="fas fa-phone"></i> (123) 456-7890</p>
-                <p><i class="fas fa-envelope"></i> finance@smia.edu</p>
-                <p><i class="fas fa-clock"></i> Mon-Fri: 8:00 AM - 4:00 PM</p>
+                <h3>Support</h3>
+                <a href="mailto:finance@sucesss.edu"><i class="fas fa-envelope"></i> finance@sucesss.edu</a>
+                <a href="mailto:support@sucesss.edu"><i class="fas fa-life-ring"></i> support@sucesss.edu</a>
+                <p><i class="fas fa-phone"></i> (555) 123-4567</p>
             </div>
         </div>
         <div class="copyright">
-            <p>&copy; 2024 Success Model International Academy. All rights reserved.</p>
-            <p>Financial Management System v2.1</p>
+            <p>&copy; 2024 Sucesss Academy Finance System. All rights reserved.</p>
+            <p>Payment Portal v1.2 | Secure Transaction Processing</p>
         </div>
     </footer>
 
@@ -757,46 +873,38 @@
         // Initialize with card method selected
         document.addEventListener('DOMContentLoaded', function() {
             selectMethod('card');
+            
+            // Format card number input
+            document.getElementById('card-number').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                let formatted = '';
+                for (let i = 0; i < value.length && i < 16; i++) {
+                    if (i > 0 && i % 4 === 0) formatted += ' ';
+                    formatted += value[i];
+                }
+                e.target.value = formatted;
+            });
+
+            // Format expiry date input
+            document.getElementById('expiry-date').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+                e.target.value = value;
+            });
         });
 
         // Payment method selection
         function selectMethod(method) {
             // Remove selected class from all methods
-            document.querySelectorAll('.method').forEach(m => {
+            document.querySelectorAll('.method-card').forEach(m => {
                 m.classList.remove('selected');
             });
             
             // Add selected class to clicked method
             document.getElementById(`${method}-method`).classList.add('selected');
-            
-            // Show appropriate form (in real implementation, you'd have different forms)
-            const cardForm = document.getElementById('card-form');
-            if (method === 'card') {
-                cardForm.style.display = 'block';
-            } else {
-                cardForm.style.display = 'none';
-            }
         }
-
-        // Format card number input
-        document.getElementById('card-number').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            let formatted = '';
-            for (let i = 0; i < value.length && i < 16; i++) {
-                if (i > 0 && i % 4 === 0) formatted += ' ';
-                formatted += value[i];
-            }
-            e.target.value = formatted;
-        });
-
-        // Format expiry date input
-        document.getElementById('expiry-date').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length >= 2) {
-                value = value.substring(0, 2) + '/' + value.substring(2, 4);
-            }
-            e.target.value = value;
-        });
 
         // Process payment
         function processPayment() {
@@ -807,7 +915,7 @@
             const cardName = document.getElementById('card-name').value;
 
             if (!cardNumber || !expiryDate || !cvv || !cardName) {
-                alert('Please fill in all card details.');
+                alert('Please fill in all payment details.');
                 return;
             }
 
@@ -833,15 +941,14 @@
             }, 2000);
         }
 
-        // Close modal
+        // Close modal and redirect
         function closeModal() {
             document.getElementById('successModal').style.display = 'none';
-            // In real implementation, redirect to receipt page
-            // window.location.href = 'receipt.html?id=SMIA-TXN-20240315-001';
+            window.location.href = 'finance-dashboard.html';
         }
 
-        // Add smooth animations
-        document.querySelectorAll('.method').forEach(method => {
+        // Add click animations
+        document.querySelectorAll('.method-card').forEach(method => {
             method.addEventListener('click', function() {
                 this.style.transform = 'scale(0.98)';
                 setTimeout(() => {
