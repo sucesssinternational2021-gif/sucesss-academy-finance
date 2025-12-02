@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fees & Levies - Sucesss Academy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background: #f5f7fa;
+            color: #333;
+        }
+        .navbar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .logo span {
+            color: #3498db;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 15px;
+            border-radius: 4px;
+        }
+        .nav-links a:hover {
+            background: #34495e;
+        }
+        .nav-links a.active {
+            background: #3498db;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .page-header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-card h3 {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #7f8c8d;
+            border-bottom: 3px solid transparent;
+        }
+        .tab.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: #34495e;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .fee-type {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .type-tuition { background: #d6eaf8; color: #3498db; }
+        .type-development { background: #d5f4e6; color: #27ae60; }
+        .type-examination { background: #fdebd0; color: #e67e22; }
+        .type-uniform { background: #e8daef; color: #9b59b6; }
+        .type-sports { background: #fadbd8; color: #e74c3c; }
+        .type-other { background: #f2f3f4; color: #7f8c8d; }
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn-success {
+            background: #27ae60;
+        }
+        .btn-success:hover {
+            background: #219653;
+        }
+        .btn-warning {
+            background: #f39c12;
+        }
+        .btn-warning:hover {
+            background: #d68910;
+        }
+        .sucesss-badge {
+            background: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .filter-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .fee-form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .amount {
+            font-weight: bold;
+            color: #27ae60;
+        }
+        .status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .status-active { background: #d5f4e6; color: #27ae60; }
+        .status-inactive { background: #f2f3f4; color: #7f8c8d; }
+        .levy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .levy-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .levy-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .levy-card .type {
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        .levy-card .details {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .levy-card .amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+        .levy-card .classes {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+        .required-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+        .term-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .term-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .term-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .class-fee-table {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            Sucesss<span>Academy</span>
+            <span class="sucesss-badge">FEES & LEVIES</span>
+        </div>
+        
+        <div class="nav-links">
+            <a href="finance-dashboard.html">Dashboard</a>
+            <a href="payments.html">Payments</a>
+            <a href="students.html">Students</a>
+            <a href="fees-levies.html" class="active">Fees & Levies</a>
+            <a href="expenses.html">Expenses</a>
+            <a href="reports.html">Reports</a>
+            <a href="index.html">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>💰 Sucesss Academy Fees & Other Levies</h1>
+            <div>
+                <a href="#add-fee" class="btn btn-success">+ Add Fee/Levy</a>
+                <a href="#" class="btn">📊 Fee Structure</a>
+            </div>
+        </div>
+
+        <!-- Fee Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>ANNUAL TUITION FEES</h3>
+                <div class="value">₦51.3M</div>
+                <div style="color: #27ae60; font-size: 14px;">342 students × avg. ₦150K</div>
+            </div>
+            <div class="stat-card">
+                <h3>OTHER LEVIES</h3>
+                <div class="value">₦8.5M</div>
+                <div style="color: #9b59b6; font-size: 14px;">Development, Exams, Sports</div>
+            </div>
+            <div class="stat-card">
+                <h3>ACTIVE FEE ITEMS</h3>
+                <div class="value">18</div>
+                <div style="color: #3498db; font-size: 14px;">6 mandatory, 12 optional</div>
+            </div>
+            <div class="stat-card">
+                <h3>TERM FEES COLLECTED</h3>
+                <div class="value">78%</div>
+                <div style="color: #27ae60; font-size: 14px;">₦34.5M of ₦44.3M target</div>
+            </div>
+        </div>
+
+        <!-- Term Selector -->
+        <div class="term-selector">
+            <button class="term-btn active" onclick="selectTerm(1)">First Term</button>
+            <button class="term-btn" onclick="selectTerm(2)">Second Term</button>
+            <button class="term-btn" onclick="selectTerm(3)">Third Term</button>
+            <button class="term-btn" onclick="selectTerm('all')">All Terms</button>
+        </div>
+
+        <!-- Fees Breakdown -->
+        <div class="class-fee-table">
+            <h2 style="color: #2c3e50; margin-bottom: 20px;">🏫 Class-wise Fee Structure (First Term 2024/2025)</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Class Level</th>
+                            <th>Tuition Fee</th>
+                            <th>Development Levy</th>
+                            <th>Examination Fee</th>
+                            <th>Sports Levy</th>
+                            <th>PTA Levy</th>
+                            <th>Total per Student</th>
+                            <th>Total Expected</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Nursery</strong></td>
+                            <td class="amount">₦65,000</td>
+                            <td class="amount">₦10,000</td>
+                            <td class="amount">₦5,000</td>
+                            <td class="amount">₦3,000</td>
+                            <td class="amount">₦2,000</td>
+                            <td class="amount"><strong>₦85,000</strong></td>
+                            <td class="amount">₦7,225,000</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Primary</strong></td>
+                            <td class="amount">₦95,000</td>
+                            <td class="amount">₦15,000</td>
+                            <td class="amount">₦7,000</td>
+                            <td class="amount">₦5,000</td>
+                            <td class="amount">₦3,000</td>
+                            <td class="amount"><strong>₦125,000</strong></td>
+                            <td class="amount">₦15,000,000</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Junior Secondary</strong></td>
+                            <td class="amount">₦120,000</td>
+                            <td class="amount">₦20,000</td>
+                            <td class="amount">₦10,000</td>
+                            <td class="amount">₦7,000</td>
+                            <td class="amount">₦5,000</td>
+                            <td class="amount"><strong>₦162,000</strong></td>
+                            <td class="amount">₦12,150,000</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Senior Secondary</strong></td>
+                            <td class="amount">₦145,000</td>
+                            <td class="amount">₦25,000</td>
+                            <td class="amount">₦15,000</td>
+                            <td class="amount">₦10,000</td>
+                            <td class="amount">₦7,000</td>
+                            <td class="amount"><strong>₦202,000</strong></td>
+                            <td class="amount">₦12,524,000</td>
+                        </tr>
+                        <tr style="background: #f8f9fa;">
+                            <td><strong>TOTAL</strong></td>
+                            <td class="amount">₦425,000</td>
+                            <td class="amount">₦70,000</td>
+                            <td class="amount">₦37,000</td>
+                            <td class="amount">₦25,000</td>
+                            <td class="amount">₦17,000</td>
+                            <td class="amount"><strong>₦574,000</strong></td>
+                            <td class="amount"><strong>₦46,899,000</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('all')">📋 All Fees & Levies</button>
+            <button class="tab" onclick="showTab('mandatory')">📝 Mandatory Fees</button>
+            <button class="tab" onclick="showTab('optional')">🎯 Optional Levies</button>
+            <button class="tab" onclick="showTab('add')" id="add-fee">➕ Add Fee/Levy</button>
+        </div>
+
+        <!-- All Fees Tab -->
+        <div id="all-tab" class="tab-content active">
+            <div class="filter-bar">
+                <div class="filter-row">
+                    <div>
+                        <label style="color: #7f8c8d; font-size: 14px;">Search Fee</label>
+                        <input type="text" placeholder="Fee name or code..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="color: #7f8c8d; font-size: 14px;">Fee Type</label>
+                        <select style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="">All Types</option>
+                            <option value="tuition">Tuition Fee</option>
+                            <option value="development">Development Levy</option>
+                            <option value="examination">Examination Fee</option>
+                            <option value="sports">Sports Levy</option>
+                            <option value="pta">PTA Levy</option>
+                            <option value="other">Other Levies</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #7f8c8d; font-size: 14px;">Status</label>
+                        <select style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #7f8c8d; font-size: 14px;">&nbsp;</label>
+                        <button class="btn" style="width: 100%;">🔍 Filter Fees</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Levy Cards Grid -->
+            <div class="levy-grid">
+                <div class="levy-card">
+                    <span class="fee-type type-tuition">Tuition Fee</span>
+                    <h3>First Term Tuition <span class="required-badge">Required</span></h3>
+                    <div class="details">Main academic fee covering teaching and learning materials</div>
+                    <div class="amount">₦65,000 - ₦145,000</div>
+                    <div class="classes">All classes • Varies by level</div>
+                    <div style="margin-top: 15px;">
+                        <span class="status status-active">Active</span>
+                        <button class="btn" style="float: right;">Edit</button>
+                    </div>
+                </div>
+                
+                <div class="levy-card">
+                    <span class="fee-type type-development">Development Levy</span>
+                    <h3>School Development Fund</h3>
+                    <div class="details">For infrastructure development and facility maintenance</div>
+                    <div class="amount">₦10,000 - ₦25,000</div>
+                    <div class="classes">All classes • Per term</div>
+                    <div style="margin-top: 15px;">
+                        <span class="status status-active">Active</span>
+                        <button class="btn" style="float: right;">Edit</button>
+                    </div>
+                </div>
+                
+                <div class="levy-card">
+                    <span class="fee-type type-examination">Examination Fee</span>
+                    <h3>Term Examination Fee</h3>
+                    <div class="details">Covers examination materials, invigilation, and grading</div>
+                    <div class="amount">₦5,000 - ₦15,000</div>
+                    <div class="classes">All classes • Per term</div>
+                    <div style="margin-top: 15px;">
+                        <span class="status status-active">Active</span>
+                        <button class="btn" style="float: right;">Edit</button>
+                    </div>
+                </div>
+                
+                <div class="levy-card">
+                    <span class="fee-type type-sports">Sports Levy</span>
+                    <h3>Sports & Games Fee</h3>
+                    <div class="details">For sports equipment, inter-house sports, and games</div>
+                    <div class="amount">₦3,000 - ₦10,000</div>
+                    <div class="classes">All classes • Per term</div>
+                    <div style="margin-top: 15px;">
+                        <span class="status status-active">Active</span>
+                        <button class="btn" style="float: right;">Edit</button>
+                    </div>
+                </div>
+                
+                <div class="levy-card">
+                    <span class="fee-type type-other">PTA Levy</span>
+                    <h3>Parent-Teacher Association</h3>
+                    <div class="details">PTA activities, meetings, and projects</div>
+                    <div class="amount">₦2,000 - ₦7,000</div>
+                    <div class="classes">All classes • Per term</div>
+                    <div style="margin-top: 15px;">
+                        <span class="status status-active">Active</span>
+                        <button class="btn" style="float: right;">Edit</button>
+                    </div>
+                </div>
+                
+                <div class="levy-card">
+                    <span class="fee-type type-uniform">Uniform Levy</span>
+                    <h3>School Uniform (Optional)</h3>
+                    <div class="details">New uniform purchase (optional for existing students)</div>
+                    <div class="amount">₦15,000</div>
+                    <div class="classes">New students only • One-time</div>
+                    <div style="margin-top: 15px;">
+                        <span class="status status-active">Active</span>
+                        <button class="btn" style="float: right;">Edit</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table View -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fee Code</th>
+                            <th>Fee Name</th>
+                            <th>Type</th>
+                            <th>Amount (₦)</th>
+                            <th>Applicable To</th>
+                            <th>Frequency</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>FEE-001</td>
+                            <td>First Term Tuition</td>
+                            <td><span class="fee-type type-tuition">Tuition</span></td>
+                            <td class="amount">65,000 - 145,000</td>
+                            <td>All Students</td>
+                            <td>Per Term</td>
+                            <td><span class="status status-active">Active</span></td>
+                            <td>
+                                <button class="btn" onclick="editFee('FEE-001')">Edit</button>
+                                <button class="btn btn-warning">Duplicate</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>FEE-002</td>
+                            <td>Development Levy</td>
+                            <td><span class="fee-type type-development">Development</span></td>
+                            <td class="amount">10,000 - 25,000</td>
+                            <td>All Students</td>
+                            <td>Per Term</td>
+                            <td><span class="status status-active">Active</span></td>
+                            <td>
+                                <button class="btn" onclick="editFee('FEE-002')">Edit</button>
+                                <button class="btn btn-warning">Duplicate</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>FEE-003</td>
+                            <td>Examination Fee</td>
+                            <td><span class="fee-type type-examination">Examination</span></td>
+                            <td class="amount">5,000 - 15,000</td>
+                            <td>Primary & Secondary</td>
+                            <td>Per Term</td>
+                            <td><span class="status status-active">Active</span></td>
+                            <td>
+                                <button class="btn" onclick="editFee('FEE-003')">Edit</button>
+                                <button class="btn btn-warning">Duplicate</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>FEE-004</td>
+                            <td>Sports Levy</td>
+                            <td><span class="fee-type type-sports">Sports</span></td>
+                            <td class="amount">3,000 - 10,000</td>
+                            <td>All Students</td>
+                            <td>Per Term</td>
+                            <td><span class="status status-active">Active</span></td>
+                            <td>
+                                <button class="btn" onclick="editFee('FEE-004')">Edit</button>
+                                <button class="btn btn-warning">Duplicate</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add Fee Tab -->
+        <div id="add-tab" class="tab-content">
+            <div class="fee-form">
+                <h2 style="color: #2c3e50; margin-bottom: 20px;">➕ Add New Fee or Levy</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fee Name *</label>
+                        <input type="text" id="feeName" placeholder="e.g., Development Levy" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fee Type *</label>
+                        <select id="feeType" required>
+                            <option value="">-- Select Type --</option>
+                            <option value="tuition">Tuition Fee</option>
+                            <option value="development">Development Levy</option>
+                            <option value="examination">Examination Fee</option>
+                            <option value="sports">Sports Levy</option>
+                            <option value="pta">PTA Levy</option>
+                            <option value="uniform">Uniform Levy</option>
+                            <option value="other">Other Levy</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Amount (₦) *</label>
+                        <input type="number" id="feeAmount" placeholder="Enter amount" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fee Code</label>
+                        <input type="text" id="feeCode" placeholder="Auto-generated" readonly>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Applicable To *</label>
+                        <select id="applicableTo" required>
+                            <option value="">-- Select --</option>
+                            <option value="all">All Students</option>
+                            <option value="nursery">Nursery Only</option>
+                            <option value="primary">Primary Only</option>
+                            <option value="secondary">Secondary Only</option>
+                            <option value="jss">JSS Only</option>
+                            <option value="sss">SSS Only</option>
+                            <option value="new">New Students Only</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Frequency *</label>
+                        <select id="frequency" required>
+                            <option value="">-- Select --</option>
+                            <option value="term">Per Term</option>
+                            <option value="annual">Annual</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="one-time">One-time</option>
+                            <option value="optional">Optional/On-demand</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Effective From *</label>
+                        <input type="date" id="effectiveFrom" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Effective To</label>
+                        <input type="date" id="effectiveTo">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="feeDescription" rows="3" placeholder="Describe what this fee covers..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isMandatory"> This is a mandatory fee
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isActive" checked> Active immediately
+                        </label>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 15px;">
+                    <button class="btn btn-secondary" onclick="showTab('all')">← Cancel</button>
+                    <button class="btn" onclick="previewFee()">👁️ Preview</button>
+                    <button class="btn btn-success" onclick="addFeeLevy()">💾 Add Fee/Levy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Optional Levies Summary -->
+        <div class="class-fee-table">
+            <h2 style="color: #2c3e50; margin-bottom: 20px;">🎯 Optional Levies & One-time Fees</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fee Name</th>
+                            <th>Amount (₦)</th>
+                            <th>Applicable To</th>
+                            <th>When Due</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>School Uniform (Complete Set)</td>
+                            <td class="amount">25,000</td>
+                            <td>New Students</td>
+                            <td>On Admission</td>
+                            <td><span class="status status-active">Active</span></td>
+                            <td><button class="btn">Apply</button></td>
+                        </tr>
+                        <tr>
+                            <td>WAEC/NECO Registration (SSS 3)</td>
+                            <td class="amount">45,000</td>
+                            <td>SSS 3 Students</td>
+                            <td>February 2025</td>
+                            <td><span class="status status-active">Active</span></td>
+                            <td><button class="btn">Apply</button></td>
+                        </tr>
+                        <tr>
+                            <td>Excursion Trip (JSS 2)</td>
+                            <td class="amount">15,000</td>
+                            <td>JSS 2 Students</td>
+                            <td>March 2025</td>
+                            <td><span class="status status-active">Active</span></td>
+                            <td><button class="btn">Apply</button></td>
+                        </tr>
+                        <tr>
+                            <td>Science Practical Kit</td>
+                            <td class="amount">12,000</td>
+                            <td>JSS 1 & SSS 1</td>
+                            <td>First Term</td>
+                            <td><span class="status status-active">Active</span></td>
+                            <td><button class="btn">Apply</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTerm = 1;
+        
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            // Generate fee code for add tab
+            if (tabName === 'add') {
+                generateFeeCode();
+            }
+        }
+        
+        function selectTerm(term) {
+            currentTerm = term;
+            document.querySelectorAll('.term-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const termNames = {1: 'First', 2: 'Second', 3: 'Third', 'all': 'All'};
+            alert(`Viewing ${termNames[term]} Term fee structure`);
+        }
+        
+        function generateFeeCode() {
+            const prefix = 'FEE';
+            const year = new Date().getFullYear();
+            const random = Math.floor(100 + Math.random() * 900);
+            document.getElementById('feeCode').value = `${prefix}-${year}-${random}`;
+        }
+        
+        function editFee(feeCode) {
+            alert(`Editing fee: ${feeCode}\n\nThis would open the fee editing form with pre-filled data.`);
+        }
+        
+        function previewFee() {
+            const name = document.getElementById('feeName').value;
+            const type = document.getElementById('feeType').value;
+            const amount = document.getElementById('feeAmount').value;
+            
+            if (!name || !type || !amount) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            alert(`💰 Fee Preview\n\nName: ${name}\nType: ${type}\nAmount: ₦${parseInt(amount).toLocaleString()}\n\nClick "Add Fee/Levy" to save.`);
+        }
+        
+        function addFeeLevy() {
+            const name = document.getElementById('feeName').value;
+            const type = document.getElementById('feeType').value;
+            const amount = document.getElementById('feeAmount').value;
+            const code = document.getElementById('feeCode').value;
+            
+            if (!name || !type || !amount) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            if (confirm(`Add "${name}" to fees list?\n\nAmount: ₦${parseInt(amount).toLocaleString()}\nType: ${type}\nCode: ${code}`)) {
+                alert(`✅ Fee/Levy added successfully!\n\nFee: ${name}\nAmount: ₦${parseInt(amount).toLocaleString()}\nCode: ${code}\n\nRedirecting to fees list...`);
+                
+                setTimeout(() => {
+                    showTab('all');
+                }, 1500);
+            }
+        }
+        
+        // Set default effective date to today
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('effectiveFrom').value = today;
+            
+            // Set effective to 1 year from now
+            const nextYear = new Date();
+            nextYear.setFullYear(nextYear.getFullYear() + 1);
+            document.getElementById('effectiveTo').value = nextYear.toISOString().split('T')[0];
+            
+            generateFeeCode();
+            console.log('Sucesss Academy Fees & Levies page loaded');
+        });
+    </script>
+</body>
+</html>
