@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Management - Sucesss Academy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background: #f5f7fa;
+            color: #333;
+        }
+        .navbar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .logo span {
+            color: #3498db;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 15px;
+            border-radius: 4px;
+        }
+        .nav-links a:hover {
+            background: #34495e;
+        }
+        .nav-links a.active {
+            background: #3498db;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .page-header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+        }
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn-success {
+            background: #27ae60;
+        }
+        .btn-success:hover {
+            background: #219653;
+        }
+        .search-filter {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .filter-group label {
+            margin-bottom: 5px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .filter-group select,
+        .filter-group input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: #34495e;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .status-paid {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+        .status-pending {
+            background: #ffeaa7;
+            color: #e67e22;
+        }
+        .status-overdue {
+            background: #ffcccc;
+            color: #e74c3c;
+        }
+        .status-partial {
+            background: #d6eaf8;
+            color: #3498db;
+        }
+        .amount {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .view-btn {
+            background: #3498db;
+            color: white;
+        }
+        .receipt-btn {
+            background: #27ae60;
+            color: white;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .page-btn {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .page-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-box h3 {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .stat-box .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .payment-methods {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        .method-tag {
+            background: #ecf0f1;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        .sucesss-badge {
+            background: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            Sucesss<span>Academy</span>
+            <span class="sucesss-badge">PAYMENTS</span>
+        </div>
+        
+        <div class="nav-links">
+            <a href="finance-dashboard.html">Dashboard</a>
+            <a href="payments.html" class="active">Payments</a>
+            <a href="students.html">Students</a>
+            <a href="nursery.html">Nursery</a>
+            <a href="primary.html">Primary</a>
+            <a href="secondary.html">Secondary</a>
+            <a href="reports.html">Reports</a>
+            <a href="index.html">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>💳 Sucesss Academy Payment Management</h1>
+            <div>
+                <a href="record-payment.html" class="btn btn-success">➕ Record New Payment</a>
+                <a href="#" class="btn">📤 Export Data</a>
+            </div>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="stats-summary">
+            <div class="stat-box">
+                <h3>TOTAL COLLECTED</h3>
+                <div class="value">₦34,508,000</div>
+                <div style="color: #27ae60; font-size: 14px;">↑ 12% this term</div>
+            </div>
+            <div class="stat-box">
+                <h3>PENDING PAYMENTS</h3>
+                <div class="value">₦1,250,500</div>
+                <div style="color: #e74c3c; font-size: 14px;">↓ 8% from last month</div>
+            </div>
+            <div class="stat-box">
+                <h3>AVERAGE PAYMENT</h3>
+                <div class="value">₦128,500</div>
+                <div style="color: #3498db; font-size: 14px;">Per student per term</div>
+            </div>
+            <div class="stat-box">
+                <h3>PAYMENT RATE</h3>
+                <div class="value">78%</div>
+                <div style="color: #27ae60; font-size: 14px;">↑ 5% from last term</div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="search-filter">
+            <div class="filter-group">
+                <label>Search Student</label>
+                <input type="text" placeholder="Name or ID..." id="searchInput">
+            </div>
+            <div class="filter-group">
+                <label>Class</label>
+                <select id="classFilter">
+                    <option value="">All Classes</option>
+                    <option value="Nursery">Nursery</option>
+                    <option value="Primary">Primary</option>
+                    <option value="JSS">Junior Secondary</option>
+                    <option value="SSS">Senior Secondary</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Payment Status</label>
+                <select id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="paid">Paid</option>
+                    <option value="pending">Pending</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="partial">Partial</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Date Range</label>
+                <input type="date" id="dateFrom">
+            </div>
+            <div class="filter-group">
+                <label>to</label>
+                <input type="date" id="dateTo">
+            </div>
+            <div class="filter-group">
+                <label>&nbsp;</label>
+                <button class="btn" onclick="filterPayments()">🔍 Apply Filters</button>
+            </div>
+        </div>
+
+        <!-- Payments Table -->
+        <div class="table-container">
+            <table id="paymentsTable">
+                <thead>
+                    <tr>
+                        <th>Receipt No</th>
+                        <th>Student Name</th>
+                        <th>Class</th>
+                        <th>Amount Due</th>
+                        <th>Amount Paid</th>
+                        <th>Balance</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Payment Method</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>SA2024-001</td>
+                        <td>Adeola Johnson</td>
+                        <td>Nursery 2</td>
+                        <td class="amount">₦85,000</td>
+                        <td class="amount">₦85,000</td>
+                        <td class="amount">₦0</td>
+                        <td>Dec 2, 2024</td>
+                        <td><span class="status status-paid">Paid</span></td>
+                        <td>
+                            <div class="payment-methods">
+                                <span class="method-tag">Bank Transfer</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view-btn">View</button>
+                                <button class="action-btn receipt-btn">Receipt</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>SA2024-002</td>
+                        <td>Chinedu Okafor</td>
+                        <td>Primary 4</td>
+                        <td class="amount">₦120,000</td>
+                        <td class="amount">₦120,000</td>
+                        <td class="amount">₦0</td>
+                        <td>Dec 1, 2024</td>
+                        <td><span class="status status-paid">Paid</span></td>
+                        <td>
+                            <div class="payment-methods">
+                                <span class="method-tag">Cash</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view-btn">View</button>
+                                <button class="action-btn receipt-btn">Receipt</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>SA2024-003</td>
+                        <td>Fatima Bello</td>
+                        <td>JSS 2</td>
+                        <td class="amount">₦150,000</td>
+                        <td class="amount">₦75,000</td>
+                        <td class="amount">₦75,000</td>
+                        <td>Nov 30, 2024</td>
+                        <td><span class="status status-partial">Partial</span></td>
+                        <td>
+                            <div class="payment-methods">
+                                <span class="method-tag">POS</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view-btn">View</button>
+                                <button class="action-btn edit-btn">Remind</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>SA2024-004</td>
+                        <td>Emeka Nwosu</td>
+                        <td>SSS 1</td>
+                        <td class="amount">₦180,000</td>
+                        <td class="amount">₦0</td>
+                        <td class="amount">₦180,000</td>
+                        <td>Nov 28, 2024</td>
+                        <td><span class="status status-overdue">Overdue</span></td>
+                        <td>
+                            <div class="payment-methods">
+                                <span class="method-tag">Not Paid</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view-btn">View</button>
+                                <button class="action-btn edit-btn" style="background: #e74c3c;">Contact</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="color: #2c3e50; margin-bottom: 15px;">Sucesss Academy Payment Summary</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
+                <div>
+                    <div style="color: #7f8c8d; font-size: 14px;">Total Transactions</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #2c3e50;">156</div>
+                </div>
+                <div>
+                    <div style="color: #7f8c8d; font-size: 14px;">Cash Payments</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #27ae60;">₦8,450,000</div>
+                </div>
+                <div>
+                    <div style="color: #7f8c8d; font-size: 14px;">Bank Transfers</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #3498db;">₦18,750,000</div>
+                </div>
+                <div>
+                    <div style="color: #7f8c8d; font-size: 14px;">POS Payments</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #9b59b6;">₦7,308,000</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filterPayments() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const classFilter = document.getElementById('classFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            const rows = document.querySelectorAll('#paymentsTable tbody tr');
+            
+            rows.forEach(row => {
+                const studentName = row.cells[1].textContent.toLowerCase();
+                const className = row.cells[2].textContent;
+                const status = row.cells[7].querySelector('.status').textContent.toLowerCase();
+                
+                let show = true;
+                
+                if (search && !studentName.includes(search)) {
+                    show = false;
+                }
+                if (classFilter && !className.includes(classFilter)) {
+                    show = false;
+                }
+                if (statusFilter && !status.includes(statusFilter)) {
+                    show = false;
+                }
+                
+                row.style.display = show ? '' : 'none';
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const receiptNo = row.cells[0].textContent;
+                    alert(`Sucesss Academy - Viewing payment: ${receiptNo}`);
+                });
+            });
+            
+            document.querySelectorAll('.receipt-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const receiptNo = row.cells[0].textContent;
+                    alert(`Sucesss Academy - Generating receipt: ${receiptNo}`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
