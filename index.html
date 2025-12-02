@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Success Model International Academy</title>
+    <title>Login - Sucesss Model International Academy</title>
     <link rel="stylesheet" href="css/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -17,7 +17,7 @@
                 <div class="logo-container">
                     <i class="fas fa-graduation-cap"></i>
                     <div class="school-name">
-                        <h1>Success Model International Academy</h1>
+                        <h1>Sucesss Model International Academy</h1>
                         <p class="motto">"Excellence in Education, Success in Life"</p>
                     </div>
                 </div>
@@ -32,7 +32,7 @@
                     <p>Access your school management dashboard</p>
                 </div>
                 
-                <form id="loginForm" autocomplete="off">
+                <form id="loginForm">
                     <div class="form-group">
                         <label for="email"><i class="fas fa-envelope"></i> Email</label>
                         <input type="email" id="email" placeholder="admin@sucesss.com" required value="admin@sucesss.com">
@@ -62,10 +62,9 @@
                         <a href="#" class="forgot-link" id="forgotPassword">Forgot Password?</a>
                     </div>
                     
-                    <button type="submit" class="login-btn" id="loginButton">
+                    <button type="submit" class="login-btn">
                         <i class="fas fa-sign-in-alt"></i>
                         <span>Login to Dashboard</span>
-                        <div class="spinner hidden" id="loginSpinner"></div>
                     </button>
                     
                     <div class="demo-credentials">
@@ -77,11 +76,6 @@
                         </div>
                     </div>
                 </form>
-                
-                <div class="login-footer">
-                    <p><i class="fas fa-shield-alt"></i> Secured by Firebase</p>
-                    <p class="copyright">© 2024 Success Model International Academy</p>
-                </div>
             </div>
             
             <div class="system-features">
@@ -127,36 +121,30 @@
                         <p>Access from any device</p>
                     </div>
                 </div>
-                
-                <div class="levels-section">
-                    <h4><i class="fas fa-layer-group"></i> School Levels</h4>
-                    <div class="level-tags">
-                        <span class="level-tag kg">Kindergarten (KG)</span>
-                        <span class="level-tag nursery">Nursery School</span>
-                        <span class="level-tag primary">Primary School</span>
-                        <span class="level-tag secondary">Secondary School</span>
-                    </div>
-                </div>
             </div>
         </div>
         
         <div class="technical-info">
-            <p><i class="fas fa-database"></i> Firebase Firestore</p>
-            <p><i class="fas fa-cloud"></i> Hosted on Netlify</p>
-            <p><i class="fas fa-code"></i> Version 2.0.1</p>
+            <p><i class="fas fa-database"></i> Powered by Firebase</p>
+            <p><i class="fas fa-cloud"></i> Hosted on GitHub Pages</p>
+            <p><i class="fas fa-code"></i> Sucesss Academy v1.0</p>
         </div>
     </div>
 
-    <div class="modal hidden" id="messageModal">
-        <div class="modal-content">
-            <div class="modal-icon" id="modalIcon"><i class="fas fa-check-circle"></i></div>
-            <h3 id="modalTitle">Success</h3>
-            <p id="modalMessage">Login successful</p>
-            <button class="modal-btn" id="modalButton">OK</button>
-        </div>
-    </div>
-
-    <script src="js/firebase-config.js"></script>
-    <script src="js/auth.js"></script>
+    <script>
+        // Simple login for testing
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Login successful! Welcome to Sucesss Academy.');
+        });
+        
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+        });
+    </script>
 </body>
-</html>
+</html>       
