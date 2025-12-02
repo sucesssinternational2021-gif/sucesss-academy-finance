@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Success Model International Academy</title>
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="school-brand">
+                <div class="logo-container">
+                    <i class="fas fa-graduation-cap"></i>
+                    <div class="school-name">
+                        <h1>Success Model International Academy</h1>
+                        <p class="motto">"Excellence in Education, Success in Life"</p>
+                    </div>
+                </div>
+                <p class="system-name">School Finance & Management System</p>
+            </div>
+        </div>
+        
+        <div class="login-main">
+            <div class="login-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-lock"></i> Secure Login</h2>
+                    <p>Access your school management dashboard</p>
+                </div>
+                
+                <form id="loginForm" autocomplete="off">
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="email" placeholder="admin@sucesss.com" required value="admin@sucesss.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password"><i class="fas fa-key"></i> Password</label>
+                        <div class="password-container">
+                            <input type="password" id="password" placeholder="Enter password" required value="admin123">
+                            <button type="button" class="toggle-password" id="togglePassword"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="academicYear"><i class="fas fa-calendar-alt"></i> Academic Year</label>
+                        <select id="academicYear" required>
+                            <option value="">Select Year</option>
+                            <option value="2024-2025" selected>2024-2025</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox">
+                            <input type="checkbox" id="rememberMe" checked>
+                            <span>Remember me</span>
+                        </label>
+                        <a href="#" class="forgot-link" id="forgotPassword">Forgot Password?</a>
+                    </div>
+                    
+                    <button type="submit" class="login-btn" id="loginButton">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Login to Dashboard</span>
+                        <div class="spinner hidden" id="loginSpinner"></div>
+                    </button>
+                    
+                    <div class="demo-credentials">
+                        <h4><i class="fas fa-info-circle"></i> Demo Credentials</h4>
+                        <div class="credential-list">
+                            <div class="credential"><strong>Admin:</strong> admin@sucesss.com / admin123</div>
+                            <div class="credential"><strong>Accountant:</strong> accountant@sucesss.com / account123</div>
+                            <div class="credential"><strong>Teacher:</strong> teacher@sucesss.com / teacher123</div>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="login-footer">
+                    <p><i class="fas fa-shield-alt"></i> Secured by Firebase</p>
+                    <p class="copyright">© 2024 Success Model International Academy</p>
+                </div>
+            </div>
+            
+            <div class="system-features">
+                <div class="features-header">
+                    <h3><i class="fas fa-star"></i> System Features</h3>
+                    <p>Complete school finance management</p>
+                </div>
+                
+                <div class="features-grid">
+                    <div class="feature">
+                        <div class="feature-icon"><i class="fas fa-money-check-alt"></i></div>
+                        <h4>Fee Management</h4>
+                        <p>Track all fee payments automatically</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <div class="feature-icon"><i class="fas fa-user-graduate"></i></div>
+                        <h4>Student Records</h4>
+                        <p>Comprehensive student database</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <div class="feature-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                        <h4>Staff Management</h4>
+                        <p>Teacher records and salary processing</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <div class="feature-icon"><i class="fas fa-chart-pie"></i></div>
+                        <h4>Financial Reports</h4>
+                        <p>Generate detailed reports</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <div class="feature-icon"><i class="fas fa-print"></i></div>
+                        <h4>Receipt Printing</h4>
+                        <p>A4 and POS receipt generation</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                        <h4>Responsive Design</h4>
+                        <p>Access from any device</p>
+                    </div>
+                </div>
+                
+                <div class="levels-section">
+                    <h4><i class="fas fa-layer-group"></i> School Levels</h4>
+                    <div class="level-tags">
+                        <span class="level-tag kg">Kindergarten (KG)</span>
+                        <span class="level-tag nursery">Nursery School</span>
+                        <span class="level-tag primary">Primary School</span>
+                        <span class="level-tag secondary">Secondary School</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="technical-info">
+            <p><i class="fas fa-database"></i> Firebase Firestore</p>
+            <p><i class="fas fa-cloud"></i> Hosted on Netlify</p>
+            <p><i class="fas fa-code"></i> Version 2.0.1</p>
+        </div>
+    </div>
+
+    <div class="modal hidden" id="messageModal">
+        <div class="modal-content">
+            <div class="modal-icon" id="modalIcon"><i class="fas fa-check-circle"></i></div>
+            <h3 id="modalTitle">Success</h3>
+            <p id="modalMessage">Login successful</p>
+            <button class="modal-btn" id="modalButton">OK</button>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
