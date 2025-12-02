@@ -1,0 +1,210 @@
+<!-- 
+    FILE: error.html
+    PURPOSE: Error display page
+    LINKS TO: index.html, dashboard.html
+    FEATURES: Shows error messages from URL
+    EXAMPLE: error.html?error=Page+not+found
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - GitSucesss</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            color: #c9d1d9;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .error-container {
+            background: #21262d;
+            border-radius: 12px;
+            padding: 60px 40px;
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid #30363d;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            text-align: center;
+        }
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(248, 81, 73, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            border: 3px solid #f85149;
+        }
+        .error-icon svg {
+            width: 40px;
+            height: 40px;
+            color: #f85149;
+        }
+        h1 {
+            color: #f0f6fc;
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        .error-code {
+            color: #f78166;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .error-message {
+            background: rgba(248, 81, 73, 0.05);
+            border: 1px solid rgba(248, 81, 73, 0.3);
+            color: #f0f6fc;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 25px 0;
+            font-size: 16px;
+            text-align: left;
+        }
+        p {
+            color: #8b949e;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        .btn {
+            display: inline-block;
+            background: #238636;
+            color: white;
+            padding: 14px 30px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: background 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #2ea043;
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+        }
+        .btn-secondary:hover {
+            background: #30363d;
+            border-color: #58a6ff;
+        }
+        .logo {
+            color: #f0f6fc;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .logo span {
+            color: #58a6ff;
+        }
+        .suggestions {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: left;
+        }
+        .suggestions h3 {
+            color: #f0f6fc;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .suggestions ul {
+            padding-left: 20px;
+            color: #8b949e;
+        }
+        .suggestions li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
+            </svg>
+        </div>
+        
+        <div class="logo">Git<span>Sucesss</span></div>
+        
+        <h1>Oops! Something Went Wrong</h1>
+        
+        <div class="error-code" id="error-code">Error 404</div>
+        
+        <div class="error-message" id="error-message">
+            The page you're looking for could not be found.
+        </div>
+        
+        <p>
+            Don't worry, this happens sometimes. You can try going back or 
+            using one of the links below to get back on track.
+        </p>
+        
+        <div class="btn-group">
+            <a href="dashboard.html" class="btn">Go to Dashboard</a>
+            <a href="index.html" class="btn-secondary">Login Page</a>
+            <a href="profile.html" class="btn-secondary">Your Profile</a>
+            <a href="repo.html" class="btn-secondary">Repositories</a>
+        </div>
+        
+        <div class="suggestions">
+            <h3>What you can try:</h3>
+            <ul>
+                <li>Check if you're logged in properly</li>
+                <li>Make sure the page URL is correct</li>
+                <li>Clear your browser cache and cookies</li>
+                <li>Contact support if the problem continues</li>
+            </ul>
+        </div>
+        
+        <div style="margin-top: 30px; color: #8b949e; font-size: 14px;">
+            <p>User: <span style="color: #58a6ff;">successinternational2021-gif</span> • 
+            Time: <span id="current-time"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Get error message from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorMsg = urlParams.get('error') || 'The page you\'re looking for could not be found.';
+        const errorCode = urlParams.get('code') || '404';
+        
+        // Display error
+        document.getElementById('error-message').textContent = decodeURIComponent(errorMsg);
+        document.getElementById('error-code').textContent = `Error ${errorCode}`;
+        
+        // Set current time
+        const now = new Date();
+        document.getElementById('current-time').textContent = now.toLocaleTimeString();
+        
+        // Log error (for debugging)
+        console.error(`GitSucesss Error ${errorCode}: ${errorMsg}`);
+    </script>
+</body>
+</html>
