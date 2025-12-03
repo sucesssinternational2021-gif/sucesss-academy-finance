@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Portal - Sucesss Academy Finance</title>
+    <title>Payments - Sucesss Academy Finance</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         
         /* Header */
         .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            background: linear-gradient(135deg, #1e8449 0%, #27ae60 100%);
             color: white;
             padding: 20px 0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -42,7 +42,7 @@
         
         .logo-icon {
             background: white;
-            color: #2c3e50;
+            color: #1e8449;
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -60,18 +60,21 @@
         }
         
         .school-name .sucesss {
-            color: #3498db;
+            color: #fff;
             font-weight: bold;
         }
         
         .school-name .academy {
-            color: white;
+            color: #f1c40f;
             font-weight: 600;
         }
         
         .school-name .finance {
-            color: #27ae60;
+            color: white;
             font-weight: bold;
+            background: #2c3e50;
+            padding: 2px 8px;
+            border-radius: 4px;
         }
         
         .school-name p {
@@ -88,7 +91,7 @@
         .user-avatar {
             width: 40px;
             height: 40px;
-            background: #27ae60;
+            background: #f39c12;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -138,6 +141,7 @@
             padding: 30px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
             margin-bottom: 30px;
+            border-left: 5px solid #27ae60;
         }
         
         .student-card h2 {
@@ -157,6 +161,7 @@
             padding: 15px;
             background: #f8fafc;
             border-radius: 10px;
+            border: 1px solid #e9ecef;
         }
         
         .info-item h4 {
@@ -179,6 +184,7 @@
             padding: 30px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
             margin-bottom: 30px;
+            border-left: 5px solid #3498db;
         }
         
         .fees-section h2 {
@@ -213,7 +219,11 @@
         
         .amount {
             font-weight: bold;
-            color: #2c3e50;
+            color: #27ae60;
+        }
+        
+        .amount::before {
+            content: "₦ ";
         }
         
         .status-paid {
@@ -226,8 +236,8 @@
         }
         
         .status-pending {
-            color: #e74c3c;
-            background: #fadbd8;
+            color: #f39c12;
+            background: #fef9e7;
             padding: 5px 10px;
             border-radius: 20px;
             font-size: 12px;
@@ -235,8 +245,8 @@
         }
         
         .status-overdue {
-            color: #c0392b;
-            background: #f2d7d5;
+            color: #e74c3c;
+            background: #fadbd8;
             padding: 5px 10px;
             border-radius: 20px;
             font-size: 12px;
@@ -250,6 +260,7 @@
             padding: 30px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
             margin-bottom: 30px;
+            border-left: 5px solid #9b59b6;
         }
         
         .payment-methods h2 {
@@ -314,6 +325,7 @@
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border-left: 5px solid #e74c3c;
         }
         
         .payment-form h2 {
@@ -383,6 +395,7 @@
             position: sticky;
             top: 30px;
             height: fit-content;
+            border-left: 5px solid #f39c12;
         }
         
         .total-amount {
@@ -401,7 +414,11 @@
         .total {
             font-size: 36px;
             font-weight: bold;
-            color: #2c3e50;
+            color: #27ae60;
+        }
+        
+        .total::before {
+            content: "₦ ";
         }
         
         .fee-breakdown {
@@ -416,10 +433,14 @@
             border-bottom: 1px dashed #eee;
         }
         
+        .breakdown-item span:last-child::before {
+            content: "₦ ";
+        }
+        
         .pay-button {
             width: 100%;
             padding: 18px;
-            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            background: linear-gradient(135deg, #1e8449 0%, #27ae60 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -493,7 +514,7 @@
         .footer-section h3 {
             margin-bottom: 20px;
             font-size: 18px;
-            color: #27ae60;
+            color: #f39c12;
         }
         
         .footer-section p,
@@ -567,6 +588,17 @@
             margin-top: 20px;
         }
         
+        .naira-note {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid #ffeaa7;
+        }
+        
         /* Responsive */
         @media (max-width: 992px) {
             .container {
@@ -601,14 +633,14 @@
     <header class="header">
         <div class="header-container">
             <div class="logo">
-                <div class="logo-icon">SAF</div>
+                <div class="logo-icon">SA</div>
                 <div class="school-name">
                     <h1>
                         <span class="sucesss">Sucesss</span>
                         <span class="academy">Academy</span>
-                        <span class="finance">Finance</span>
+                        <span class="finance">FINANCE</span>
                     </h1>
-                    <p>Payment Processing Portal</p>
+                    <p>Payment Portal | Nigerian Naira (₦)</p>
                 </div>
             </div>
             
@@ -620,7 +652,7 @@
                     <div class="user-avatar">FA</div>
                     <div>
                         <div style="font-weight: bold;">Finance Admin</div>
-                        <div style="font-size: 14px;">Administrator</div>
+                        <div style="font-size: 14px;">₦ Payments</div>
                     </div>
                 </div>
             </div>
@@ -637,65 +669,74 @@
                 <div class="student-info-grid">
                     <div class="info-item">
                         <h4>Student Name</h4>
-                        <p>Alex Johnson</p>
+                        <p>Chinedu Okonkwo</p>
                     </div>
                     <div class="info-item">
                         <h4>Student ID</h4>
                         <p>SA2024001</p>
                     </div>
                     <div class="info-item">
-                        <h4>Grade Level</h4>
-                        <p>Grade 12</p>
+                        <h4>Class</h4>
+                        <p>SS 3 Science</p>
                     </div>
                     <div class="info-item">
-                        <h4>Academic Year</h4>
-                        <p>2023-2024</p>
+                        <h4>Academic Session</h4>
+                        <p>2023/2024</p>
                     </div>
                 </div>
             </div>
 
             <!-- Outstanding Fees -->
             <div class="fees-section">
-                <h2><i class="fas fa-receipt"></i> Outstanding Fees</h2>
+                <h2><i class="fas fa-receipt"></i> Outstanding School Fees (₦)</h2>
+                <div class="naira-note">
+                    <i class="fas fa-info-circle"></i> All amounts are in Nigerian Naira (₦)
+                </div>
                 <table class="fees-table">
                     <thead>
                         <tr>
                             <th>Fee Description</th>
                             <th>Due Date</th>
                             <th>Status</th>
-                            <th>Amount</th>
+                            <th>Amount (₦)</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Tuition Fee - Term 3</td>
+                            <td>Tuition Fee - 3rd Term</td>
                             <td>Mar 15, 2024</td>
                             <td><span class="status-pending">Pending</span></td>
-                            <td class="amount">$1,200.00</td>
+                            <td class="amount">150,000.00</td>
                         </tr>
                         <tr>
-                            <td>Examination Fee</td>
+                            <td>WAEC/NECO Registration</td>
                             <td>Mar 10, 2024</td>
                             <td><span class="status-overdue">Overdue</span></td>
-                            <td class="amount">$150.00</td>
+                            <td class="amount">45,000.00</td>
                         </tr>
                         <tr>
                             <td>Laboratory Fee</td>
                             <td>Mar 20, 2024</td>
                             <td><span class="status-pending">Pending</span></td>
-                            <td class="amount">$100.00</td>
+                            <td class="amount">25,000.00</td>
                         </tr>
                         <tr>
                             <td>Library Fee</td>
                             <td>Feb 28, 2024</td>
                             <td><span class="status-paid">Paid</span></td>
-                            <td class="amount">$50.00</td>
+                            <td class="amount">10,000.00</td>
                         </tr>
                         <tr>
-                            <td>Sports Fee</td>
+                            <td>Sports & Games</td>
                             <td>Mar 05, 2024</td>
                             <td><span class="status-overdue">Overdue</span></td>
-                            <td class="amount">$75.00</td>
+                            <td class="amount">15,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>Excursion Fee</td>
+                            <td>Mar 25, 2024</td>
+                            <td><span class="status-pending">Pending</span></td>
+                            <td class="amount">30,000.00</td>
                         </tr>
                     </tbody>
                 </table>
@@ -710,8 +751,8 @@
                             <i class="fas fa-credit-card"></i>
                         </div>
                         <div class="method-info">
-                            <h3>Credit/Debit Card</h3>
-                            <p>Visa, MasterCard, American Express</p>
+                            <h3>Card Payment</h3>
+                            <p>Visa, MasterCard, Verve cards accepted</p>
                         </div>
                     </div>
 
@@ -721,7 +762,7 @@
                         </div>
                         <div class="method-info">
                             <h3>Bank Transfer</h3>
-                            <p>Direct bank transfer to school account</p>
+                            <p>Transfer to school bank account</p>
                         </div>
                     </div>
 
@@ -730,8 +771,8 @@
                             <i class="fas fa-mobile-alt"></i>
                         </div>
                         <div class="method-info">
-                            <h3>Mobile Money</h3>
-                            <p>Pay via mobile money services</p>
+                            <h3>USSD/Mobile Money</h3>
+                            <p>GTBank, Zenith, UBA, Access USSD</p>
                         </div>
                     </div>
                 </div>
@@ -742,12 +783,12 @@
                 <h2><i class="fas fa-file-invoice-dollar"></i> Payment Details</h2>
                 <form id="paymentForm">
                     <div class="form-group">
-                        <label for="card-number">Card Number</label>
-                        <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+                        <label for="card-number">Card Number (Verve/Visa/MasterCard)</label>
+                        <input type="text" id="card-number" placeholder="5061 XXXX XXXX XXXX" maxlength="19">
                         <div class="card-icons">
+                            <div class="card-icon">VERVE</div>
                             <div class="card-icon">VISA</div>
                             <div class="card-icon">MC</div>
-                            <div class="card-icon">AMEX</div>
                         </div>
                     </div>
 
@@ -764,12 +805,12 @@
 
                     <div class="form-group">
                         <label for="card-name">Name on Card</label>
-                        <input type="text" id="card-name" placeholder="Alex Johnson">
+                        <input type="text" id="card-name" placeholder="Chinedu Okonkwo">
                     </div>
 
                     <div class="form-group">
                         <label for="email-receipt">Email for Receipt</label>
-                        <input type="email" id="email-receipt" placeholder="alex.johnson@sucesss.edu" value="alex.johnson@sucesss.edu">
+                        <input type="email" id="email-receipt" placeholder="parent@email.com" value="parent@email.com">
                     </div>
                 </form>
             </div>
@@ -779,47 +820,53 @@
         <div class="payment-sidebar">
             <div class="total-amount">
                 <h3>TOTAL PAYABLE AMOUNT</h3>
-                <div class="total">$1,525.00</div>
+                <div class="total">265,000.00</div>
+                <p style="color: #666; font-size: 14px; margin-top: 5px;">Nigerian Naira</p>
             </div>
 
             <div class="fee-breakdown">
-                <h3>Fee Breakdown</h3>
+                <h3>Fee Breakdown (₦)</h3>
                 <div class="breakdown-item">
                     <span>Tuition Fee</span>
-                    <span class="amount">$1,200.00</span>
+                    <span>150,000.00</span>
                 </div>
                 <div class="breakdown-item">
-                    <span>Examination Fee</span>
-                    <span class="amount">$150.00</span>
+                    <span>WAEC/NECO</span>
+                    <span>45,000.00</span>
                 </div>
                 <div class="breakdown-item">
-                    <span>Laboratory Fee</span>
-                    <span class="amount">$100.00</span>
+                    <span>Laboratory</span>
+                    <span>25,000.00</span>
                 </div>
                 <div class="breakdown-item">
-                    <span>Sports Fee</span>
-                    <span class="amount">$75.00</span>
+                    <span>Sports</span>
+                    <span>15,000.00</span>
                 </div>
-                <div class="breakdown-item" style="border-bottom: 2px solid #2c3e50; padding-top: 10px;">
+                <div class="breakdown-item">
+                    <span>Excursion</span>
+                    <span>30,000.00</span>
+                </div>
+                <div class="breakdown-item" style="border-bottom: 2px solid #27ae60; padding-top: 10px;">
                     <span style="font-weight: bold;">Total</span>
-                    <span class="amount" style="font-size: 20px;">$1,525.00</span>
+                    <span style="font-size: 20px; color: #27ae60;">265,000.00</span>
                 </div>
             </div>
 
             <button class="pay-button" onclick="processPayment()">
-                <i class="fas fa-lock"></i> PROCESS PAYMENT
+                <i class="fas fa-lock"></i> PAY ₦265,000.00
             </button>
 
             <div class="secure-notice">
                 <i class="fas fa-shield-alt"></i>
-                <span>256-bit SSL Encryption | PCI DSS Compliant</span>
+                <span>Secured by Flutterwave | PCI DSS Compliant</span>
             </div>
 
             <div class="help-box">
                 <h4><i class="fas fa-question-circle"></i> Need Help?</h4>
-                <p><i class="fas fa-phone"></i> Finance Office: (555) 123-4567</p>
-                <p><i class="fas fa-envelope"></i> finance@sucesss.edu</p>
+                <p><i class="fas fa-phone"></i> Bursary: 01-2345678</p>
+                <p><i class="fas fa-envelope"></i> bursary@sucesssacademy.edu.ng</p>
                 <p><i class="fas fa-clock"></i> Mon-Fri: 8:00 AM - 4:00 PM</p>
+                <p><i class="fas fa-map-marker-alt"></i> Lagos, Nigeria</p>
             </div>
         </div>
     </div>
@@ -831,9 +878,12 @@
                 <i class="fas fa-check-circle"></i>
             </div>
             <h2>Payment Successful!</h2>
-            <p>Payment of <strong>$1,525.00</strong> processed successfully.</p>
-            <p>Receipt sent to: <strong>alex.johnson@sucesss.edu</strong></p>
-            <p>Transaction ID: <strong>SAF-TXN-20240315-001</strong></p>
+            <p>Payment of <strong>₦265,000.00</strong> processed successfully.</p>
+            <p>Receipt sent to: <strong>parent@email.com</strong></p>
+            <p>Transaction ID: <strong>SAF-NG-20240315-001</strong></p>
+            <p style="color: #27ae60; font-weight: bold;">
+                <i class="fas fa-check"></i> Payment confirmed in Naira
+            </p>
             <button class="close-modal" onclick="closeModal()">Return to Dashboard</button>
         </div>
     </div>
@@ -842,30 +892,38 @@
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-section">
-                <h3>Sucesss Academy Finance</h3>
-                <p>Secure Financial Management System</p>
-                <p>123 Education Boulevard</p>
-                <p>Academic City, AC 12345</p>
+                <h3>Sucesss Academy</h3>
+                <p>Excellence in Education</p>
+                <p>Lagos, Nigeria</p>
+                <p>Since 1995</p>
             </div>
             
             <div class="footer-section">
                 <h3>Quick Links</h3>
                 <a href="finance-dashboard.html">Dashboard</a>
-                <a href="payment.html">Payment Portal</a>
+                <a href="payments.html">Payment Portal</a>
                 <a href="receipts.html">Payment Receipts</a>
                 <a href="fees.html">Fee Structure</a>
             </div>
             
             <div class="footer-section">
-                <h3>Support</h3>
-                <a href="mailto:finance@sucesss.edu"><i class="fas fa-envelope"></i> finance@sucesss.edu</a>
-                <a href="mailto:support@sucesss.edu"><i class="fas fa-life-ring"></i> support@sucesss.edu</a>
-                <p><i class="fas fa-phone"></i> (555) 123-4567</p>
+                <h3>Bank Details</h3>
+                <p>Sucesss Academy Ltd</p>
+                <p>GTBank: 0123456789</p>
+                <p>Zenith: 0987654321</p>
+                <p>UBA: 1122334455</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <a href="mailto:bursary@sucesssacademy.edu.ng"><i class="fas fa-envelope"></i> Bursary</a>
+                <a href="mailto:finance@sucesssacademy.edu.ng"><i class="fas fa-envelope"></i> Finance</a>
+                <p><i class="fas fa-phone"></i> 01-2345678, 0803XXX XXXX</p>
             </div>
         </div>
         <div class="copyright">
-            <p>&copy; 2024 Sucesss Academy Finance System. All rights reserved.</p>
-            <p>Payment Portal v1.2 | Secure Transaction Processing</p>
+            <p>&copy; 2024 Sucesss Academy Finance System. All amounts in Nigerian Naira (₦).</p>
+            <p>Payment Portal v2.0 | Nigerian Educational System</p>
         </div>
     </footer>
 
@@ -893,6 +951,9 @@
                 }
                 e.target.value = value;
             });
+            
+            // Show Nigerian payment methods note
+            console.log('Payment portal initialized with Nigerian Naira (₦) currency');
         });
 
         // Payment method selection
@@ -927,7 +988,7 @@
             // Show loading state
             const payButton = document.querySelector('.pay-button');
             const originalText = payButton.innerHTML;
-            payButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            payButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing ₦265,000...';
             payButton.disabled = true;
 
             // Simulate payment processing
@@ -938,6 +999,10 @@
                 // Reset button
                 payButton.innerHTML = originalText;
                 payButton.disabled = false;
+                
+                // Log Nigerian payment
+                console.log('Payment processed: ₦265,000.00');
+                console.log('Transaction completed in Nigerian Naira');
             }, 2000);
         }
 
