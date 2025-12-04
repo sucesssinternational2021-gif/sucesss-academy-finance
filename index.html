@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sucesss Model International Academy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a5f7a 0%, #2c3e50 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, #1a5f7a, #27ae60, #f39c12);
+        }
+        
+        .logo-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .school-badge {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #1a5f7a 0%, #27ae60 100%);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .school-name {
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .school-tagline {
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .system-name {
+            color: #1a5f7a;
+            font-weight: 600;
+            font-size: 18px;
+            background: #e8f4fc;
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 16px 20px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            color: #2c3e50;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #1a5f7a;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(26, 95, 122, 0.1);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #1a5f7a 0%, #27ae60 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(39, 174, 96, 0.4);
+        }
+        
+        .login-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .links {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .links a {
+            color: #1a5f7a;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        .links a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c0392b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+            display: none;
+            border: 1px solid #fadbd8;
+            font-size: 15px;
+        }
+        
+        .school-info {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 600px) {
+            .login-container {
+                padding: 30px;
+            }
+            
+            .school-name {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-section">
+            <div class="school-badge">SMIA</div>
+            <h1 class="school-name">Sucesss Model International Academy</h1>
+            <p class="school-tagline">Excellence in Education</p>
+            <div class="system-name">Financial Management System</div>
+        </div>
+
+        <div id="errorMessage" class="error-message">
+            <!-- Error messages will appear here -->
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter school email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="login-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Login to Finance Portal
+            </button>
+        </form>
+
+        <div class="links">
+            <a href="reset.html">Forgot Password?</a> 
+            <span style="color: #ddd;"> | </span>
+            <a href="#" id="demoLogin">Use Demo Account</a>
+        </div>
+
+        <div class="school-info">
+            <p>NO13 Behind COCIN Church Gura-Landoh Gyel, Plateau State, Nigeria</p>
+            <p>📞 09020488851 | ✉️ sucesssinternational2021@gmail.com</p>
+            <p style="margin-top: 10px; font-size: 12px; color: #95a5a6;">&copy; 2024 Sucesss Model International Academy</p>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="firebase-init.js"></script>
+    <script type="module" src="firebase-service.js"></script>
+    
+    <script type="module">
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const errorMessage = document.getElementById('errorMessage');
+            const demoLogin = document.getElementById('demoLogin');
+            
+            // Auto-focus on email field
+            document.getElementById('email').focus();
+            
+            // Handle form submission
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                
+                // Clear previous errors
+                errorMessage.style.display = 'none';
+                
+                // Validation
+                if (!email || !password) {
+                    showError('Please enter both email and password.');
+                    return;
+                }
+                
+                // Show loading
+                const button = this.querySelector('.login-btn');
+                const originalHTML = button.innerHTML;
+                button.innerHTML = '<div class="spinner"></div> Authenticating...';
+                button.disabled = true;
+                
+                // Add spinner style
+                const style = document.createElement('style');
+                style.textContent = `
+                    .spinner {
+                        border: 3px solid rgba(255,255,255,0.3);
+                        border-radius: 50%;
+                        border-top: 3px solid white;
+                        width: 20px;
+                        height: 20px;
+                        animation: spin 1s linear infinite;
+                        display: inline-block;
+                        margin-right: 10px;
+                    }
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                try {
+                    // Use Firebase authentication
+                    const auth = getAuth();
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+                    
+                    // Store user session
+                    localStorage.setItem('sucesss_user', JSON.stringify({
+                        uid: user.uid,
+                        email: user.email,
+                        name: user.displayName || 'Finance Officer',
+                        role: 'admin',
+                        school: 'Sucesss Model International Academy',
+                        loginTime: new Date().toISOString()
+                    }));
+                    
+                    // Redirect to dashboard
+                    window.location.href = 'dashboard.html';
+                    
+                } catch (error) {
+                    // Handle specific error codes
+                    let errorMsg = 'Login failed. ';
+                    switch(error.code) {
+                        case 'auth/user-not-found':
+                            errorMsg += 'No account found with this email.';
+                            break;
+                        case 'auth/wrong-password':
+                            errorMsg += 'Incorrect password.';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMsg += 'Invalid email address.';
+                            break;
+                        case 'auth/too-many-requests':
+                            errorMsg += 'Too many failed attempts. Try again later.';
+                            break;
+                        default:
+                            errorMsg += error.message;
+                    }
+                    
+                    showError(errorMsg);
+                    button.innerHTML = originalHTML;
+                    button.disabled = false;
+                }
+            });
+            
+            // Demo login button
+            demoLogin.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('email').value = 'admin@sucesss.edu';
+                document.getElementById('password').value = 'admin123';
+                
+                // Show demo notice
+                showError('Using demo credentials. Click Login to continue.', 'info');
+            });
+            
+            function showError(message, type = 'error') {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+                errorMessage.style.background = type === 'info' ? '#e3f2fd' : '#fee';
+                errorMessage.style.color = type === 'info' ? '#1976d2' : '#c0392b';
+                errorMessage.style.borderColor = type === 'info' ? '#bbdefb' : '#fadbd8';
+            }
+            
+            // Check if already logged in
+            const user = JSON.parse(localStorage.getItem('sucesss_user') || '{}');
+            if (user.email && user.uid) {
+                // Auto-redirect if already logged in
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>
