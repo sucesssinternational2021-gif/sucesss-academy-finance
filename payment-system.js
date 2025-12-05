@@ -1,9 +1,20 @@
-// payment-system.js
+// payment-system.js - Complete Updated Version
 
 // Global variables
 let currentStudent = null;
 let lastPaymentId = null;
 let currentUser = null;
+let studentDeductionHistory = {}; // Track deductions per student per term
+
+// Fee structure configuration
+const feeStructure = {
+    tuition: { ptaPercentage: 0.10, levyPercentage: 0.05 }, // 10% PTA, 5% Levy
+    pta: { ptaPercentage: 1.00, levyPercentage: 0.00 }, // 100% PTA, 0% Levy
+    exam: { ptaPercentage: 0.00, levyPercentage: 0.00 },
+    library: { ptaPercentage: 0.00, levyPercentage: 0.00 },
+    sports: { ptaPercentage: 0.00, levyPercentage: 0.00 },
+    other: { ptaPercentage: 0.00, levyPercentage: 0.00 }
+};
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -37,25 +48,41 @@ function setupEventListeners() {
     
     // Payment type change - show/hide PTA breakdown
     document.getElementById('paymentType').addEventListener('change', function() {
-        const ptaBreakdown = document.getElementById('ptaBreakdown');
+        const studentId = document.getElementById('studentId').value.trim();
+        const term = document.getElementById('term').value;
         const amount = parseFloat(document.getElementById('amount').value) || 0;
         
-        if (this.value === 'tuition' && amount > 0) {
-            ptaBreakdown.classList.remove('hidden');
-            calculatePTABreakdown(amount);
+        if (this.value === 'tuition' && amount > 0 && studentId && term) {
+            document.getElementById('ptaBreakdown').classList.remove('hidden');
+            calculatePTABreakdown(amount, this.value, studentId, term);
         } else {
-            ptaBreakdown.classList.add('hidden');
+            document.getElementById('ptaBreakdown').classList.add('hidden');
         }
     });
     
     // Amount input - update PTA breakdown
     document.getElementById('amount').addEventListener('input', function() {
         const paymentType = document.getElementById('paymentType').value;
+        const studentId = document.getElementById('studentId').value.trim();
+        const term = document.getElementById('term').value;
         const amount = parseFloat(this.value) || 0;
         
-        if (paymentType === 'tuition' && amount > 0) {
+        if (paymentType === 'tuition' && amount > 0 && studentId && term) {
             document.getElementById('ptaBreakdown').classList.remove('hidden');
-            calculatePTABreakdown(amount);
+            calculatePTABreakdown(amount, paymentType, studentId, term);
+        } else if (paymentType !== 'tuition') {
+            document.getElementById('ptaBreakdown').classList.add('hidden');
+        }
+    });
+    
+    // Term change - reset deduction tracking for new term
+    document.getElementById('term').addEventListener('change', function() {
+        const studentId = document.getElementById('studentId').value.trim();
+        const paymentType = document.getElementById('paymentType').value;
+        const amount = parseFloat(document.getElementById('amount').value) || 0;
+        
+        if (paymentType === 'tuition' && amount > 0 && studentId) {
+            calculatePTABreakdown(amount, paymentType, studentId, this.value);
         }
     });
     
@@ -88,14 +115,56 @@ async function searchStudent() {
             currentStudent = { id: studentId, ...studentSnap.data() };
             displayStudentInfo(currentStudent);
             showAlert('Student found successfully!', 'success');
+            
+            // Load deduction history for current term
+            await loadDeductionHistory(studentId);
         } else {
             showAlert('Student not found. Please check the Student ID.', 'error');
             currentStudent = null;
             document.getElementById('studentInfo').classList.add('hidden');
+            document.getElementById('ptaBreakdown').classList.add('hidden');
         }
     } catch (error) {
         console.error("Error searching student:", error);
         showAlert('Error searching for student. Please try again.', 'error');
+    }
+}
+
+// Load deduction history for student
+async function loadDeductionHistory(studentId) {
+    try {
+        // Query payments for this student to check deduction history
+        const paymentsQuery = query(
+            collection(db, "payments"),
+            where("studentId", "==", studentId)
+        );
+        
+        const querySnapshot = await getDocs(paymentsQuery);
+        
+        // Reset deduction history
+        studentDeductionHistory = {};
+        
+        querySnapshot.forEach((doc) => {
+            const payment = doc.data();
+            const deductionKey = `${studentId}_${payment.term}`;
+            
+            if (!studentDeductionHistory[deductionKey]) {
+                studentDeductionHistory[deductionKey] = {
+                    ptaDeducted: false,
+                    levyDeducted: false
+                };
+            }
+            
+            if (payment.ptaDeduction > 0) {
+                studentDeductionHistory[deductionKey].ptaDeducted = true;
+            }
+            if (payment.levyDeduction > 0) {
+                studentDeductionHistory[deductionKey].levyDeducted = true;
+            }
+        });
+        
+    } catch (error) {
+        console.error("Error loading deduction history:", error);
     }
 }
 
@@ -106,18 +175,58 @@ function displayStudentInfo(student) {
     document.getElementById('studentClass').textContent = student.class || 'N/A';
     document.getElementById('totalFees').textContent = formatCurrency(student.totalFees || 0);
     document.getElementById('paidAmount').textContent = formatCurrency(student.paidAmount || 0);
+    document.getElementById('ptaDeducted').textContent = formatCurrency(student.ptaDeducted || 0);
+    document.getElementById('levyDeducted').textContent = formatCurrency(student.levyDeducted || 0);
+    document.getElementById('totalDeductions').textContent = formatCurrency(student.totalDeductions || 0);
     document.getElementById('outstandingBalance').textContent = formatCurrency(student.outstanding || 0);
 }
 
-// Calculate PTA deduction (10% of tuition payment)
-function calculatePTABreakdown(amount) {
-    const ptaPercentage = 0.10; // 10% for PTA
-    const ptaDeduction = amount * ptaPercentage;
-    const schoolPortion = amount - ptaDeduction;
+// Calculate PTA and levies breakdown with smart deduction logic
+function calculatePTABreakdown(amount, paymentType, studentId, term) {
+    const ptaPercentage = feeStructure[paymentType]?.ptaPercentage || 0;
+    const levyPercentage = feeStructure[paymentType]?.levyPercentage || 0;
     
+    // Check deduction history for this student and term
+    const deductionKey = `${studentId}_${term}`;
+    let ptaDeduction = 0;
+    let levyDeduction = 0;
+    
+    if (studentDeductionHistory[deductionKey]) {
+        // Check if deductions already made this term
+        if (studentDeductionHistory[deductionKey].ptaDeducted) {
+            ptaDeduction = 0;
+            document.getElementById('ptaNote').innerHTML = 
+                '<i class="fas fa-info-circle"></i> PTA already deducted for this term. No additional PTA will be charged.';
+        } else {
+            ptaDeduction = amount * ptaPercentage;
+        }
+        
+        if (studentDeductionHistory[deductionKey].levyDeducted) {
+            levyDeduction = 0;
+            document.getElementById('ptaNote').innerHTML += 
+                '<br><i class="fas fa-info-circle"></i> School levy already deducted for this term.';
+        } else {
+            levyDeduction = amount * levyPercentage;
+        }
+    } else {
+        // First deduction this term
+        ptaDeduction = amount * ptaPercentage;
+        levyDeduction = amount * levyPercentage;
+        document.getElementById('ptaNote').innerHTML = 
+            '<i class="fas fa-info-circle"></i> First payment this term. PTA and levies will be deducted.';
+    }
+    
+    const totalDeductions = ptaDeduction + levyDeduction;
+    const schoolPortion = amount - totalDeductions;
+    
+    // Update display
     document.getElementById('paymentAmountDisplay').textContent = formatCurrency(amount);
     document.getElementById('ptaDeductionDisplay').textContent = formatCurrency(ptaDeduction);
+    document.getElementById('levyDeductionDisplay').textContent = formatCurrency(levyDeduction);
+    document.getElementById('totalDeductionsDisplay').textContent = formatCurrency(totalDeductions);
     document.getElementById('schoolPortionDisplay').textContent = formatCurrency(schoolPortion);
+    
+    return { ptaDeduction, levyDeduction, totalDeductions, schoolPortion };
 }
 
 // Process payment form submission
@@ -153,13 +262,36 @@ async function processPayment(e) {
         return;
     }
     
-    // Calculate PTA deduction if payment type is tuition
-    let ptaDeduction = 0;
-    if (paymentType === 'tuition') {
-        ptaDeduction = amount * 0.10; // 10% PTA deduction
+    if (amount > currentStudent.outstanding && paymentType === 'tuition') {
+        showAlert(`Amount exceeds outstanding balance. Maximum allowed: ${formatCurrency(currentStudent.outstanding)}`, 'error');
+        return;
     }
     
     try {
+        // Calculate deductions
+        let ptaDeduction = 0;
+        let levyDeduction = 0;
+        let totalDeductions = 0;
+        
+        if (paymentType === 'tuition') {
+            const deductions = calculatePTABreakdown(amount, paymentType, studentId, term);
+            ptaDeduction = deductions.ptaDeduction;
+            levyDeduction = deductions.levyDeduction;
+            totalDeductions = deductions.totalDeductions;
+            
+            // Update deduction history
+            const deductionKey = `${studentId}_${term}`;
+            if (!studentDeductionHistory[deductionKey]) {
+                studentDeductionHistory[deductionKey] = {
+                    ptaDeducted: false,
+                    levyDeducted: false
+                };
+            }
+            
+            if (ptaDeduction > 0) studentDeductionHistory[deductionKey].ptaDeducted = true;
+            if (levyDeduction > 0) studentDeductionHistory[deductionKey].levyDeducted = true;
+        }
+        
         // Generate payment ID
         const paymentId = generatePaymentId();
         lastPaymentId = paymentId;
@@ -178,6 +310,8 @@ async function processPayment(e) {
             recordedBy: currentUser.uid,
             recordedByName: currentUser.email,
             ptaDeduction: ptaDeduction,
+            levyDeduction: levyDeduction,
+            totalDeductions: totalDeductions,
             term: term,
             status: 'completed',
             receiptGenerated: false,
@@ -188,7 +322,7 @@ async function processPayment(e) {
         await addDoc(collection(db, "payments"), paymentData);
         
         // Update student's payment information
-        await updateStudentBalance(studentId, amount, ptaDeduction);
+        await updateStudentBalance(studentId, amount, ptaDeduction, levyDeduction, term);
         
         // Show success message
         showAlert(`Payment of ${formatCurrency(amount)} processed successfully! Payment ID: ${paymentId}`, 'success');
@@ -214,7 +348,7 @@ async function processPayment(e) {
 }
 
 // Update student's balance after payment
-async function updateStudentBalance(studentId, amount, ptaDeduction) {
+async function updateStudentBalance(studentId, amount, ptaDeduction, levyDeduction, term) {
     try {
         const studentRef = doc(db, "students", studentId);
         const studentSnap = await getDoc(studentRef);
@@ -222,14 +356,34 @@ async function updateStudentBalance(studentId, amount, ptaDeduction) {
         if (studentSnap.exists()) {
             const studentData = studentSnap.data();
             const newPaidAmount = (studentData.paidAmount || 0) + amount;
-            const newOutstanding = (studentData.totalFees || 0) - newPaidAmount;
+            const newOutstanding = Math.max(0, (studentData.totalFees || 0) - newPaidAmount);
             const newPtaDeducted = (studentData.ptaDeducted || 0) + ptaDeduction;
+            const newLevyDeducted = (studentData.levyDeducted || 0) + levyDeduction;
+            const newTotalDeductions = (studentData.totalDeductions || 0) + ptaDeduction + levyDeduction;
+            
+            // Update term deductions tracking
+            let termDeductions = studentData.termDeductions || {};
+            if (!termDeductions[term]) {
+                termDeductions[term] = {
+                    ptaDeducted: false,
+                    levyDeducted: false,
+                    totalDeducted: 0
+                };
+            }
+            
+            if (ptaDeduction > 0) termDeductions[term].ptaDeducted = true;
+            if (levyDeduction > 0) termDeductions[term].levyDeducted = true;
+            termDeductions[term].totalDeducted = (termDeductions[term].totalDeducted || 0) + ptaDeduction + levyDeduction;
             
             await updateDoc(studentRef, {
                 paidAmount: newPaidAmount,
                 outstanding: newOutstanding,
                 ptaDeducted: newPtaDeducted,
-                lastPaymentDate: new Date().toISOString()
+                levyDeducted: newLevyDeducted,
+                totalDeductions: newTotalDeductions,
+                lastPaymentDate: new Date().toISOString(),
+                lastPaymentTerm: term,
+                termDeductions: termDeductions
             });
         }
     } catch (error) {
@@ -244,9 +398,11 @@ function generatePaymentId() {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
     
-    return `PAY${year}${month}${day}-${random}`;
+    return `PAY${year}${month}${day}${hours}${minutes}${seconds}`;
 }
 
 // Load recent payments
@@ -269,11 +425,13 @@ async function loadRecentPayments() {
         let html = '';
         let termTotal = 0;
         let totalPTA = 0;
+        let totalLevies = 0;
         
         querySnapshot.forEach((doc) => {
             const payment = doc.data();
             termTotal += payment.amount || 0;
             totalPTA += payment.ptaDeduction || 0;
+            totalLevies += payment.levyDeduction || 0;
             
             html += `
                 <div class="payment-item">
@@ -283,8 +441,10 @@ async function loadRecentPayments() {
                     </div>
                     <div class="payment-details">
                         <p><strong>${payment.studentName}</strong> (${payment.studentId})</p>
-                        <p>${payment.description}</p>
-                        <p class="payment-date">${formatDate(payment.dateTime)} • ${payment.paymentMethod}</p>
+                        <p>${payment.description} • ${payment.paymentType}</p>
+                        ${payment.ptaDeduction > 0 ? `<p>PTA: ${formatCurrency(payment.ptaDeduction)}</p>` : ''}
+                        ${payment.levyDeduction > 0 ? `<p>Levy: ${formatCurrency(payment.levyDeduction)}</p>` : ''}
+                        <p class="payment-date">${formatDate(payment.dateTime)} • ${payment.paymentMethod} • ${payment.term}</p>
                     </div>
                 </div>
             `;
@@ -295,7 +455,8 @@ async function loadRecentPayments() {
         // Update summary
         document.getElementById('termTotal').textContent = formatCurrency(termTotal);
         document.getElementById('totalPTA').textContent = formatCurrency(totalPTA);
-        document.getElementById('netToSchool').textContent = formatCurrency(termTotal - totalPTA);
+        document.getElementById('totalLevies').textContent = formatCurrency(totalLevies);
+        document.getElementById('netToSchool').textContent = formatCurrency(termTotal - totalPTA - totalLevies);
         
     } catch (error) {
         console.error("Error loading payments:", error);
@@ -370,6 +531,7 @@ function createReceiptContent(payment, receiptNumber) {
                 .total { font-weight: bold; font-size: 1.2em; border-top: 2px solid #000; padding-top: 10px; }
                 .footer { text-align: center; margin-top: 30px; color: #7f8c8d; font-size: 0.9em; }
                 .signature { margin-top: 40px; border-top: 1px solid #000; padding-top: 10px; }
+                .deductions { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px; }
             </style>
         </head>
         <body>
@@ -377,7 +539,7 @@ function createReceiptContent(payment, receiptNumber) {
                 <div class="header">
                     <h1>Success Academy</h1>
                     <p>Official Receipt</p>
-                    <p>${receiptNumber}</p>
+                    <p><strong>${receiptNumber}</strong></p>
                 </div>
                 
                 <div class="details">
@@ -409,14 +571,35 @@ function createReceiptContent(payment, receiptNumber) {
                         <span>Payment Method:</span>
                         <span>${payment.paymentMethod}</span>
                     </div>
-                    ${payment.ptaDeduction > 0 ? `
                     <div class="row">
-                        <span>PTA Deduction (10%):</span>
-                        <span>-${formatCurrency(payment.ptaDeduction)}</span>
+                        <span>Term:</span>
+                        <span>${payment.term}</span>
+                    </div>
+                    
+                    ${(payment.ptaDeduction > 0 || payment.levyDeduction > 0) ? `
+                    <div class="deductions">
+                        <h4>Deductions</h4>
+                        ${payment.ptaDeduction > 0 ? `
+                        <div class="row">
+                            <span>PTA (10%):</span>
+                            <span>-${formatCurrency(payment.ptaDeduction)}</span>
+                        </div>
+                        ` : ''}
+                        ${payment.levyDeduction > 0 ? `
+                        <div class="row">
+                            <span>School Levy (5%):</span>
+                            <span>-${formatCurrency(payment.levyDeduction)}</span>
+                        </div>
+                        ` : ''}
+                        <div class="row">
+                            <span>Total Deductions:</span>
+                            <span>-${formatCurrency(payment.totalDeductions || 0)}</span>
+                        </div>
                     </div>
                     ` : ''}
+                    
                     <div class="row total">
-                        <span>Amount Paid:</span>
+                        <span>Total Amount Paid:</span>
                         <span>${formatCurrency(payment.amount)}</span>
                     </div>
                 </div>
@@ -430,6 +613,7 @@ function createReceiptContent(payment, receiptNumber) {
                     <p>Thank you for your payment!</p>
                     <p>Success Academy Finance Department</p>
                     <p>Contact: finance@successacademy.edu</p>
+                    <p><em>This is an official receipt. Please keep for your records.</em></p>
                 </div>
             </div>
             
@@ -443,12 +627,12 @@ function createReceiptContent(payment, receiptNumber) {
     `;
 }
 
-// Utility: Format currency
+// Utility: Format currency in Nigerian Naira
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-    }).format(amount);
+    return '₦' + amount.toLocaleString('en-NG', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 }
 
 // Utility: Format date
@@ -470,9 +654,11 @@ function showAlert(message, type) {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type}`;
     alertDiv.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-        ${message}
-        <button onclick="this.parentElement.remove()" style="float:right; background:none; border:none; cursor:pointer;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${message}</span>
+        </div>
+        <button onclick="this.parentElement.remove()" style="background:none; border:none; cursor:pointer; font-size: 1.2em;">
             <i class="fas fa-times"></i>
         </button>
     `;
@@ -487,8 +673,56 @@ function showAlert(message, type) {
     }, 5000);
 }
 
+// Setup collections function (for testing)
+async function setupCollections() {
+    try {
+        // Create sample student
+        const studentData = {
+            studentId: "STU001",
+            fullName: "John Doe",
+            class: "Grade 10A",
+            parentName: "Jane Doe",
+            parentPhone: "+2348012345678",
+            parentEmail: "parent@example.com",
+            totalFees: 150000,
+            paidAmount: 0,
+            outstanding: 150000,
+            ptaDeducted: 0,
+            levyDeducted: 0,
+            totalDeductions: 0,
+            createdAt: new Date().toISOString(),
+            termDeductions: {
+                "Term 1 2024/2025": { ptaDeducted: false, levyDeducted: false, totalDeducted: 0 },
+                "Term 2 2024/2025": { ptaDeducted: false, levyDeducted: false, totalDeducted: 0 },
+                "Term 3 2024/2025": { ptaDeducted: false, levyDeducted: false, totalDeducted: 0 }
+            }
+        };
+        
+        await setDoc(doc(db, "students", "STU001"), studentData);
+        
+        // Create sample fees structure
+        const feesData = {
+            tuition: { amount: 150000, ptaPercentage: 0.10, levyPercentage: 0.05 },
+            pta: { amount: 15000, ptaPercentage: 1.00, levyPercentage: 0.00 },
+            exam: { amount: 10000, ptaPercentage: 0.00, levyPercentage: 0.00 },
+            library: { amount: 5000, ptaPercentage: 0.00, levyPercentage: 0.00 },
+            sports: { amount: 8000, ptaPercentage: 0.00, levyPercentage: 0.00 },
+            updatedAt: new Date().toISOString()
+        };
+        
+        await setDoc(doc(db, "fees_structure", "current"), feesData);
+        
+        showAlert('Collections setup complete! Sample student STU001 created.', 'success');
+        
+    } catch (error) {
+        console.error("Setup error:", error);
+        showAlert('Error setting up collections: ' + error.message, 'error');
+    }
+}
+
 // Make functions available globally
 window.searchStudent = searchStudent;
 window.processPayment = processPayment;
 window.generateReceipt = generateReceipt;
 window.showAlert = showAlert;
+window.setupCollections = setupCollections;
