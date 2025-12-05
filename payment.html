@@ -156,6 +156,13 @@
             margin-bottom: 8px;
         }
         
+        .fee-item.total {
+            font-weight: bold;
+            border-top: 1px solid #ddd;
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+        
         .hidden {
             display: none;
         }
@@ -164,6 +171,9 @@
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
         
         .alert-success {
@@ -210,6 +220,15 @@
         .payment-date {
             color: #666;
             font-size: 0.9rem;
+        }
+        
+        .info-note {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 0.9em;
+            color: #1565c0;
         }
         
         @media (max-width: 768px) {
@@ -260,15 +279,27 @@
                             </div>
                             <div class="summary-item">
                                 <span>Total Fees:</span>
-                                <span id="totalFees">$0.00</span>
+                                <span id="totalFees">₦0.00</span>
                             </div>
                             <div class="summary-item">
                                 <span>Paid Amount:</span>
-                                <span id="paidAmount">$0.00</span>
+                                <span id="paidAmount">₦0.00</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>PTA Deducted:</span>
+                                <span id="ptaDeducted">₦0.00</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Levies Deducted:</span>
+                                <span id="levyDeducted">₦0.00</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Total Deductions:</span>
+                                <span id="totalDeductions">₦0.00</span>
                             </div>
                             <div class="summary-item total">
                                 <span>Outstanding Balance:</span>
-                                <span id="outstandingBalance">$0.00</span>
+                                <span id="outstandingBalance">₦0.00</span>
                             </div>
                         </div>
                     </div>
@@ -287,8 +318,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="amount"><i class="fas fa-money-bill-wave"></i> Amount ($) *</label>
-                        <input type="number" id="amount" step="0.01" min="0" placeholder="Enter amount" required>
+                        <label for="amount"><i class="fas fa-money-bill-wave"></i> Amount (₦) *</label>
+                        <input type="number" id="amount" step="0.01" min="0" placeholder="Enter amount in ₦" required>
                     </div>
                     
                     <div class="form-group">
@@ -319,19 +350,28 @@
                     </div>
                     
                     <div class="fee-breakdown hidden" id="ptaBreakdown">
-                        <h4><i class="fas fa-percentage"></i> PTA Deduction Breakdown</h4>
+                        <h4><i class="fas fa-percentage"></i> Deduction Breakdown</h4>
                         <div class="fee-item">
                             <span>Payment Amount:</span>
-                            <span id="paymentAmountDisplay">$0.00</span>
+                            <span id="paymentAmountDisplay">₦0.00</span>
                         </div>
                         <div class="fee-item">
                             <span>PTA Portion (10%):</span>
-                            <span id="ptaDeductionDisplay">$0.00</span>
+                            <span id="ptaDeductionDisplay">₦0.00</span>
                         </div>
                         <div class="fee-item">
-                            <span>Remaining to School:</span>
-                            <span id="schoolPortionDisplay">$0.00</span>
+                            <span>School Levy (5%):</span>
+                            <span id="levyDeductionDisplay">₦0.00</span>
                         </div>
+                        <div class="fee-item">
+                            <span>Total Deductions:</span>
+                            <span id="totalDeductionsDisplay">₦0.00</span>
+                        </div>
+                        <div class="fee-item total">
+                            <span>Net to School:</span>
+                            <span id="schoolPortionDisplay">₦0.00</span>
+                        </div>
+                        <div id="ptaNote" class="info-note"></div>
                     </div>
                     
                     <button type="submit" class="btn btn-full">
@@ -352,15 +392,19 @@
                     <h3><i class="fas fa-chart-bar"></i> Term Summary</h3>
                     <div class="summary-item">
                         <span>Total Collected This Term:</span>
-                        <span id="termTotal">$0.00</span>
+                        <span id="termTotal">₦0.00</span>
                     </div>
                     <div class="summary-item">
                         <span>Total PTA Deducted:</span>
-                        <span id="totalPTA">$0.00</span>
+                        <span id="totalPTA">₦0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total Levies Deducted:</span>
+                        <span id="totalLevies">₦0.00</span>
                     </div>
                     <div class="summary-item total">
                         <span>Net to School:</span>
-                        <span id="netToSchool">$0.00</span>
+                        <span id="netToSchool">₦0.00</span>
                     </div>
                 </div>
                 
@@ -370,6 +414,11 @@
                 
                 <button id="viewAllPayments" class="btn btn-full" style="margin-top: 10px; background: #6c757d;">
                     <i class="fas fa-list"></i> View All Payments
+                </button>
+                
+                <!-- Temporary setup button -->
+                <button onclick="setupCollections()" class="btn btn-full" style="margin-top: 10px; background: #28a745;">
+                    <i class="fas fa-database"></i> Setup Collections (Run Once)
                 </button>
             </div>
         </div>
