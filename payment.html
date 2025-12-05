@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success Academy - Payment System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: #667eea;
+        }
+        
+        .logo h1 {
+            color: #333;
+            font-size: 1.8rem;
+        }
+        
+        .logo span {
+            color: #667eea;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-full {
+            width: 100%;
+        }
+        
+        .payment-summary {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .summary-item.total {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .fee-breakdown {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .fee-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        #paymentHistory {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .payment-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .payment-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .payment-id {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .payment-amount {
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .payment-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <div>
+                    <h1>Success Academy <span>Finance</span></h1>
+                    <p>Payment Management System</p>
+                </div>
+            </div>
+        </header>
+        
+        <div id="alertContainer"></div>
+        
+        <div class="main-content">
+            <!-- Payment Form Section -->
+            <div class="card">
+                <h2><i class="fas fa-credit-card"></i> Make Payment</h2>
+                
+                <form id="paymentForm">
+                    <div class="form-group">
+                        <label for="studentId"><i class="fas fa-user-graduate"></i> Student ID *</label>
+                        <input type="text" id="studentId" placeholder="Enter Student ID (e.g., STU001)" required>
+                        <button type="button" id="searchStudent" class="btn" style="margin-top: 5px; padding: 8px 15px;">
+                            <i class="fas fa-search"></i> Search Student
+                        </button>
+                    </div>
+                    
+                    <div id="studentInfo" class="hidden">
+                        <div class="payment-summary">
+                            <h3>Student Information</h3>
+                            <div class="summary-item">
+                                <span>Name:</span>
+                                <span id="studentNameDisplay">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Class:</span>
+                                <span id="studentClass">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Total Fees:</span>
+                                <span id="totalFees">$0.00</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Paid Amount:</span>
+                                <span id="paidAmount">$0.00</span>
+                            </div>
+                            <div class="summary-item total">
+                                <span>Outstanding Balance:</span>
+                                <span id="outstandingBalance">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="paymentType"><i class="fas fa-list"></i> Payment Type *</label>
+                        <select id="paymentType" required>
+                            <option value="">Select Payment Type</option>
+                            <option value="tuition">Tuition Fees</option>
+                            <option value="pta">PTA/Levies</option>
+                            <option value="exam">Examination Fees</option>
+                            <option value="library">Library Fees</option>
+                            <option value="sports">Sports Fees</option>
+                            <option value="other">Other Fees</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="amount"><i class="fas fa-money-bill-wave"></i> Amount ($) *</label>
+                        <input type="number" id="amount" step="0.01" min="0" placeholder="Enter amount" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="paymentMethod"><i class="fas fa-credit-card"></i> Payment Method *</label>
+                        <select id="paymentMethod" required>
+                            <option value="">Select Method</option>
+                            <option value="cash">Cash</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="card">Credit/Debit Card</option>
+                            <option value="mobile_money">Mobile Money</option>
+                            <option value="check">Check</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description"><i class="fas fa-file-alt"></i> Description</label>
+                        <textarea id="description" rows="3" placeholder="Payment description (optional)"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="term"><i class="fas fa-calendar-alt"></i> Term *</label>
+                        <select id="term" required>
+                            <option value="">Select Term</option>
+                            <option value="Term 1 2024/2025">Term 1 2024/2025</option>
+                            <option value="Term 2 2024/2025">Term 2 2024/2025</option>
+                            <option value="Term 3 2024/2025">Term 3 2024/2025</option>
+                        </select>
+                    </div>
+                    
+                    <div class="fee-breakdown hidden" id="ptaBreakdown">
+                        <h4><i class="fas fa-percentage"></i> PTA Deduction Breakdown</h4>
+                        <div class="fee-item">
+                            <span>Payment Amount:</span>
+                            <span id="paymentAmountDisplay">$0.00</span>
+                        </div>
+                        <div class="fee-item">
+                            <span>PTA Portion (10%):</span>
+                            <span id="ptaDeductionDisplay">$0.00</span>
+                        </div>
+                        <div class="fee-item">
+                            <span>Remaining to School:</span>
+                            <span id="schoolPortionDisplay">$0.00</span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-full">
+                        <i class="fas fa-paper-plane"></i> Process Payment
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Payment History & Summary Section -->
+            <div class="card">
+                <h2><i class="fas fa-history"></i> Recent Payments</h2>
+                <div id="paymentHistory">
+                    <!-- Payment history will be loaded here -->
+                    <p class="loading">Loading payment history...</p>
+                </div>
+                
+                <div class="payment-summary" style="margin-top: 20px;">
+                    <h3><i class="fas fa-chart-bar"></i> Term Summary</h3>
+                    <div class="summary-item">
+                        <span>Total Collected This Term:</span>
+                        <span id="termTotal">$0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total PTA Deducted:</span>
+                        <span id="totalPTA">$0.00</span>
+                    </div>
+                    <div class="summary-item total">
+                        <span>Net to School:</span>
+                        <span id="netToSchool">$0.00</span>
+                    </div>
+                </div>
+                
+                <button id="generateReceipt" class="btn btn-full" style="margin-top: 20px;" disabled>
+                    <i class="fas fa-receipt"></i> Generate Receipt for Last Payment
+                </button>
+                
+                <button id="viewAllPayments" class="btn btn-full" style="margin-top: 10px; background: #6c757d;">
+                    <i class="fas fa-list"></i> View All Payments
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            getDoc, 
+            setDoc, 
+            addDoc, 
+            updateDoc,
+            query, 
+            where, 
+            orderBy, 
+            limit,
+            getDocs,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-Xz6BftZJf96JDZu-fUUlR-ldGYG-2gI",
+            authDomain: "sucesss-academy.firebaseapp.com",
+            projectId: "sucesss-academy",
+            storageBucket: "sucesss-academy.firebasestorage.app",
+            messagingSenderId: "274982692906",
+            appId: "1:274982692906:web:5e39a38451725a3cd13b53",
+            measurementId: "G-QLX11V1YHQ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Make available globally
+        window.db = db;
+        window.auth = auth;
+        window.firestore = { 
+            collection, doc, getDoc, setDoc, addDoc, updateDoc, 
+            query, where, orderBy, limit, getDocs, serverTimestamp 
+        };
+
+        console.log("Firebase initialized successfully!");
+    </script>
+    
+    <!-- Payment System JavaScript -->
+    <script src="payment-system.js"></script>
+</body>
+</html>
