@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secondary Students Management - Success Academy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #28a745;
+            --info: #17a2b8;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+        
+        .logo {
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .logo h1 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .nav-menu {
+            flex: 1;
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            color: #555;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-item:hover {
+            background: #f8f9fa;
+            color: var(--primary);
+        }
+        
+        .nav-item.active {
+            background: #f0f2ff;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .nav-item i {
+            width: 25px;
+            margin-right: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .nav-item span {
+            font-weight: 500;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-content h2 {
+            color: var(--dark);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-content p {
+            color: #666;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* Button Styles */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background: white;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .tab:hover {
+            background: #f8f9fa;
+        }
+        
+        .tab.active {
+            background: #f0f2ff;
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Card Styles */
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .card h3 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8f9fa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Form Styles */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        /* Class Filter */
+        .class-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .class-btn {
+            padding: 8px 15px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .class-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .class-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .data-table th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Alert */
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Status Badges */
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .badge-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .badge-graduated {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .badge-transferred {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        /* House Colors */
+        .house-red { color: #dc3545; }
+        .house-blue { color: #007bff; }
+        .house-green { color: #28a745; }
+        .house-yellow { color: #ffc107; }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Student Card */
+        .student-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .student-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .student-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+        
+        .student-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .student-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .student-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 2px;
+        }
+        
+        .detail-value {
+            font-weight: 500;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h3 {
+            color: var(--dark);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .stat-card h3 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            color: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: fixed;
+                left: -250px;
+                transition: left 0.3s;
+                height: 100vh;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .student-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .student-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h1>Success Academy</h1>
+                <p>Secondary Students</p>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="index.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                
+                <a href="payment.html" class="nav-item">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Payment System</span>
+                </a>
+                
+                <a href="fees-levies.html" class="nav-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Fees & Levies</span>
+                </a>
+                
+                <a href="pupils.html" class="nav-item">
+                    <i class="fas fa-child"></i>
+                    <span>Pupils (KG/Nursery)</span>
+                </a>
+                
+                <a href="students.html" class="nav-item active">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Students (JSS1-SS3)</span>
+                </a>
+                
+                <a href="expenses.html" class="nav-item">
+                    <i class="fas fa-receipt"></i>
+                    <span>Expenses</span>
+                </a>
+                
+                <a href="reports.html" class="nav-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </a>
+                
+                <a href="settings.html" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div id="alertContainer"></div>
+            
+            <div class="header">
+                <div class="header-content">
+                    <h2><i class="fas fa-user-graduate"></i> Secondary Students Management</h2>
+                    <p>Manage JSS1, JSS2, JSS3, SS1, SS2, and SS3 students</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="showAddStudentModal()">
+                        <i class="fas fa-user-plus"></i> Add Student
+                    </button>
+                    <button class="btn btn-primary" onclick="window.location.href='payment.html'">
+                        <i class="fas fa-credit-card"></i> Collect Fees
+                    </button>
+                    <button class="btn btn-warning" onclick="generateStudentIdCards()">
+                        <i class="fas fa-id-card"></i> Print ID Cards
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="totalStudents">0</h3>
+                    <p>Total Students</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="activeStudents">0</h3>
+                    <p>Active Students</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="jssStudents">0</h3>
+                    <p>JSS Students</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="ssStudents">0</h3>
+                    <p>SS Students</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="maleStudents">0</h3>
+                    <p>Male Students</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="femaleStudents">0</h3>
+                    <p>Female Students</p>
+                </div>
+            </div>
+            
+            <!-- Class Filter -->
+            <div class="class-filter">
+                <button class="class-btn active" data-class="all">All Classes</button>
+                <button class="class-btn" data-class="jss1">JSS 1</button>
+                <button class="class-btn" data-class="jss2">JSS 2</button>
+                <button class="class-btn" data-class="jss3">JSS 3</button>
+                <button class="class-btn" data-class="ss1">SS 1</button>
+                <button class="class-btn" data-class="ss2">SS 2</button>
+                <button class="class-btn" data-class="ss3">SS 3</button>
+                <button class="class-btn" data-class="graduated">Graduated</button>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" data-tab="list">Students List</div>
+                <div class="tab" data-tab="academic">Academic Records</div>
+                <div class="tab" data-tab="promotion">Promotion</div>
+                <div class="tab" data-tab="reports">Student Reports</div>
+            </div>
+            
+            <!-- Students List Tab -->
+            <div class="tab-content active" id="listTab">
+                <div class="card">
+                    <h3><i class="fas fa-users"></i> Students List</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Admission No.</th>
+                                    <th>Student Name</th>
+                                    <th>Class</th>
+                                    <th>House</th>
+                                    <th>Gender</th>
+                                    <th>Parent</th>
+                                    <th>Phone</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTable">
+                                <tr>
+                                    <td colspan="9" style="text-align: center; padding: 40px;">
+                                        <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; color: #667eea;"></i>
+                                        <p style="margin-top: 10px;">Loading students data...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                        <div style="color: #666;">
+                            Showing <span id="showingCount">0</span> of <span id="totalCount">0</span> students
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" onclick="exportStudents('csv')">
+                                <i class="fas fa-file-csv"></i> Export CSV
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportStudents('pdf')">
+                                <i class="fas fa-file-pdf"></i> Export PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Academic Records Tab -->
+            <div class="tab-content" id="academicTab">
+                <div class="card">
+                    <h3><i class="fas fa-book-open"></i> Academic Records Management</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="academicClass">Select Class</label>
+                            <select id="academicClass">
+                                <option value="">Select Class</option>
+                                <option value="jss1">JSS 1</option>
+                                <option value="jss2">JSS 2</option>
+                                <option value="jss3">JSS 3</option>
+                                <option value="ss1">SS 1</option>
+                                <option value="ss2">SS 2</option>
+                                <option value="ss3">SS 3</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="academicTerm">Select Term</label>
+                            <select id="academicTerm">
+                                <option value="Term 1 2024/2025">Term 1 2024/2025</option>
+                                <option value="Term 2 2024/2025">Term 2 2024/2025</option>
+                                <option value="Term 3 2024/2025">Term 3 2024/2025</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="loadAcademicRecords()">
+                        <i class="fas fa-search"></i> Load Records
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-clipboard-list"></i> Academic Results</h3>
+                    <div id="academicResults" style="min-height: 200px; padding: 20px; text-align: center;">
+                        <p style="color: #666;">Select class and term to view academic records</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Promotion Tab -->
+            <div class="tab-content" id="promotionTab">
+                <div class="card">
+                    <h3><i class="fas fa-graduation-cap"></i> Student Promotion</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fromClass">From Class</label>
+                            <select id="fromClass">
+                                <option value="">Select Current Class</option>
+                                <option value="jss1">JSS 1</option>
+                                <option value="jss2">JSS 2</option>
+                                <option value="jss3">JSS 3</option>
+                                <option value="ss1">SS 1</option>
+                                <option value="ss2">SS 2</option>
+                                <option value="ss3">SS 3</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="toClass">To Class</label>
+                            <select id="toClass">
+                                <option value="">Select Next Class</option>
+                                <option value="jss2">JSS 2</option>
+                                <option value="jss3">JSS 3</option>
+                                <option value="ss1">SS 1</option>
+                                <option value="ss2">SS 2</option>
+                                <option value="ss3">SS 3</option>
+                                <option value="graduated">Graduated</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="promotionSession">Academic Session</label>
+                            <input type="text" id="promotionSession" value="2024/2025">
+                        </div>
+                        <div class="form-group">
+                            <label for="promotionDate">Promotion Date</label>
+                            <input type="date" id="promotionDate">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="promotionRemarks">Remarks</label>
+                        <textarea id="promotionRemarks" rows="3" placeholder="Additional remarks about the promotion..."></textarea>
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="promoteStudents()">
+                        <i class="fas fa-arrow-right"></i> Promote Students
+                    </button>
+                    <button class="btn btn-warning" onclick="bulkPromotion()">
+                        <i class="fas fa-users"></i> Bulk Promotion
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-history"></i> Promotion History</h3>
+                    <div id="promotionHistory" style="min-height: 200px; padding: 20px; text-align: center;">
+                        <p style="color: #666;">No promotion history available</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Student Reports Tab -->
+            <div class="tab-content" id="reportsTab">
+                <div class="card">
+                    <h3><i class="fas fa-chart-line"></i> Generate Student Reports</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reportStudentClass">Student Class</label>
+                            <select id="reportStudentClass">
+                                <option value="all">All Classes</option>
+                                <option value="jss1">JSS 1</option>
+                                <option value="jss2">JSS 2</option>
+                                <option value="jss3">JSS 3</option>
+                                <option value="ss1">SS 1</option>
+                                <option value="ss2">SS 2</option>
+                                <option value="ss3">SS 3</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="reportType">Report Type</label>
+                            <select id="reportType">
+                                <option value="attendance">Attendance Report</option>
+                                <option value="academic">Academic Report</option>
+                                <option value="financial">Financial Report</option>
+                                <option value="disciplinary">Disciplinary Report</option>
+                                <option value="medical">Medical Report</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reportStartDate">Start Date</label>
+                            <input type="date" id="reportStartDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="reportEndDate">End Date</label>
+                            <input type="date" id="reportEndDate">
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="generateStudentReport()">
+                        <i class="fas fa-file-export"></i> Generate Report
+                    </button>
+                    <button class="btn btn-secondary" onclick="printReport()">
+                        <i class="fas fa-print"></i> Print Report
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-file-alt"></i> Report Preview</h3>
+                    <div id="reportPreview" style="min-height: 400px; padding: 20px; background: #f8f9fa; border-radius: 5px;">
+                        <p style="color: #666; text-align: center;">Generated report will appear here</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Student Modal -->
+    <div class="modal" id="studentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Student</h3>
+                <button class="close-modal" onclick="closeStudentModal()">&times;</button>
+            </div>
+            <form id="studentForm">
+                <input type="hidden" id="studentId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name *</label>
+                        <input type="text" id="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name *</label>
+                        <input type="text" id="lastName" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="otherNames">Other Names</label>
+                        <input type="text" id="otherNames">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender *</label>
+                        <select id="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dateOfBirth">Date of Birth *</label>
+                        <input type="date" id="dateOfBirth" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" min="10" max="25" readonly>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="admissionClass">Admission Class *</label>
+                        <select id="admissionClass" required>
+                            <option value="">Select Class</option>
+                            <option value="jss1">JSS 1</option>
+                            <option value="jss2">JSS 2</option>
+                            <option value="jss3">JSS 3</option>
+                            <option value="ss1">SS 1</option>
+                            <option value="ss2">SS 2</option>
+                            <option value="ss3">SS 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="currentClass">Current Class</label>
+                        <select id="currentClass">
+                            <option value="jss1">JSS 1</option>
+                            <option value="jss2">JSS 2</option>
+                            <option value="jss3">JSS 3</option>
+                            <option value="ss1">SS 1</option>
+                            <option value="ss2">SS 2</option>
+                            <option value="ss3">SS 3</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="house">House</label>
+                        <select id="house">
+                            <option value="">Select House</option>
+                            <option value="red">Red House</option>
+                            <option value="blue">Blue House</option>
+                            <option value="green">Green House</option>
+                            <option value="yellow">Yellow House</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="religion">Religion</label>
+                        <select id="religion">
+                            <option value="">Select Religion</option>
+                            <option value="christianity">Christianity</option>
+                            <option value="islam">Islam</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nationality">Nationality</label>
+                        <input type="text" id="nationality" value="Nigerian">
+                    </div>
+                    <div class="form-group">
+                        <label for="stateOfOrigin">State of Origin</label>
+                        <input type="text" id="stateOfOrigin">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="lga">Local Government Area</label>
+                        <input type="text" id="lga">
+                    </div>
+                    <div class="form-group">
+                        <label for="hometown">Hometown</label>
+                        <input type="text" id="hometown">
+                    </div>
+                </div>
+                
+                <h4 style="margin: 20px 0 10px 0; color: #667eea;">Parent/Guardian Information</h4>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="parentName">Parent/Guardian Name *</label>
+                        <input type="text" id="parentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="parentRelationship">Relationship *</label>
+                        <select id="parentRelationship" required>
+                            <option value="">Select Relationship</option>
+                            <option value="father">Father</option>
+                            <option value="mother">Mother</option>
+                            <option value="guardian">Guardian</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="parentPhone">Phone Number *</label>
+                        <input type="tel" id="parentPhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="parentEmail">Email Address</label>
+                        <input type="email" id="parentEmail">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="parentOccupation">Occupation</label>
+                        <input type="text" id="parentOccupation">
+                    </div>
+                    <div class="form-group">
+                        <label for="parentAddress">Address *</label>
+                        <input type="text" id="parentAddress" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="emergencyContact">Emergency Contact</label>
+                        <input type="text" id="emergencyContact">
+                    </div>
+                    <div class="form-group">
+                        <label for="emergencyPhone">Emergency Phone</label>
+                        <input type="tel" id="emergencyPhone">
+                    </div>
+                </div>
+                
+                <h4 style="margin: 20px 0 10px 0; color: #667eea;">Academic Information</h4>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="admissionNumber">Admission Number *</label>
+                        <input type="text" id="admissionNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admissionDate">Admission Date *</label>
+                        <input type="date" id="admissionDate" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="previousSchool">Previous School</label>
+                        <input type="text" id="previousSchool">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastClassPassed">Last Class Passed</label>
+                        <input type="text" id="lastClassPassed">
+                    </div>
+                </div>
+                
+                <h4 style="margin: 20px 0 10px 0; color: #667eea;">Medical Information</h4>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bloodGroup">Blood Group</label>
+                        <select id="bloodGroup">
+                            <option value="">Select Blood Group</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="genotype">Genotype</label>
+                        <select id="genotype">
+                            <option value="">Select Genotype</option>
+                            <option value="AA">AA</option>
+                            <option value="AS">AS</option>
+                            <option value="SS">SS</option>
+                            <option value="AC">AC</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="medicalConditions">Medical Conditions/Allergies</label>
+                    <textarea id="medicalConditions" rows="3" placeholder="Any medical conditions or allergies..."></textarea>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="medications">Regular Medications</label>
+                    <textarea id="medications" rows="2" placeholder="Any regular medications..."></textarea>
+                </div>
+                
+                <h4 style="margin: 20px 0 10px 0; color: #667eea;">Additional Information</h4>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="status">Status *</label>
+                        <select id="status" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="graduated">Graduated</option>
+                            <option value="transferred">Transferred</option>
+                            <option value="suspended">Suspended</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="boardingStatus">Boarding Status</label>
+                        <select id="boardingStatus">
+                            <option value="day">Day Student</option>
+                            <option value="boarding">Boarding Student</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="notes">Additional Notes</label>
+                    <textarea id="notes" rows="3" placeholder="Any additional notes about the student..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-success" style="flex: 1;">
+                        <i class="fas fa-save"></i> Save Student
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeStudentModal()" style="flex: 1;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            getDoc, 
+            setDoc, 
+            addDoc, 
+            updateDoc,
+            deleteDoc,
+            query, 
+            where, 
+            orderBy, 
+            limit,
+            getDocs,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-Xz6BftZJf96JDZu-fUUlR-ldGYG-2gI",
+            authDomain: "sucesss-academy.firebaseapp.com",
+            projectId: "sucesss-academy",
+            storageBucket: "sucesss-academy.firebasestorage.app",
+            messagingSenderId: "274982692906",
+            appId: "1:274982692906:web:5e39a38451725a3cd13b53",
+            measurementId: "G-QLX11V1YHQ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Make available globally
+        window.db = db;
+        window.auth = auth;
+        window.firestore = { 
+            collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
+            query, where, orderBy, limit, getDocs, serverTimestamp 
+        };
+
+        console.log("Firebase initialized for Secondary Students!");
+    </script>
+    
+    <!-- Students Management JavaScript -->
+    <script src="students-system.js"></script>
+</body>
+</html>
