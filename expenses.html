@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses Management - Success Academy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #28a745;
+            --info: #17a2b8;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+        
+        .logo {
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .logo h1 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .nav-menu {
+            flex: 1;
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            color: #555;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-item:hover {
+            background: #f8f9fa;
+            color: var(--primary);
+        }
+        
+        .nav-item.active {
+            background: #f0f2ff;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .nav-item i {
+            width: 25px;
+            margin-right: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .nav-item span {
+            font-weight: 500;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-content h2 {
+            color: var(--dark);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-content p {
+            color: #666;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* Button Styles */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background: white;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .tab:hover {
+            background: #f8f9fa;
+        }
+        
+        .tab.active {
+            background: #f0f2ff;
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Card Styles */
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .card h3 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8f9fa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Form Styles */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .data-table th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Alert */
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Status Badges */
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .badge-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-approved {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .badge-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Expense Card */
+        .expense-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .expense-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .expense-card.urgent {
+            border-left: 4px solid var(--danger);
+        }
+        
+        .expense-card.moderate {
+            border-left: 4px solid var(--warning);
+        }
+        
+        .expense-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .expense-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+        
+        .expense-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .expense-amount {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--danger);
+        }
+        
+        .expense-details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 2px;
+        }
+        
+        .detail-value {
+            font-weight: 500;
+        }
+        
+        /* Budget Card */
+        .budget-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--info);
+        }
+        
+        .budget-progress {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .budget-progress-bar {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .budget-progress-bar.low {
+            background: var(--success);
+        }
+        
+        .budget-progress-bar.medium {
+            background: var(--warning);
+        }
+        
+        .budget-progress-bar.high {
+            background: var(--danger);
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Category Colors */
+        .category-salary { color: #dc3545; }
+        .category-utilities { color: #007bff; }
+        .category-maintenance { color: #28a745; }
+        .category-supplies { color: #ffc107; }
+        .category-other { color: #6c757d; }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h3 {
+            color: var(--dark);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            min-height: 300px;
+        }
+        
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            color: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: fixed;
+                left: -250px;
+                transition: left 0.3s;
+                height: 100vh;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .expense-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .expense-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h1>Success Academy</h1>
+                <p>Expenses Management</p>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="index.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                
+                <a href="payment.html" class="nav-item">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Payment System</span>
+                </a>
+                
+                <a href="fees-levies.html" class="nav-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Fees & Levies</span>
+                </a>
+                
+                <a href="pupils.html" class="nav-item">
+                    <i class="fas fa-child"></i>
+                    <span>Pupils (KG/Nursery)</span>
+                </a>
+                
+                <a href="students.html" class="nav-item">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Students (JSS1-SS3)</span>
+                </a>
+                
+                <a href="expenses.html" class="nav-item active">
+                    <i class="fas fa-receipt"></i>
+                    <span>Expenses</span>
+                </a>
+                
+                <a href="reports.html" class="nav-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </a>
+                
+                <a href="settings.html" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div id="alertContainer"></div>
+            
+            <div class="header">
+                <div class="header-content">
+                    <h2><i class="fas fa-receipt"></i> Expenses Management</h2>
+                    <p>Track and manage all school expenses and budgets</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="showAddExpenseModal()">
+                        <i class="fas fa-plus-circle"></i> Add Expense
+                    </button>
+                    <button class="btn btn-primary" onclick="showAddBudgetModal()">
+                        <i class="fas fa-chart-pie"></i> Create Budget
+                    </button>
+                    <button class="btn btn-warning" onclick="exportExpenses()">
+                        <i class="fas fa-file-export"></i> Export Data
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="totalExpenses">₦0</h3>
+                    <p>Total Expenses</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="monthlyExpenses">₦0</h3>
+                    <p>This Month</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="pendingExpenses">0</h3>
+                    <p>Pending Approvals</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="budgetUtilization">0%</h3>
+                    <p>Budget Used</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="topCategory">-</h3>
+                    <p>Top Category</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="avgExpense">₦0</h3>
+                    <p>Average Expense</p>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" data-tab="expenses">All Expenses</div>
+                <div class="tab" data-tab="budgets">Budgets</div>
+                <div class="tab" data-tab="categories">Categories</div>
+                <div class="tab" data-tab="analysis">Expense Analysis</div>
+                <div class="tab" data-tab="approvals">Approvals</div>
+            </div>
+            
+            <!-- All Expenses Tab -->
+            <div class="tab-content active" id="expensesTab">
+                <div class="card">
+                    <h3><i class="fas fa-list"></i> Recent Expenses</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expenseFilterCategory">Filter by Category</label>
+                            <select id="expenseFilterCategory">
+                                <option value="all">All Categories</option>
+                                <option value="salary">Salary & Wages</option>
+                                <option value="utilities">Utilities</option>
+                                <option value="maintenance">Maintenance</option>
+                                <option value="supplies">Supplies</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseFilterDate">Filter by Date</label>
+                            <select id="expenseFilterDate">
+                                <option value="all">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="quarter">This Quarter</option>
+                                <option value="year">This Year</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="filterExpenses()">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearFilters()">
+                        <i class="fas fa-times"></i> Clear Filters
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Payment Method</th>
+                                <th>Status</th>
+                                <th>Approved By</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expensesTable">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 40px;">
+                                    <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; color: #667eea;"></i>
+                                    <p style="margin-top: 10px;">Loading expenses data...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                    <div style="color: #666;">
+                        Showing <span id="expensesShowing">0</span> of <span id="expensesTotal">0</span> expenses
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="printExpenses()">
+                            <i class="fas fa-print"></i> Print List
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Budgets Tab -->
+            <div class="tab-content" id="budgetsTab">
+                <div class="card">
+                    <h3><i class="fas fa-chart-pie"></i> Budget Management</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="budgetYear">Budget Year</label>
+                            <select id="budgetYear">
+                                <option value="2024">2024</option>
+                                <option value="2025" selected>2025</option>
+                                <option value="2026">2026</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="budgetTerm">Budget Term</label>
+                            <select id="budgetTerm">
+                                <option value="annual">Annual</option>
+                                <option value="term1">Term 1</option>
+                                <option value="term2">Term 2</option>
+                                <option value="term3">Term 3</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="loadBudgets()">
+                        <i class="fas fa-search"></i> Load Budgets
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-balance-scale"></i> Current Budgets</h3>
+                    <div id="budgetsList">
+                        <div class="budget-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <div>
+                                    <h4 style="margin: 0; color: #333;">Staff Salaries</h4>
+                                    <p style="color: #666; margin: 5px 0;">Annual Budget</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 1.2rem; font-weight: bold; color: #dc3545;">₦12,500,000</div>
+                                    <div style="color: #666; font-size: 0.9rem;">Budget: ₦15,000,000</div>
+                                </div>
+                            </div>
+                            
+                            <div class="budget-progress">
+                                <div class="budget-progress-bar high" style="width: 83%;"></div>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; color: #666; font-size: 0.9rem;">
+                                <span>Spent: ₦12.5M</span>
+                                <span>Remaining: ₦2.5M</span>
+                                <span>83% used</span>
+                            </div>
+                        </div>
+                        
+                        <div class="budget-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <div>
+                                    <h4 style="margin: 0; color: #333;">School Maintenance</h4>
+                                    <p style="color: #666; margin: 5px 0;">Term 1 Budget</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 1.2rem; font-weight: bold; color: #28a745;">₦750,000</div>
+                                    <div style="color: #666; font-size: 0.9rem;">Budget: ₦1,000,000</div>
+                                </div>
+                            </div>
+                            
+                            <div class="budget-progress">
+                                <div class="budget-progress-bar medium" style="width: 75%;"></div>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; color: #666; font-size: 0.9rem;">
+                                <span>Spent: ₦750K</span>
+                                <span>Remaining: ₦250K</span>
+                                <span>75% used</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Categories Tab -->
+            <div class="tab-content" id="categoriesTab">
+                <div class="card">
+                    <h3><i class="fas fa-tags"></i> Expense Categories</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="categoryName">Category Name *</label>
+                            <input type="text" id="categoryName" placeholder="e.g., Salaries, Utilities, etc.">
+                        </div>
+                        <div class="form-group">
+                            <label for="categoryCode">Category Code</label>
+                            <input type="text" id="categoryCode" placeholder="e.g., SAL, UTIL">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="categoryBudget">Monthly Budget (₦)</label>
+                            <input type="number" id="categoryBudget" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="categoryColor">Color Code</label>
+                            <input type="color" id="categoryColor" value="#667eea">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="categoryDescription">Description</label>
+                        <textarea id="categoryDescription" rows="3" placeholder="Describe this expense category..."></textarea>
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="saveCategory()">
+                        <i class="fas fa-save"></i> Save Category
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-list-ol"></i> Current Categories</h3>
+                    <div id="categoriesList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
+                        <!-- Categories will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Expense Analysis Tab -->
+            <div class="tab-content" id="analysisTab">
+                <div class="card">
+                    <h3><i class="fas fa-chart-line"></i> Expense Analysis</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="analysisPeriod">Analysis Period</label>
+                            <select id="analysisPeriod">
+                                <option value="month">Monthly</option>
+                                <option value="quarter">Quarterly</option>
+                                <option value="year">Yearly</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="analysisYear">Year</label>
+                            <select id="analysisYear">
+                                <option value="2023">2023</option>
+                                <option value="2024" selected>2024</option>
+                                <option value="2025">2025</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="generateAnalysis()">
+                        <i class="fas fa-chart-bar"></i> Generate Analysis
+                    </button>
+                </div>
+                
+                <div class="chart-container">
+                    <h4>Expense Trend Analysis</h4>
+                    <div id="expenseChart" style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                        <p style="color: #666;">Select analysis criteria and generate to see charts</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h4><i class="fas fa-lightbulb"></i> Insights & Recommendations</h4>
+                    <div id="expenseInsights" style="padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                        <p style="color: #666;">Analysis insights will appear here...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Approvals Tab -->
+            <div class="tab-content" id="approvalsTab">
+                <div class="card">
+                    <h3><i class="fas fa-check-circle"></i> Expense Approvals</h3>
+                    <p style="color: #666; margin-bottom: 20px;">Review and approve pending expenses</p>
+                    
+                    <div id="pendingApprovals">
+                        <div class="expense-card urgent">
+                            <div class="expense-header">
+                                <div class="expense-info">
+                                    <h4>Urgent Roof Repair</h4>
+                                    <p>Submitted by: Maintenance Dept • Date: 2024-12-05</p>
+                                </div>
+                                <div class="expense-amount">₦350,000</div>
+                            </div>
+                            
+                            <div class="expense-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Category</span>
+                                    <span class="detail-value">Maintenance</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Priority</span>
+                                    <span class="detail-value" style="color: #dc3545;">High</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Payment Method</span>
+                                    <span class="detail-value">Bank Transfer</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Status</span>
+                                    <span class="badge badge-pending">Pending</span>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 15px;">
+                                <p><strong>Description:</strong> Urgent repair of leaking roof in JSS block. Heavy rains causing damage to classrooms.</p>
+                                <p><strong>Vendor:</strong> ABC Roofing Services</p>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                <button class="btn btn-success" style="flex: 1;">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                <button class="btn btn-danger" style="flex: 1;">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                                <button class="btn btn-secondary" style="flex: 1;">
+                                    <i class="fas fa-comment"></i> Request Info
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="expense-card">
+                            <div class="expense-header">
+                                <div class="expense-info">
+                                    <h4>Science Lab Equipment</h4>
+                                    <p>Submitted by: Science Dept • Date: 2024-12-04</p>
+                                </div>
+                                <div class="expense-amount">₦850,000</div>
+                            </div>
+                            
+                            <div class="expense-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Category</span>
+                                    <span class="detail-value">Supplies</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Priority</span>
+                                    <span class="detail-value" style="color: #ffc107;">Medium</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Payment Method</span>
+                                    <span class="detail-value">Cheque</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Status</span>
+                                    <span class="badge badge-pending">Pending</span>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                <button class="btn btn-success" style="flex: 1;">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                <button class="btn btn-danger" style="flex: 1;">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h4><i class="fas fa-history"></i> Approval History</h4>
+                    <div id="approvalHistory" style="min-height: 200px; padding: 20px; text-align: center;">
+                        <p style="color: #666;">Approval history will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Expense Modal -->
+    <div class="modal" id="expenseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Record New Expense</h3>
+                <button class="close-modal" onclick="closeExpenseModal()">&times;</button>
+            </div>
+            <form id="expenseForm">
+                <input type="hidden" id="expenseId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expenseDate">Expense Date *</label>
+                        <input type="date" id="expenseDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseAmount">Amount (₦) *</label>
+                        <input type="number" id="expenseAmount" step="0.01" min="0" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expenseCategory">Category *</label>
+                        <select id="expenseCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="salary">Salary & Wages</option>
+                            <option value="utilities">Utilities</option>
+                            <option value="maintenance">Maintenance & Repairs</option>
+                            <option value="supplies">Supplies & Materials</option>
+                            <option value="transport">Transport & Travel</option>
+                            <option value="training">Training & Development</option>
+                            <option value="marketing">Marketing & Advertising</option>
+                            <option value="equipment">Equipment Purchase</option>
+                            <option value="rent">Rent & Leases</option>
+                            <option value="insurance">Insurance</option>
+                            <option value="taxes">Taxes & Levies</option>
+                            <option value="other">Other Expenses</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expensePriority">Priority Level</label>
+                        <select id="expensePriority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expenseVendor">Vendor/Supplier</label>
+                        <input type="text" id="expenseVendor" placeholder="Name of vendor/supplier">
+                    </div>
+                    <div class="form-group">
+                        <label for="expensePaymentMethod">Payment Method *</label>
+                        <select id="expensePaymentMethod" required>
+                            <option value="">Select Method</option>
+                            <option value="cash">Cash</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="cheque">Cheque</option>
+                            <option value="pos">POS/Card</option>
+                            <option value="mobile_money">Mobile Money</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expenseReference">Reference Number</label>
+                        <input type="text" id="expenseReference" placeholder="Invoice/Receipt number">
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseStatus">Status *</label>
+                        <select id="expenseStatus" required>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="paid">Paid</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="expenseDescription">Description *</label>
+                    <textarea id="expenseDescription" rows="3" placeholder="Detailed description of the expense..." required></textarea>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="expenseNotes">Additional Notes</label>
+                    <textarea id="expenseNotes" rows="2" placeholder="Any additional notes or remarks..."></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expenseDepartment">Department</label>
+                        <select id="expenseDepartment">
+                            <option value="">Select Department</option>
+                            <option value="administration">Administration</option>
+                            <option value="academic">Academic</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="accounts">Accounts</option>
+                            <option value="sports">Sports</option>
+                            <option value="library">Library</option>
+                            <option value="laboratory">Laboratory</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseApprover">Approver</label>
+                        <input type="text" id="expenseApprover" placeholder="Name of approver">
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-success" style="flex: 1;">
+                        <i class="fas fa-save"></i> Save Expense
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()" style="flex: 1;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Add Budget Modal -->
+    <div class="modal" id="budgetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Budget</h3>
+                <button class="close-modal" onclick="closeBudgetModal()">&times;</button>
+            </div>
+            <form id="budgetForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="budgetName">Budget Name *</label>
+                        <input type="text" id="budgetName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budgetCategory">Category *</label>
+                        <select id="budgetCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="salary">Salary & Wages</option>
+                            <option value="utilities">Utilities</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="supplies">Supplies</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="budgetAmount">Budget Amount (₦) *</label>
+                        <input type="number" id="budgetAmount" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budgetPeriod">Budget Period *</label>
+                        <select id="budgetPeriod" required>
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="term">Per Term</option>
+                            <option value="annual">Annual</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="budgetStartDate">Start Date *</label>
+                        <input type="date" id="budgetStartDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budgetEndDate">End Date *</label>
+                        <input type="date" id="budgetEndDate" required>
+                    </div>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="budgetDescription">Description</label>
+                    <textarea id="budgetDescription" rows="3" placeholder="Purpose and details of this budget..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-success" style="flex: 1;">
+                        <i class="fas fa-save"></i> Create Budget
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeBudgetModal()" style="flex: 1;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            getDoc, 
+            setDoc, 
+            addDoc, 
+            updateDoc,
+            deleteDoc,
+            query, 
+            where, 
+            orderBy, 
+            limit,
+            getDocs,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-Xz6BftZJf96JDZu-fUUlR-ldGYG-2gI",
+            authDomain: "sucesss-academy.firebaseapp.com",
+            projectId: "sucesss-academy",
+            storageBucket: "sucesss-academy.firebasestorage.app",
+            messagingSenderId: "274982692906",
+            appId: "1:274982692906:web:5e39a38451725a3cd13b53",
+            measurementId: "G-QLX11V1YHQ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Make available globally
+        window.db = db;
+        window.auth = auth;
+        window.firestore = { 
+            collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
+            query, where, orderBy, limit, getDocs, serverTimestamp 
+        };
+
+        console.log("Firebase initialized for Expenses Management!");
+    </script>
+    
+    <!-- Expenses Management JavaScript -->
+    <script src="expenses-system.js"></script>
+</body>
+</html>
