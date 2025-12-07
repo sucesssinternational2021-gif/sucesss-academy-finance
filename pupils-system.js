@@ -1,1055 +1,612 @@
-// pupils-system.js - Complete Pupils Management System
+// Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyC-Xz6BftZJf96JDZu-fUUlR-ldGYG-2gI",
+    authDomain: "sucesss-academy.firebaseapp.com",
+    projectId: "sucesss-academy",
+    storageBucket: "sucesss-academy.firebasestorage.app",
+    messagingSenderId: "274982692906",
+    appId: "1:274982692906:web:5e39a38451725a3cd13b53",
+    measurementId: "G-QLX11V1YHQ"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 // Global variables
-let currentUser = null;
-let currentClass = 'all';
-let currentTab = 'list';
 let allPupils = [];
-let filteredPupils = [];
-let currentPage = 1;
-const itemsPerPage = 10;
-let currentAttendanceData = {};
-let attendanceDate = new Date().toISOString().split('T')[0];
+let currentFilter = 'all';
 
-// Initialize when page loads
+// DOM Elements
+const addPupilSection = document.getElementById('addPupilSection');
+const pupilsListSection = document.getElementById('pupilsListSection');
+const dashboardSection = document.getElementById('dashboardSection');
+const classSection = document.getElementById('classSection');
+const classTitle = document.getElementById('classTitle');
+const classPupilsList = document.getElementById('classPupilsList');
+const pupilsTableBody = document.getElementById('pupilsTableBody');
+const loadingSpinner = document.getElementById('loadingSpinner');
+const noPupilsMessage = document.getElementById('noPupilsMessage');
+const searchInput = document.getElementById('searchInput');
+
+// Form elements
+const pupilForm = document.getElementById('pupilForm');
+const hasLeftCheckbox = document.getElementById('hasLeft');
+const dateLeftSection = document.getElementById('dateLeftSection');
+
+// Dashboard elements
+const totalPupilsElement = document.getElementById('totalPupils');
+const newIntakeElement = document.getElementById('newIntake');
+const activePupilsElement = document.getElementById('activePupils');
+const leftPupilsElement = document.getElementById('leftPupils');
+
+// Initialize application
 document.addEventListener('DOMContentLoaded', function() {
-    // Check authentication
+    // Check if user is logged in (basic check)
     checkAuth();
     
-    // Setup event listeners
-    setupEventListeners();
-    
-    // Load initial data
+    // Load all pupils
     loadPupils();
-    loadStats();
-    loadFeeStructures();
+    
+    // Set today's date for date fields
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('dateOfEntry').value = today;
+    
+    // Setup event listeners
+    hasLeftCheckbox.addEventListener('change', function() {
+        dateLeftSection.style.display = this.checked ? 'block' : 'none';
+        if (this.checked) {
+            document.getElementById('dateLeft').value = today;
+        }
+    });
+    
+    // Generate pupil ID if field is empty
+    document.getElementById('pupilId').addEventListener('focus', function() {
+        if (!this.value) {
+            generatePupilId();
+        }
+    });
 });
 
-// Check if user is logged in
-async function checkAuth() {
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUser = user;
-            console.log("User authenticated:", user.email);
-        } else {
-            // Redirect to login if not authenticated
-            window.location.href = "login.html";
-        }
-    });
+// Generate automatic pupil ID
+function generatePupilId() {
+    const year = new Date().getFullYear();
+    const randomNum = Math.floor(100 + Math.random() * 900);
+    const pupilId = `SMIA-${year}-${randomNum}`;
+    document.getElementById('pupilId').value = pupilId;
 }
 
-// Setup all event listeners
-function setupEventListeners() {
-    // Class selection
-    document.querySelectorAll('.class-item').forEach(item => {
-        item.addEventListener('click', function() {
-            document.querySelectorAll('.class-item').forEach(i => i.classList.remove('active'));
-            this.classList.add('active');
-            currentClass = this.dataset.class;
-            document.getElementById('className').textContent = this.querySelector('span').textContent;
-            currentPage = 1;
-            filterAndDisplayPupils();
-        });
-    });
-    
-    // Tab selection
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            currentTab = this.dataset.tab;
-            
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(currentTab + 'Tab').classList.add('active');
-        });
-    });
-    
-    // Search input
-    document.getElementById('searchInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            searchPupils();
-        }
-    });
-    
-    // Pupil form submission
-    document.getElementById('pupilForm').addEventListener('submit', savePupil);
-    
-    // Fee structure form submission
-    document.getElementById('feeStructureForm').addEventListener('submit', saveFeeStructure);
-    
-    // Calculate age from date of birth
-    document.getElementById('pupilDob').addEventListener('change', calculateAge);
-    
-    // Set today's date for attendance
-    document.getElementById('attendanceDate').value = attendanceDate;
-}
-
-// Calculate age from date of birth
-function calculateAge() {
-    const dob = new Date(document.getElementById('pupilDob').value);
-    if (isNaN(dob.getTime())) return;
-    
-    const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const monthDiff = today.getMonth() - dob.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-        age--;
-    }
-    
-    document.getElementById('pupilAge').value = age;
+// Check authentication (basic implementation)
+function checkAuth() {
+    // In a real application, implement proper Firebase Authentication
+    console.log("Authentication check passed");
 }
 
 // Load all pupils from Firestore
-async function loadPupils() {
-    try {
-        const pupilsQuery = query(
-            collection(db, "pupils"),
-            orderBy("createdAt", "desc")
-        );
-        
-        const querySnapshot = await getDocs(pupilsQuery);
-        allPupils = [];
-        
-        querySnapshot.forEach((doc) => {
-            const pupil = { id: doc.id, ...doc.data() };
-            allPupils.push(pupil);
+function loadPupils() {
+    loadingSpinner.style.display = 'block';
+    noPupilsMessage.style.display = 'none';
+    
+    db.collection('pupils').orderBy('dateOfEntry', 'desc')
+        .onSnapshot((snapshot) => {
+            allPupils = [];
+            snapshot.forEach((doc) => {
+                const pupil = {
+                    id: doc.id,
+                    ...doc.data()
+                };
+                allPupils.push(pupil);
+            });
+            
+            updatePupilsTable();
+            updateDashboard();
+            loadingSpinner.style.display = 'none';
+            
+            if (allPupils.length === 0) {
+                noPupilsMessage.style.display = 'block';
+            }
+        }, (error) => {
+            console.error("Error loading pupils: ", error);
+            loadingSpinner.style.display = 'none';
+            alert("Error loading pupils data. Please check console.");
         });
-        
-        filterAndDisplayPupils();
-        
-    } catch (error) {
-        console.error("Error loading pupils:", error);
-        showAlert('Error loading pupils data', 'error');
-        document.getElementById('pupilsTableBody').innerHTML = 
-            '<tr><td colspan="9" class="no-data">Error loading data</td></tr>';
-    }
 }
 
-// Filter and display pupils based on current class
-function filterAndDisplayPupils() {
-    // Filter by class
-    if (currentClass === 'all') {
-        filteredPupils = [...allPupils];
-    } else {
-        filteredPupils = allPupils.filter(pupil => pupil.class === currentClass);
+// Update pupils table based on current filter
+function updatePupilsTable() {
+    pupilsTableBody.innerHTML = '';
+    
+    let filteredPupils = allPupils;
+    
+    // Apply status filter
+    if (currentFilter === 'active') {
+        filteredPupils = allPupils.filter(pupil => !pupil.hasLeft);
+    } else if (currentFilter === 'left') {
+        filteredPupils = allPupils.filter(pupil => pupil.hasLeft);
     }
     
-    // Apply search filter if any
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    // Apply search filter if exists
+    const searchTerm = searchInput.value.toLowerCase();
     if (searchTerm) {
         filteredPupils = filteredPupils.filter(pupil => 
-            (pupil.firstName?.toLowerCase().includes(searchTerm) || 
-             pupil.lastName?.toLowerCase().includes(searchTerm) ||
-             pupil.pupilId?.toLowerCase().includes(searchTerm) ||
-             pupil.parentName?.toLowerCase().includes(searchTerm) ||
-             pupil.parentPhone?.includes(searchTerm))
+            pupil.pupilId.toLowerCase().includes(searchTerm) ||
+            pupil.firstName.toLowerCase().includes(searchTerm) ||
+            pupil.lastName.toLowerCase().includes(searchTerm) ||
+            (pupil.parentName && pupil.parentName.toLowerCase().includes(searchTerm))
         );
     }
     
-    displayPupilsTable();
-    updatePagination();
-}
-
-// Display pupils in table
-function displayPupilsTable() {
-    const tbody = document.getElementById('pupilsTableBody');
-    
     if (filteredPupils.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="9" class="no-data">
-                    <i class="fas fa-user-slash" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                    <p>No pupils found</p>
-                </td>
-            </tr>
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td colspan="8" class="text-center py-4">
+                No pupils found matching your criteria.
+            </td>
         `;
+        pupilsTableBody.appendChild(row);
         return;
     }
     
-    // Calculate pagination
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const pagePupils = filteredPupils.slice(startIndex, endIndex);
-    
-    let html = '';
-    
-    pagePupils.forEach(pupil => {
-        const fullName = `${pupil.firstName || ''} ${pupil.lastName || ''}`;
-        const className = getClassName(pupil.class);
-        const age = pupil.age || calculateAgeFromDob(pupil.dob);
-        
-        html += `
-            <tr>
-                <td>${pupil.pupilId || pupil.id}</td>
-                <td>
-                    <strong>${fullName}</strong>
-                    ${pupil.medicalNotes ? '<br><small style="color: #dc3545;"><i class="fas fa-heartbeat"></i> Medical note</small>' : ''}
-                </td>
-                <td>${className}</td>
-                <td>${pupil.gender === 'male' ? '👦 Boy' : '👧 Girl'}</td>
-                <td>${age}</td>
-                <td>
-                    ${pupil.parentName || 'N/A'}<br>
-                    <small>${pupil.parentRelationship || ''}</small>
-                </td>
-                <td>${pupil.parentPhone || 'N/A'}</td>
-                <td>
-                    <span class="status-${pupil.status || 'active'}">
-                        ${getStatusText(pupil.status)}
-                    </span>
-                </td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="action-btn" style="background: #17a2b8; color: white;" onclick="viewPupil('${pupil.id}')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="action-btn" style="background: #ffc107; color: black;" onclick="editPupil('${pupil.id}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn" style="background: #dc3545; color: white;" onclick="deletePupil('${pupil.id}', '${fullName}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                        ${pupil.status === 'active' ? `
-                        <button class="action-btn" style="background: #28a745; color: white;" onclick="collectPayment('${pupil.id}', '${fullName}')">
-                            <i class="fas fa-money-bill-wave"></i>
-                        </button>
-                        ` : ''}
-                    </div>
-                </td>
-            </tr>
-        `;
-    });
-    
-    tbody.innerHTML = html;
-}
-
-// Update pagination controls
-function updatePagination() {
-    const totalPages = Math.ceil(filteredPupils.length / itemsPerPage);
-    const paginationDiv = document.getElementById('pagination');
-    
-    if (totalPages <= 1) {
-        paginationDiv.innerHTML = '';
-        return;
-    }
-    
-    let html = '';
-    
-    // Previous button
-    html += `
-        <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-    `;
-    
-    // Page numbers
-    for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-            html += `
-                <button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">
-                    ${i}
+    filteredPupils.forEach(pupil => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${pupil.pupilId}</td>
+            <td>
+                <strong>${pupil.firstName} ${pupil.lastName}</strong>
+                ${pupil.hasLeft ? '<br><small class="text-danger">(Left School)</small>' : ''}
+            </td>
+            <td>
+                <span class="class-badge ${getClassColor(pupil.classLevel)}">
+                    ${pupil.classLevel}
+                </span>
+            </td>
+            <td>${pupil.parentName || 'N/A'}</td>
+            <td>${pupil.parentPhone || 'N/A'}</td>
+            <td>
+                <span class="badge ${pupil.pupilType === 'new' ? 'bg-success' : 'bg-primary'}">
+                    ${pupil.pupilType === 'new' ? 'New Intake' : 'Returning'}
+                </span>
+            </td>
+            <td>
+                <span class="badge ${pupil.hasLeft ? 'bg-danger' : 'bg-success'}">
+                    ${pupil.hasLeft ? 'Left' : 'Active'}
+                </span>
+            </td>
+            <td>
+                <button class="btn btn-sm btn-info" onclick="viewPupilDetails('${pupil.id}')">
+                    <i class="fas fa-eye"></i>
                 </button>
-            `;
-        } else if (i === currentPage - 3 || i === currentPage + 3) {
-            html += `<span>...</span>`;
-        }
-    }
-    
-    // Next button
-    html += `
-        <button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-    `;
-    
-    paginationDiv.innerHTML = html;
+                <button class="btn btn-sm btn-warning" onclick="editPupil('${pupil.id}')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deletePupil('${pupil.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        pupilsTableBody.appendChild(row);
+    });
 }
 
-// Change page
-function changePage(page) {
-    currentPage = page;
-    displayPupilsTable();
-    updatePagination();
+// Get class color for badge
+function getClassColor(classLevel) {
+    const colors = {
+        'KG': 'bg-primary',
+        'Nursery 1': 'bg-success',
+        'Nursery 2': 'bg-warning',
+        'Nursery 3': 'bg-info'
+    };
+    return colors[classLevel] || 'bg-secondary';
 }
 
 // Search pupils
 function searchPupils() {
-    currentPage = 1;
-    filterAndDisplayPupils();
+    updatePupilsTable();
 }
 
-// Clear search
-function clearSearch() {
-    document.getElementById('searchInput').value = '';
-    currentPage = 1;
-    filterAndDisplayPupils();
+// Filter by status
+function filterByStatus(status) {
+    currentFilter = status;
+    updatePupilsTable();
 }
 
-// Load statistics
-async function loadStats() {
-    try {
-        // Get all pupils if not already loaded
-        if (allPupils.length === 0) {
-            await loadPupils();
-        }
-        
-        const totalPupils = allPupils.length;
-        const activePupils = allPupils.filter(p => p.status === 'active').length;
-        const boys = allPupils.filter(p => p.gender === 'male').length;
-        const girls = allPupils.filter(p => p.gender === 'female').length;
-        const kgPupils = allPupils.filter(p => p.class === 'kg').length;
-        const nurseryPupils = allPupils.filter(p => p.class.startsWith('nursery')).length;
-        
-        document.getElementById('totalPupils').textContent = totalPupils;
-        document.getElementById('activePupils').textContent = activePupils;
-        document.getElementById('boysCount').textContent = boys;
-        document.getElementById('girlsCount').textContent = girls;
-        document.getElementById('kgCount').textContent = kgPupils;
-        document.getElementById('nurseryCount').textContent = nurseryPupils;
-        
-    } catch (error) {
-        console.error("Error loading stats:", error);
+// Save pupil to Firestore
+function savePupil(event) {
+    event.preventDefault();
+    
+    const pupilData = {
+        pupilId: document.getElementById('pupilId').value,
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        classLevel: document.getElementById('classLevel').value,
+        pupilType: document.querySelector('input[name="pupilType"]:checked').value,
+        dateOfBirth: document.getElementById('dateOfBirth').value,
+        parentName: document.getElementById('parentName').value,
+        parentPhone: document.getElementById('parentPhone').value,
+        parentEmail: document.getElementById('parentEmail').value || '',
+        address: document.getElementById('address').value,
+        dateOfEntry: document.getElementById('dateOfEntry').value,
+        hasLeft: document.getElementById('hasLeft').checked,
+        dateLeft: document.getElementById('hasLeft').checked ? document.getElementById('dateLeft').value : '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    // Check if we're editing an existing pupil
+    const pupilId = pupilForm.getAttribute('data-edit-id');
+    
+    if (pupilId) {
+        // Update existing pupil
+        db.collection('pupils').doc(pupilId).update(pupilData)
+            .then(() => {
+                alert('Pupil updated successfully!');
+                resetForm();
+                showPupilsSection();
+            })
+            .catch(error => {
+                console.error("Error updating pupil: ", error);
+                alert('Error updating pupil. Please try again.');
+            });
+    } else {
+        // Add new pupil
+        db.collection('pupils').add(pupilData)
+            .then(() => {
+                alert('Pupil added successfully!');
+                resetForm();
+                showPupilsSection();
+            })
+            .catch(error => {
+                console.error("Error adding pupil: ", error);
+                alert('Error adding pupil. Please try again.');
+            });
     }
 }
 
-// Show add pupil modal
-function showAddPupilModal() {
-    document.getElementById('modalTitle').textContent = 'Add New Pupil';
-    document.getElementById('pupilForm').reset();
-    document.getElementById('pupilId').value = '';
-    document.getElementById('enrollmentDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('status').value = 'active';
-    document.getElementById('pupilModal').style.display = 'flex';
+// Reset form
+function resetForm() {
+    pupilForm.reset();
+    pupilForm.removeAttribute('data-edit-id');
+    document.getElementById('dateOfEntry').value = new Date().toISOString().split('T')[0];
+    dateLeftSection.style.display = 'none';
+    generatePupilId();
 }
 
-// Show edit pupil modal
-async function editPupil(pupilId) {
-    try {
-        const pupilRef = doc(db, "pupils", pupilId);
-        const pupilSnap = await getDoc(pupilRef);
-        
-        if (pupilSnap.exists()) {
-            const pupil = pupilSnap.data();
-            
-            document.getElementById('modalTitle').textContent = 'Edit Pupil';
-            document.getElementById('pupilId').value = pupilId;
-            document.getElementById('pupilFirstName').value = pupil.firstName || '';
-            document.getElementById('pupilLastName').value = pupil.lastName || '';
-            document.getElementById('pupilClass').value = pupil.class || '';
-            document.getElementById('pupilGender').value = pupil.gender || '';
-            document.getElementById('pupilDob').value = pupil.dob || '';
-            document.getElementById('pupilAge').value = pupil.age || '';
-            document.getElementById('pupilAddress').value = pupil.address || '';
-            document.getElementById('parentName').value = pupil.parentName || '';
-            document.getElementById('parentRelationship').value = pupil.parentRelationship || '';
-            document.getElementById('parentPhone').value = pupil.parentPhone || '';
-            document.getElementById('parentEmail').value = pupil.parentEmail || '';
-            document.getElementById('parentOccupation').value = pupil.parentOccupation || '';
-            document.getElementById('parentAddress').value = pupil.parentAddress || '';
-            document.getElementById('enrollmentDate').value = pupil.enrollmentDate || '';
-            document.getElementById('status').value = pupil.status || 'active';
-            document.getElementById('medicalNotes').value = pupil.medicalNotes || '';
-            document.getElementById('notes').value = pupil.notes || '';
-            
-            document.getElementById('pupilModal').style.display = 'flex';
-        }
-    } catch (error) {
-        console.error("Error loading pupil for edit:", error);
-        showAlert('Error loading pupil data', 'error');
+// Edit pupil
+function editPupil(pupilId) {
+    const pupil = allPupils.find(p => p.id === pupilId);
+    if (!pupil) return;
+    
+    // Fill form with pupil data
+    document.getElementById('pupilId').value = pupil.pupilId;
+    document.getElementById('firstName').value = pupil.firstName;
+    document.getElementById('lastName').value = pupil.lastName;
+    document.getElementById('classLevel').value = pupil.classLevel;
+    
+    // Set pupil type radio
+    if (pupil.pupilType === 'new') {
+        document.getElementById('newIntakeRadio').checked = true;
+    } else {
+        document.getElementById('returningRadio').checked = true;
     }
+    
+    document.getElementById('dateOfBirth').value = pupil.dateOfBirth;
+    document.getElementById('parentName').value = pupil.parentName;
+    document.getElementById('parentPhone').value = pupil.parentPhone;
+    document.getElementById('parentEmail').value = pupil.parentEmail || '';
+    document.getElementById('address').value = pupil.address;
+    document.getElementById('dateOfEntry').value = pupil.dateOfEntry;
+    document.getElementById('hasLeft').checked = pupil.hasLeft || false;
+    
+    if (pupil.hasLeft) {
+        dateLeftSection.style.display = 'block';
+        document.getElementById('dateLeft').value = pupil.dateLeft || '';
+    }
+    
+    // Set edit mode
+    pupilForm.setAttribute('data-edit-id', pupilId);
+    
+    // Show add pupil section
+    showAddPupilForm();
+    
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // View pupil details
-async function viewPupil(pupilId) {
-    try {
-        const pupilRef = doc(db, "pupils", pupilId);
-        const pupilSnap = await getDoc(pupilRef);
-        
-        if (pupilSnap.exists()) {
-            const pupil = pupilSnap.data();
-            const fullName = `${pupil.firstName || ''} ${pupil.lastName || ''}`;
-            
-            // For now, just show an alert with basic info
-            // In a real app, you might want to show a detailed modal
-            showAlert(`Viewing: ${fullName} (${pupil.pupilId || pupilId}) - ${getClassName(pupil.class)}`, 'success');
-            
-            // You could also redirect to a detailed view page
-            // window.location.href = `pupil-details.html?id=${pupilId}`;
-        }
-    } catch (error) {
-        console.error("Error viewing pupil:", error);
-    }
-}
-
-// Collect payment for pupil
-function collectPayment(pupilId, pupilName) {
-    // Store pupil info in sessionStorage or localStorage
-    localStorage.setItem('selectedPupilId', pupilId);
-    localStorage.setItem('selectedPupilName', pupilName);
+function viewPupilDetails(pupilId) {
+    const pupil = allPupils.find(p => p.id === pupilId);
+    if (!pupil) return;
     
-    // Redirect to payment page
-    window.location.href = 'payment.html';
-}
-
-// Save pupil (add or update)
-async function savePupil(e) {
-    e.preventDefault();
-    
-    if (!currentUser) {
-        showAlert('Please login to save pupil data', 'error');
-        return;
-    }
-    
-    // Get form values
-    const pupilId = document.getElementById('pupilId').value;
-    const firstName = document.getElementById('pupilFirstName').value.trim();
-    const lastName = document.getElementById('pupilLastName').value.trim();
-    const pupilClass = document.getElementById('pupilClass').value;
-    const gender = document.getElementById('pupilGender').value;
-    const dob = document.getElementById('pupilDob').value;
-    const age = document.getElementById('pupilAge').value || calculateAgeFromDob(dob);
-    const address = document.getElementById('pupilAddress').value.trim();
-    const parentName = document.getElementById('parentName').value.trim();
-    const parentRelationship = document.getElementById('parentRelationship').value;
-    const parentPhone = document.getElementById('parentPhone').value.trim();
-    const parentEmail = document.getElementById('parentEmail').value.trim();
-    const parentOccupation = document.getElementById('parentOccupation').value.trim();
-    const parentAddress = document.getElementById('parentAddress').value.trim();
-    const enrollmentDate = document.getElementById('enrollmentDate').value;
-    const status = document.getElementById('status').value;
-    const medicalNotes = document.getElementById('medicalNotes').value.trim();
-    const notes = document.getElementById('notes').value.trim();
-    
-    // Validation
-    if (!firstName || !lastName || !pupilClass || !gender || !dob || !parentName || !parentPhone || !enrollmentDate) {
-        showAlert('Please fill all required fields', 'error');
-        return;
-    }
-    
-    try {
-        // Generate pupil ID if new
-        const newPupilId = pupilId || generatePupilId(pupilClass);
-        
-        const pupilData = {
-            firstName,
-            lastName,
-            class: pupilClass,
-            gender,
-            dob,
-            age: parseInt(age) || 0,
-            address,
-            parentName,
-            parentRelationship,
-            parentPhone,
-            parentEmail,
-            parentOccupation,
-            parentAddress,
-            enrollmentDate,
-            status,
-            medicalNotes,
-            notes,
-            pupilId: newPupilId,
-            updatedAt: serverTimestamp(),
-            updatedBy: currentUser.uid,
-            updatedByName: currentUser.email
-        };
-        
-        if (!pupilId) {
-            // New pupil
-            pupilData.createdAt = serverTimestamp();
-            pupilData.createdBy = currentUser.uid;
-            pupilData.createdByName = currentUser.email;
-            
-            await setDoc(doc(db, "pupils", newPupilId), pupilData);
-            showAlert(`Pupil ${firstName} ${lastName} added successfully! ID: ${newPupilId}`, 'success');
-        } else {
-            // Update existing pupil
-            await updateDoc(doc(db, "pupils", pupilId), pupilData);
-            showAlert(`Pupil ${firstName} ${lastName} updated successfully!`, 'success');
-        }
-        
-        // Close modal and refresh data
-        closePupilModal();
-        await loadPupils();
-        await loadStats();
-        
-    } catch (error) {
-        console.error("Error saving pupil:", error);
-        showAlert('Error saving pupil data: ' + error.message, 'error');
-    }
-}
-
-// Generate pupil ID
-function generatePupilId(pupilClass) {
-    const prefix = getClassPrefix(pupilClass);
-    const year = new Date().getFullYear().toString().slice(-2);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `${prefix}${year}${random}`;
-}
-
-// Delete pupil with confirmation
-function deletePupil(pupilId, pupilName) {
-    document.getElementById('confirmMessage').innerHTML = `
-        <p>Are you sure you want to delete pupil <strong>${pupilName}</strong>?</p>
-        <p style="color: #dc3545; font-weight: bold;">This action cannot be undone!</p>
-    `;
-    
-    document.getElementById('confirmActionBtn').onclick = async function() {
-        try {
-            await deleteDoc(doc(db, "pupils", pupilId));
-            showAlert(`Pupil ${pupilName} deleted successfully`, 'success');
-            closeConfirmModal();
-            await loadPupils();
-            await loadStats();
-        } catch (error) {
-            console.error("Error deleting pupil:", error);
-            showAlert('Error deleting pupil: ' + error.message, 'error');
-        }
-    };
-    
-    document.getElementById('confirmModal').style.display = 'flex';
-}
-
-// Save fee structure
-async function saveFeeStructure(e) {
-    e.preventDefault();
-    
-    if (!currentUser) {
-        showAlert('Please login to save fee structure', 'error');
-        return;
-    }
-    
-    // Get form values
-    const feeClass = document.getElementById('feeClass').value;
-    const feeTerm = document.getElementById('feeTerm').value;
-    const tuitionFee = parseFloat(document.getElementById('tuitionFee').value) || 0;
-    const ptaFee = parseFloat(document.getElementById('ptaFee').value) || 0;
-    const examFee = parseFloat(document.getElementById('examFee').value) || 0;
-    const sportsFee = parseFloat(document.getElementById('sportsFee').value) || 0;
-    const libraryFee = parseFloat(document.getElementById('libraryFee').value) || 0;
-    const otherFee = parseFloat(document.getElementById('otherFee').value) || 0;
-    const feeDescription = document.getElementById('feeDescription').value.trim();
-    
-    // Validation
-    if (!feeClass || !feeTerm || tuitionFee <= 0) {
-        showAlert('Please fill all required fields with valid values', 'error');
-        return;
-    }
-    
-    try {
-        const totalFees = tuitionFee + ptaFee + examFee + sportsFee + libraryFee + otherFee;
-        const feeId = `${feeClass}_${feeTerm.replace(/\s+/g, '_')}`;
-        
-        const feeData = {
-            class: feeClass,
-            term: feeTerm,
-            tuitionFee,
-            ptaFee,
-            examFee,
-            sportsFee,
-            libraryFee,
-            otherFee,
-            totalFees,
-            description: feeDescription,
-            updatedAt: serverTimestamp(),
-            updatedBy: currentUser.uid
-        };
-        
-        await setDoc(doc(db, "fee_structures", feeId), feeData);
-        showAlert(`Fee structure for ${getClassName(feeClass)} (${feeTerm}) saved successfully!`, 'success');
-        
-        // Reset form and reload fee structures
-        document.getElementById('feeStructureForm').reset();
-        await loadFeeStructures();
-        
-    } catch (error) {
-        console.error("Error saving fee structure:", error);
-        showAlert('Error saving fee structure: ' + error.message, 'error');
-    }
-}
-
-// Load fee structures
-async function loadFeeStructures() {
-    try {
-        const feesQuery = query(
-            collection(db, "fee_structures"),
-            orderBy("updatedAt", "desc")
-        );
-        
-        const querySnapshot = await getDocs(feesQuery);
-        const tbody = document.getElementById('feeStructuresTable');
-        
-        if (querySnapshot.empty) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="7" class="no-data">
-                        No fee structures found. Add one above.
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-        
-        let html = '';
-        
-        querySnapshot.forEach((doc) => {
-            const fee = doc.data();
-            const total = (fee.tuitionFee || 0) + (fee.ptaFee || 0) + (fee.examFee || 0) + 
-                         (fee.sportsFee || 0) + (fee.libraryFee || 0) + (fee.otherFee || 0);
-            
-            html += `
-                <tr>
-                    <td>${getClassName(fee.class)}</td>
-                    <td>${fee.term}</td>
-                    <td>${formatCurrency(fee.tuitionFee || 0)}</td>
-                    <td>${formatCurrency(fee.ptaFee || 0)}</td>
-                    <td>${formatCurrency(fee.examFee || 0)}</td>
-                    <td><strong>${formatCurrency(total)}</strong></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="action-btn" style="background: #ffc107; color: black;" onclick="editFeeStructure('${doc.id}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-btn" style="background: #dc3545; color: white;" onclick="deleteFeeStructure('${doc.id}', '${getClassName(fee.class)} - ${fee.term}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        });
-        
-        tbody.innerHTML = html;
-        
-    } catch (error) {
-        console.error("Error loading fee structures:", error);
-        document.getElementById('feeStructuresTable').innerHTML = 
-            '<tr><td colspan="7" class="no-data">Error loading fee structures</td></tr>';
-    }
-}
-
-// Edit fee structure
-async function editFeeStructure(feeId) {
-    try {
-        const feeRef = doc(db, "fee_structures", feeId);
-        const feeSnap = await getDoc(feeRef);
-        
-        if (feeSnap.exists()) {
-            const fee = feeSnap.data();
-            
-            document.getElementById('feeClass').value = fee.class;
-            document.getElementById('feeTerm').value = fee.term;
-            document.getElementById('tuitionFee').value = fee.tuitionFee || 0;
-            document.getElementById('ptaFee').value = fee.ptaFee || 0;
-            document.getElementById('examFee').value = fee.examFee || 0;
-            document.getElementById('sportsFee').value = fee.sportsFee || 0;
-            document.getElementById('libraryFee').value = fee.libraryFee || 0;
-            document.getElementById('otherFee').value = fee.otherFee || 0;
-            document.getElementById('feeDescription').value = fee.description || '';
-            
-            showAlert(`Loaded fee structure for editing: ${getClassName(fee.class)} (${fee.term})`, 'success');
-            
-            // Scroll to form
-            document.getElementById('feeStructureForm').scrollIntoView({ behavior: 'smooth' });
-        }
-    } catch (error) {
-        console.error("Error loading fee structure for edit:", error);
-        showAlert('Error loading fee structure', 'error');
-    }
-}
-
-// Delete fee structure
-function deleteFeeStructure(feeId, feeName) {
-    document.getElementById('confirmMessage').innerHTML = `
-        <p>Are you sure you want to delete fee structure <strong>${feeName}</strong>?</p>
-        <p style="color: #dc3545;">Note: This will not affect existing payments.</p>
-    `;
-    
-    document.getElementById('confirmActionBtn').onclick = async function() {
-        try {
-            await deleteDoc(doc(db, "fee_structures", feeId));
-            showAlert(`Fee structure ${feeName} deleted successfully`, 'success');
-            closeConfirmModal();
-            await loadFeeStructures();
-        } catch (error) {
-            console.error("Error deleting fee structure:", error);
-            showAlert('Error deleting fee structure: ' + error.message, 'error');
-        }
-    };
-    
-    document.getElementById('confirmModal').style.display = 'flex';
-}
-
-// Load class for attendance
-async function loadClassForAttendance() {
-    const attendanceClass = document.getElementById('attendanceClass').value;
-    const date = document.getElementById('attendanceDate').value;
-    
-    if (!attendanceClass || !date) {
-        showAlert('Please select class and date', 'error');
-        return;
-    }
-    
-    attendanceDate = date;
-    
-    try {
-        // Load pupils for the selected class
-        const pupilsQuery = query(
-            collection(db, "pupils"),
-            where("class", "==", attendanceClass),
-            where("status", "==", "active")
-        );
-        
-        const querySnapshot = await getDocs(pupilsQuery);
-        const tbody = document.getElementById('attendanceTableBody');
-        
-        if (querySnapshot.empty) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="no-data">
-                        No active pupils found in ${getClassName(attendanceClass)}
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-        
-        // Load existing attendance for this date and class
-        const attendanceQuery = query(
-            collection(db, "attendance"),
-            where("date", "==", date),
-            where("class", "==", attendanceClass)
-        );
-        
-        const attendanceSnapshot = await getDocs(attendanceQuery);
-        let existingAttendance = {};
-        
-        attendanceSnapshot.forEach((doc) => {
-            const att = doc.data();
-            existingAttendance[att.pupilId] = att;
-        });
-        
-        // Build attendance table
-        let html = '';
-        currentAttendanceData = {};
-        
-        querySnapshot.forEach((doc) => {
-            const pupil = doc.data();
-            const fullName = `${pupil.firstName || ''} ${pupil.lastName || ''}`;
-            const existing = existingAttendance[doc.id];
-            
-            // Store in currentAttendanceData
-            currentAttendanceData[doc.id] = existing || {
-                pupilId: doc.id,
-                pupilName: fullName,
-                class: attendanceClass,
-                date: date,
-                status: 'present',
-                arrivalTime: '08:00',
-                departureTime: '14:00',
-                remarks: ''
-            };
-            
-            // If existing, update currentAttendanceData
-            if (existing) {
-                currentAttendanceData[doc.id] = existing;
-            }
-            
-            html += `
-                <tr>
-                    <td>
-                        <strong>${fullName}</strong><br>
-                        <small>${pupil.pupilId || doc.id}</small>
-                    </td>
-                    <td>
-                        <select class="attendance-status" data-pupil="${doc.id}" onchange="updateAttendanceStatus('${doc.id}', this.value)">
-                            <option value="present" ${(existing?.status || 'present') === 'present' ? 'selected' : ''}>Present</option>
-                            <option value="absent" ${(existing?.status || 'present') === 'absent' ? 'selected' : ''}>Absent</option>
-                            <option value="late" ${(existing?.status || 'present') === 'late' ? 'selected' : ''}>Late</option>
-                            <option value="excused" ${(existing?.status || 'present') === 'excused' ? 'selected' : ''}>Excused</option>
-                            <option value="sick" ${(existing?.status || 'present') === 'sick' ? 'selected' : ''}>Sick</option>
-                        </select>
-                    </td>
-                    <td>
-                        <input type="time" class="arrival-time" data-pupil="${doc.id}" 
-                               value="${existing?.arrivalTime || '08:00'}" 
-                               onchange="updateAttendanceTime('${doc.id}', 'arrivalTime', this.value)">
-                    </td>
-                    <td>
-                        <input type="time" class="departure-time" data-pupil="${doc.id}" 
-                               value="${existing?.departureTime || '14:00'}" 
-                               onchange="updateAttendanceTime('${doc.id}', 'departureTime', this.value)">
-                    </td>
-                    <td>
-                        <input type="text" class="attendance-remarks" data-pupil="${doc.id}" 
-                               value="${existing?.remarks || ''}" 
-                               onchange="updateAttendanceRemarks('${doc.id}', this.value)"
-                               placeholder="Remarks...">
-                    </td>
-                </tr>
-            `;
-        });
-        
-        tbody.innerHTML = html;
-        document.getElementById('attendanceTableContainer').classList.remove('hidden');
-        
-    } catch (error) {
-        console.error("Error loading attendance:", error);
-        showAlert('Error loading attendance data: ' + error.message, 'error');
-    }
-}
-
-// Update attendance status
-function updateAttendanceStatus(pupilId, status) {
-    if (currentAttendanceData[pupilId]) {
-        currentAttendanceData[pupilId].status = status;
-    }
-}
-
-// Update attendance time
-function updateAttendanceTime(pupilId, field, time) {
-    if (currentAttendanceData[pupilId]) {
-        currentAttendanceData[pupilId][field] = time;
-    }
-}
-
-// Update attendance remarks
-function updateAttendanceRemarks(pupilId, remarks) {
-    if (currentAttendanceData[pupilId]) {
-        currentAttendanceData[pupilId].remarks = remarks;
-    }
-}
-
-// Save attendance
-async function saveAttendance() {
-    try {
-        const attendanceClass = document.getElementById('attendanceClass').value;
-        const date = document.getElementById('attendanceDate').value;
-        
-        if (!attendanceClass || !date || Object.keys(currentAttendanceData).length === 0) {
-            showAlert('No attendance data to save', 'error');
-            return;
-        }
-        
-        let savedCount = 0;
-        const errors = [];
-        
-        // Save each attendance record
-        for (const pupilId in currentAttendanceData) {
-            const attendance = currentAttendanceData[pupilId];
-            const attendanceId = `${date}_${attendanceClass}_${pupilId}`;
-            
-            try {
-                // Add metadata
-                attendance.updatedAt = serverTimestamp();
-                attendance.updatedBy = currentUser.uid;
-                attendance.updatedByName = currentUser.email;
-                
-                await setDoc(doc(db, "attendance", attendanceId), attendance);
-                savedCount++;
-            } catch (error) {
-                errors.push(`${attendance.pupilName}: ${error.message}`);
-            }
-        }
-        
-        if (savedCount > 0) {
-            showAlert(`Attendance saved for ${savedCount} pupil(s)`, 'success');
-            // Load attendance summary
-            await loadAttendanceSummary(attendanceClass, date);
-        }
-        
-        if (errors.length > 0) {
-            console.error("Errors saving attendance:", errors);
-            showAlert(`Saved ${savedCount} records. Some errors: ${errors.slice(0, 3).join(', ')}`, 'error');
-        }
-        
-    } catch (error) {
-        console.error("Error saving attendance:", error);
-        showAlert('Error saving attendance: ' + error.message, 'error');
-    }
-}
-
-// Clear attendance form
-function clearAttendance() {
-    document.getElementById('attendanceForm').reset();
-    document.getElementById('attendanceDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('attendanceTableContainer').classList.add('hidden');
-    currentAttendanceData = {};
-}
-
-// Load attendance summary
-async function loadAttendanceSummary(className, date) {
-    try {
-        const attendanceQuery = query(
-            collection(db, "attendance"),
-            where("date", "==", date),
-            where("class", "==", className)
-        );
-        
-        const querySnapshot = await getDocs(attendanceQuery);
-        const summaryDiv = document.getElementById('attendanceSummary');
-        
-        if (querySnapshot.empty) {
-            summaryDiv.innerHTML = '<p>No attendance records for this date.</p>';
-            return;
-        }
-        
-        let present = 0, absent = 0, late = 0, excused = 0, sick = 0;
-        
-        querySnapshot.forEach((doc) => {
-            const att = doc.data();
-            switch (att.status) {
-                case 'present': present++; break;
-                case 'absent': absent++; break;
-                case 'late': late++; break;
-                case 'excused': excused++; break;
-                case 'sick': sick++; break;
-            }
-        });
-        
-        const total = present + absent + late + excused + sick;
-        const attendanceRate = total > 0 ? Math.round((present / total) * 100) : 0;
-        
-        summaryDiv.innerHTML = `
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
-                <div class="stat-card">
-                    <h3>${total}</h3>
-                    <p>Total Pupils</p>
+    const modalContent = document.getElementById('pupilDetailsContent');
+    modalContent.innerHTML = `
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <div class="mb-3">
+                    <i class="fas fa-user-circle fa-5x text-primary"></i>
                 </div>
-                <div class="stat-card">
-                    <h3>${present}</h3>
-                    <p>Present</p>
-                </div>
-                <div class="stat-card">
-                    <h3>${attendanceRate}%</h3>
-                    <p>Attendance Rate</p>
-                </div>
+                <h4>${pupil.firstName} ${pupil.lastName}</h4>
+                <p class="text-muted">${pupil.pupilId}</p>
+                <span class="badge ${pupil.hasLeft ? 'bg-danger' : 'bg-success'}">
+                    ${pupil.hasLeft ? 'Left School' : 'Active'}
+                </span>
             </div>
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px;">
-                <h4>Attendance Breakdown</h4>
-                <p>Absent: ${absent} | Late: ${late} | Excused: ${excused} | Sick: ${sick}</p>
-                <div style="background: #e9ecef; height: 10px; border-radius: 5px; margin-top: 10px;">
-                    <div style="background: #28a745; width: ${attendanceRate}%; height: 100%; border-radius: 5px;"></div>
+            <div class="col-md-8">
+                <h5>Pupil Information</h5>
+                <table class="table table-bordered">
+                    <tr>
+                        <th width="30%">Class:</th>
+                        <td>${pupil.classLevel}</td>
+                    </tr>
+                    <tr>
+                        <th>Date of Birth:</th>
+                        <td>${formatDate(pupil.dateOfBirth)}</td>
+                    </tr>
+                    <tr>
+                        <th>Date of Entry:</th>
+                        <td>${formatDate(pupil.dateOfEntry)}</td>
+                    </tr>
+                    ${pupil.hasLeft ? `
+                    <tr>
+                        <th>Date Left:</th>
+                        <td>${formatDate(pupil.dateLeft)}</td>
+                    </tr>
+                    ` : ''}
+                    <tr>
+                        <th>Pupil Type:</th>
+                        <td>${pupil.pupilType === 'new' ? 'New Intake' : 'Returning Pupil'}</td>
+                    </tr>
+                </table>
+                
+                <h5 class="mt-4">Parent Information</h5>
+                <table class="table table-bordered">
+                    <tr>
+                        <th width="30%">Parent Name:</th>
+                        <td>${pupil.parentName}</td>
+                    </tr>
+                    <tr>
+                        <th>Phone Number:</th>
+                        <td>${pupil.parentPhone}</td>
+                    </tr>
+                    ${pupil.parentEmail ? `
+                    <tr>
+                        <th>Email:</th>
+                        <td>${pupil.parentEmail}</td>
+                    </tr>
+                    ` : ''}
+                    <tr>
+                        <th>Address:</th>
+                        <td>${pupil.address}</td>
+                    </tr>
+                </table>
+                
+                ${pupil.notes ? `
+                <h5 class="mt-4">Additional Notes</h5>
+                <p>${pupil.notes}</p>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('pupilDetailsModal'));
+    modal.show();
+}
+
+// Delete pupil
+function deletePupil(pupilId) {
+    if (confirm('Are you sure you want to delete this pupil record? This action cannot be undone.')) {
+        db.collection('pupils').doc(pupilId).delete()
+            .then(() => {
+                alert('Pupil deleted successfully!');
+            })
+            .catch(error => {
+                console.error("Error deleting pupil: ", error);
+                alert('Error deleting pupil. Please try again.');
+            });
+    }
+}
+
+// Load class section
+function loadClassSection(className) {
+    // Hide all sections
+    addPupilSection.style.display = 'none';
+    pupilsListSection.style.display = 'none';
+    dashboardSection.style.display = 'none';
+    classSection.style.display = 'block';
+    
+    // Set class title
+    classTitle.innerHTML = `<i class="fas fa-school me-2"></i> ${className} Pupils`;
+    
+    // Filter pupils by class
+    const classPupils = allPupils.filter(pupil => pupil.classLevel === className);
+    
+    if (classPupils.length === 0) {
+        classPupilsList.innerHTML = `
+            <div class="alert alert-info">
+                No pupils found in ${className}.
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Pupil ID</th>
+                        <th>Name</th>
+                        <th>Parent Name</th>
+                        <th>Phone</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    classPupils.forEach(pupil => {
+        html += `
+            <tr>
+                <td>${pupil.pupilId}</td>
+                <td>${pupil.firstName} ${pupil.lastName}</td>
+                <td>${pupil.parentName}</td>
+                <td>${pupil.parentPhone}</td>
+                <td>
+                    <span class="badge ${pupil.pupilType === 'new' ? 'bg-success' : 'bg-primary'}">
+                        ${pupil.pupilType === 'new' ? 'New' : 'Returning'}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge ${pupil.hasLeft ? 'bg-danger' : 'bg-success'}">
+                        ${pupil.hasLeft ? 'Left' : 'Active'}
+                    </span>
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-3">
+            <p><strong>Total Pupils in ${className}:</strong> ${classPupils.length}</p>
+            <p><strong>Active Pupils:</strong> ${classPupils.filter(p => !p.hasLeft).length}</p>
+        </div>
+    `;
+    
+    classPupilsList.innerHTML = html;
+}
+
+// Show add pupil form
+function showAddPupilForm() {
+    addPupilSection.style.display = 'block';
+    pupilsListSection.style.display = 'none';
+    dashboardSection.style.display = 'none';
+    classSection.style.display = 'none';
+}
+
+// Show pupils list section
+function showPupilsSection() {
+    addPupilSection.style.display = 'none';
+    pupilsListSection.style.display = 'block';
+    dashboardSection.style.display = 'none';
+    classSection.style.display = 'none';
+}
+
+// Load dashboard
+function loadDashboard() {
+    addPupilSection.style.display = 'none';
+    pupilsListSection.style.display = 'none';
+    dashboardSection.style.display = 'block';
+    classSection.style.display = 'none';
+    
+    updateDashboard();
+}
+
+// Update dashboard statistics
+function updateDashboard() {
+    const total = allPupils.length;
+    const newIntake = allPupils.filter(p => p.pupilType === 'new').length;
+    const active = allPupils.filter(p => !p.hasLeft).length;
+    const left = allPupils.filter(p => p.hasLeft).length;
+    
+    totalPupilsElement.textContent = total;
+    newIntakeElement.textContent = newIntake;
+    activePupilsElement.textContent = active;
+    leftPupilsElement.textContent = left;
+    
+    // Update class distribution chart (simple version)
+    updateClassChart();
+}
+
+// Update class distribution chart
+function updateClassChart() {
+    const classChart = document.getElementById('classChart');
+    const classes = ['KG', 'Nursery 1', 'Nursery 2', 'Nursery 3'];
+    const counts = classes.map(cls => allPupils.filter(p => p.classLevel === cls).length);
+    
+    let html = `
+        <div class="row">
+    `;
+    
+    classes.forEach((cls, index) => {
+        const count = counts[index];
+        const percentage = totalPupilsElement.textContent > 0 ? 
+            Math.round((count / totalPupilsElement.textContent) * 100) : 0;
+        
+        html += `
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5>${cls}</h5>
+                        <h3>${count}</h3>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar ${getClassColor(cls)}" 
+                                 style="width: ${percentage}%"></div>
+                        </div>
+                        <small>${percentage}% of total</small>
+                    </div>
                 </div>
             </div>
         `;
+    });
+    
+    html += `</div>`;
+    classChart.innerHTML = html;
+}
+
+// Export pupils data
+function exportPupilsData() {
+    // Simple CSV export
+    let csv = 'Pupil ID,First Name,Last Name,Class,Type,Parent Name,Phone,Email,Address,Date of Birth,Date of Entry,Status\n';
+    
+    allPupils.forEach(pupil => {
+        const row = [
+            pupil.pupilId,
+            pupil.firstName,
+            pupil.lastName,
+            pupil.classLevel,
+            pupil.pupilType === 'new' ? 'New Intake' : 'Returning',
+            pupil.parentName,
+            pupil.parentPhone,
+            pupil.parentEmail || '',
+            `"${pupil.address}"`,
+            pupil.dateOfBirth,
+            pupil.dateOfEntry,
+            pupil.hasLeft ? 'Left' : 'Active'
+        ];
         
-    } catch (error) {
-        console.error("Error loading attendance summary:", error);
-        document.getElementById('attendanceSummary').innerHTML = 
-            '<p>Error loading attendance summary</p>';
-    }
-}
-
-// Helper functions
-function getClassName(classCode) {
-    const classes = {
-        'kg': 'Kindergarten (KG)',
-        'nursery1': 'Nursery 1',
-        'nursery2': 'Nursery 2',
-        'nursery3': 'Nursery 3'
-    };
-    return classes[classCode] || classCode;
-}
-
-function getClassPrefix(classCode) {
-    const prefixes = {
-        'kg': 'KG',
-        'nursery1': 'NUR1',
-        'nursery2': 'NUR2',
-        'nursery3': 'NUR3'
-    };
-    return prefixes[classCode] || 'PUP';
-}
-
-function getStatusText(status) {
-    const statusText = {
-        'active': 'Active',
-        'inactive': 'Inactive',
-        'graduated': 'Graduated',
-        'transferred': 'Transferred'
-    };
-    return statusText[status] || status;
-}
-
-function calculateAgeFromDob(dob) {
-    if (!dob) return 0;
-    const birthDate = new Date(dob);
-    if (isNaN(birthDate.getTime())) return 0;
+        csv += row.join(',') + '\n';
+    });
     
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-    }
-    
-    return age;
+    // Create download link
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pupils_data_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
 
-function formatCurrency(amount) {
-    return '₦' + amount.toLocaleString('en-NG', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+// Print pupil details
+function printPupilDetails() {
+    window.print();
+}
+
+// Format date for display
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
     });
 }
 
-// Modal functions
-function closePupilModal() {
-    document.getElementById('pupilModal').style.display = 'none';
-}
-
-function closeConfirmModal() {
-    document.getElementById('confirmModal').style.display = 'none';
-}
-
-// Alert function
-function showAlert(message, type) {
-    const alertContainer = document.getElementById('alertContainer');
-    
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type}`;
-    alertDiv.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-            <span>${message}</span>
-        </div>
-        <button onclick="this.parentElement.remove()" style="background:none; border:none; cursor:pointer; font-size: 1.2em;">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-    
-    alertContainer.appendChild(alertDiv);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (alertDiv.parentElement) {
-            alertDiv.remove();
-        }
-    }, 5000);
-}
-
-// Make functions available globally
-window.showAddPupilModal = showAddPupilModal;
-window.closePupilModal = closePupilModal;
-window.closeConfirmModal = closeConfirmModal;
-window.editPupil = editPupil;
-window.viewPupil = viewPupil;
-window.deletePupil = deletePupil;
-window.collectPayment = collectPayment;
-window.searchPupils = searchPupils;
-window.clearSearch = clearSearch;
-window.changePage = changePage;
-window.loadClassForAttendance = loadClassForAttendance;
-window.saveAttendance = saveAttendance;
-window.clearAttendance = clearAttendance;
-window.updateAttendanceStatus = updateAttendanceStatus;
-window.updateAttendanceTime = updateAttendanceTime;
-window.updateAttendanceRemarks = updateAttendanceRemarks;
-window.editFeeStructure = editFeeStructure;
-window.deleteFeeStructure = deleteFeeStructure;
-window.showAlert = showAlert;
+// Initialize with pupils list
+showPupilsSection();
