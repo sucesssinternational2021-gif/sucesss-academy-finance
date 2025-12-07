@@ -5,10 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SMIA - Payments Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDKs - MUST BE IN THIS ORDER -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Additional Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -37,7 +43,7 @@
             color: #333;
         }
         
-        /* Sidebar */
+        /* Sidebar Navigation */
         .sidebar {
             width: var(--sidebar-width);
             background: linear-gradient(180deg, var(--primary) 0%, #0d3a6e 100%);
@@ -131,6 +137,20 @@
             font-size: 1.8rem;
         }
         
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .date-display {
+            background-color: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
         .user-info {
             display: flex;
             align-items: center;
@@ -143,6 +163,32 @@
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--secondary);
+        }
+        
+        /* Alert Messages */
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
         }
         
         /* Payment Sections */
@@ -478,32 +524,6 @@
             flex-wrap: wrap;
         }
         
-        /* Alert Messages */
-        .alert {
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .alert-info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-        
         /* Firebase Status */
         .firebase-status {
             display: inline-flex;
@@ -513,7 +533,6 @@
             border-radius: 20px;
             font-size: 0.9rem;
             font-weight: 500;
-            margin-left: 15px;
         }
         
         .firebase-status.connected {
@@ -540,6 +559,12 @@
             border-radius: 4px;
             font-size: 0.85rem;
             font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .category-badge:hover {
+            background-color: #dee2e6;
         }
         
         .category-badge.active {
@@ -554,6 +579,7 @@
             padding: 15px;
             border-radius: 6px;
             margin-top: 15px;
+            display: none;
         }
         
         .instalment-row {
@@ -566,6 +592,21 @@
             margin-bottom: 0;
             font-weight: 600;
             color: var(--primary);
+        }
+        
+        /* Login Section */
+        .login-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .login-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
         
         /* Responsive */
@@ -621,11 +662,27 @@
                 display: block;
                 overflow-x: auto;
             }
+            
+            .login-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 15px;
+            }
+            
+            .header-info {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
+    <!-- Sidebar Navigation -->
     <nav class="sidebar">
         <div class="logo-container">
             <a href="dashboard.html" class="logo">
@@ -655,13 +712,20 @@
                 <p>Record and manage fee payments for Sucesss Model International Academy</p>
             </div>
             
-            <div class="user-info">
+            <div class="header-info">
+                <div class="date-display">
+                    <i class="far fa-calendar"></i> <span id="currentDate">Loading...</span>
+                </div>
+                
                 <div id="firebaseStatus" class="firebase-status disconnected">
                     <i class="fas fa-circle"></i>
                     <span>Firebase: Disconnected</span>
                 </div>
-                <div class="user-details">
-                    <span id="currentUser">Bursar</span>
+                
+                <div class="user-info">
+                    <div class="user-details">
+                        <span id="currentUser">Bursar</span>
+                    </div>
                     <img src="https://ui-avatars.com/api/?name=Bursar+User&background=1a4f8c&color=fff" alt="User">
                 </div>
             </div>
@@ -674,6 +738,10 @@
         
         <div id="alertError" class="alert alert-danger">
             <i class="fas fa-exclamation-circle"></i> <span id="alertErrorText">An error occurred. Please try again.</span>
+        </div>
+        
+        <div id="alertInfo" class="alert alert-info">
+            <i class="fas fa-info-circle"></i> <span id="alertInfoText">Information message</span>
         </div>
         
         <!-- Payment Sections -->
@@ -739,8 +807,8 @@
                         <textarea id="paymentDescription" class="form-control" rows="3" placeholder="Enter payment description"></textarea>
                     </div>
                     
-                    <!-- Instalment Information (Visible when payment type is tuition) -->
-                    <div id="instalmentInfo" class="instalment-info" style="display: none;">
+                    <!-- Instalment Information -->
+                    <div id="instalmentInfo" class="instalment-info">
                         <h4><i class="fas fa-calendar-alt"></i> Instalment Payment Information</h4>
                         <div class="instalment-row">
                             <span>Total Term Fees:</span>
@@ -796,7 +864,7 @@
                     </select>
                 </div>
                 
-                <div class="outstanding-summary">
+                <div class="payment-summary">
                     <div class="summary-row">
                         <span class="summary-label">Brought Forward:</span>
                         <span class="summary-value" id="broughtForwardTotal">₦0.00</span>
@@ -856,7 +924,7 @@
                         <th>Date</th>
                         <th>Receipt No.</th>
                         <th>Student</th>
-                        <th>Category</th>
+                        <th>Class</th>
                         <th>Type</th>
                         <th>Amount</th>
                         <th>Status</th>
@@ -970,785 +1038,55 @@
             </div>
         </div>
     </div>
-    
-    <!-- Firebase Configuration -->
+
+    <!-- Your Payment System JavaScript -->
+    <script src="payment-system.js"></script>
+
+    <!-- Initialize Current Date -->
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyC-Xz6BftZJf96JDZu-fUUlR-ldGYG-2gI",
-            authDomain: "sucesss-academy.firebaseapp.com",
-            projectId: "sucesss-academy",
-            storageBucket: "sucesss-academy.firebasestorage.app",
-            messagingSenderId: "274982692906",
-            appId: "1:274982692906:web:5e39a38451725a3cd13b53",
-            measurementId: "G-QLX11V1YHQ"
-        };
-    </script>
-    
-    <script>
-        // Initialize Firebase
-        let db, auth;
-        let isFirebaseConnected = false;
-        let currentPaymentId = null;
-        let lastReceiptNumber = 0;
-        
-        // Payment categories
-        const paymentCategories = [
-            { id: 'kg', name: 'KG (Kindergarten)', levels: ['KG 1', 'KG 2', 'KG 3'] },
-            { id: 'nursery', name: 'Nursery', levels: ['Nursery 1', 'Nursery 2', 'Nursery 3'] },
-            { id: 'primary', name: 'Primary', levels: ['Primary 1', 'Primary 2', 'Primary 3', 'Primary 4', 'Primary 5'] },
-            { id: 'secondary', name: 'Secondary', levels: ['JSS 1', 'JSS 2', 'JSS 3', 'SSS 1', 'SSS 2', 'SSS 3'] }
-        ];
-        
-        function initializeFirebase() {
-            try {
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.firestore();
-                auth = firebase.auth();
-                isFirebaseConnected = true;
-                updateFirebaseStatus(true);
-                console.log("Firebase initialized successfully");
-                
-                // Check if user is authenticated
-                auth.onAuthStateChanged(user => {
-                    if (user) {
-                        document.getElementById('currentUser').textContent = user.displayName || user.email;
-                        loadPaymentData();
-                    } else {
-                        // If not authenticated, use demo data
-                        console.log("User not authenticated, using demo data");
-                        loadDemoData();
-                    }
-                });
-                
-            } catch (error) {
-                console.error("Error initializing Firebase:", error);
-                updateFirebaseStatus(false);
-                
-                // Load demo data if Firebase fails
-                loadDemoData();
-            }
-        }
-        
-        function updateFirebaseStatus(connected) {
-            const statusElement = document.getElementById('firebaseStatus');
-            if (connected) {
-                statusElement.innerHTML = '<i class="fas fa-circle"></i> <span>Firebase: Connected</span>';
-                statusElement.className = 'firebase-status connected';
-                isFirebaseConnected = true;
-            } else {
-                statusElement.innerHTML = '<i class="fas fa-circle"></i> <span>Firebase: Disconnected (Demo Mode)</span>';
-                statusElement.className = 'firebase-status disconnected';
-                isFirebaseConnected = false;
-            }
-        }
-        
-        // Show alert function
-        function showAlert(type, message) {
-            const alertElement = document.getElementById(`alert${type.charAt(0).toUpperCase() + type.slice(1)}`);
-            const alertText = alertElement.querySelector('span');
-            
-            alertText.textContent = message;
-            alertElement.style.display = 'block';
-            
-            // Hide alert after 5 seconds
-            setTimeout(() => {
-                alertElement.style.display = 'none';
-            }, 5000);
-        }
-        
-        // Format currency
-        function formatCurrency(amount) {
-            return '₦' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-        
-        // Format date
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
+        // Set current date
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-        
-        // Generate receipt number
-        function generateReceiptNumber() {
-            const year = new Date().getFullYear();
-            const randomNum = Math.floor(Math.random() * 1000) + 1;
-            lastReceiptNumber++;
-            return `SMIA-${year}-${String(lastReceiptNumber).padStart(5, '0')}`;
-        }
-        
-        // Initialize payment categories
-        function initPaymentCategories() {
-            const categoriesContainer = document.getElementById('paymentCategories');
-            categoriesContainer.innerHTML = '';
-            
-            paymentCategories.forEach(category => {
-                const badge = document.createElement('div');
-                badge.className = 'category-badge';
-                badge.textContent = category.name;
-                badge.dataset.id = category.id;
-                badge.dataset.levels = JSON.stringify(category.levels);
-                
-                badge.addEventListener('click', function() {
-                    // Remove active class from all badges
-                    document.querySelectorAll('.category-badge').forEach(b => {
-                        b.classList.remove('active');
-                    });
-                    
-                    // Add active class to clicked badge
-                    this.classList.add('active');
-                    
-                    // Set selected category
-                    document.getElementById('selectedCategory').value = this.dataset.id;
-                    
-                    // Load students for this category
-                    loadStudentsByCategory(this.dataset.id, JSON.parse(this.dataset.levels));
-                });
-                
-                categoriesContainer.appendChild(badge);
-            });
-        }
-        
-        // Load students by category
-        function loadStudentsByCategory(categoryId, levels) {
-            const studentSelect = document.getElementById('studentSelect');
-            
-            // Clear existing options except the first one
-            while (studentSelect.options.length > 1) {
-                studentSelect.remove(1);
-            }
-            
-            if (isFirebaseConnected) {
-                // Load students from Firebase
-                db.collection('students')
-                    .where('category', '==', categoryId)
-                    .get()
-                    .then(snapshot => {
-                        snapshot.forEach(doc => {
-                            const student = doc.data();
-                            const option = document.createElement('option');
-                            option.value = doc.id;
-                            option.textContent = `${student.name} - ${student.level || student.class} (${student.admissionNumber || 'N/A'})`;
-                            option.dataset.data = JSON.stringify(student);
-                            studentSelect.appendChild(option);
-                        });
-                        
-                        if (snapshot.empty) {
-                            showAlert('info', `No ${categoryId} students found in the database.`);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error loading students:", error);
-                        showAlert('error', 'Failed to load students.');
-                    });
-            } else {
-                // Load demo students
-                loadDemoStudents(categoryId, levels);
-            }
-        }
-        
-        // Load demo students
-        function loadDemoStudents(categoryId, levels) {
-            const studentSelect = document.getElementById('studentSelect');
-            const demoStudents = getDemoStudents(categoryId, levels);
-            
-            demoStudents.forEach(student => {
-                const option = document.createElement('option');
-                option.value = student.id;
-                option.textContent = `${student.name} - ${student.level} (${student.admissionNumber})`;
-                option.dataset.data = JSON.stringify(student);
-                studentSelect.appendChild(option);
-            });
-        }
-        
-        // Get demo students
-        function getDemoStudents(categoryId, levels) {
-            const names = [
-                'John Adebayo', 'Sarah Johnson', 'Michael Chukwu', 'Grace Okafor', 
-                'David Musa', 'Fatima Ahmed', 'Peter Okonkwo', 'Blessing Adeyemi',
-                'Emma Thompson', 'Daniel Williams', 'Sophia Garcia', 'James Brown'
-            ];
-            
-            const students = [];
-            levels.forEach((level, index) => {
-                const nameIndex = index % names.length;
-                students.push({
-                    id: `${categoryId}_${index + 1}`,
-                    name: names[nameIndex],
-                    level: level,
-                    admissionNumber: `${categoryId.toUpperCase()}${String(index + 1).padStart(3, '0')}`,
-                    category: categoryId,
-                    fees: getFeeByCategoryAndLevel(categoryId, level),
-                    paid: 0,
-                    pta: 5000,
-                    ptaPaid: false,
-                    levies: 8000,
-                    leviesPaid: false,
-                    broughtForward: 0,
-                    outstanding: 0
-                });
-            });
-            
-            return students;
-        }
-        
-        // Get fee by category and level
-        function getFeeByCategoryAndLevel(categoryId, level) {
-            const feeStructure = {
-                'kg': { 'KG 1': 45000, 'KG 2': 48000, 'KG 3': 50000 },
-                'nursery': { 'Nursery 1': 55000, 'Nursery 2': 58000, 'Nursery 3': 60000 },
-                'primary': { 
-                    'Primary 1': 75000, 'Primary 2': 78000, 'Primary 3': 80000,
-                    'Primary 4': 85000, 'Primary 5': 90000
-                },
-                'secondary': {
-                    'JSS 1': 120000, 'JSS 2': 125000, 'JSS 3': 130000,
-                    'SSS 1': 150000, 'SSS 2': 155000, 'SSS 3': 160000
-                }
+                day: 'numeric' 
             };
-            
-            return feeStructure[categoryId]?.[level] || 0;
-        }
-        
-        // Calculate instalment
-        function calculateInstalment() {
-            const studentSelect = document.getElementById('studentSelect');
-            const paymentAmount = parseFloat(document.getElementById('paymentAmount').value) || 0;
-            const paymentType = document.getElementById('paymentType').value;
-            
-            if (!studentSelect.value) {
-                showAlert('error', 'Please select a student first.');
-                return;
-            }
-            
-            const studentData = JSON.parse(studentSelect.selectedOptions[0].dataset.data);
-            
-            // Show instalment info
-            const instalmentInfo = document.getElementById('instalmentInfo');
-            instalmentInfo.style.display = 'block';
-            
-            // Update instalment info
-            document.getElementById('totalTermFees').textContent = formatCurrency(studentData.fees);
-            document.getElementById('previouslyPaid').textContent = formatCurrency(studentData.paid);
-            document.getElementById('currentPaymentDisplay').textContent = formatCurrency(paymentAmount);
-            
-            // Calculate PTA and levies to deduct
-            let ptaToDeduct = 0;
-            let leviesToDeduct = 0;
-            let newPaidAmount = studentData.paid;
-            let newBalance = studentData.fees - studentData.paid;
-            
-            // If payment type is tuition and PTA/levies haven't been paid
-            if (paymentType === 'tuition') {
-                if (!studentData.ptaPaid && paymentAmount > 0) {
-                    ptaToDeduct = Math.min(studentData.pta, paymentAmount);
-                    newPaidAmount += ptaToDeduct;
-                    paymentAmount -= ptaToDeduct;
-                }
-                
-                if (!studentData.leviesPaid && paymentAmount > 0) {
-                    leviesToDeduct = Math.min(studentData.levies, paymentAmount);
-                    newPaidAmount += leviesToDeduct;
-                    paymentAmount -= leviesToDeduct;
-                }
-                
-                // Now apply the remaining payment to tuition
-                newPaidAmount += paymentAmount;
-                newBalance = studentData.fees - newPaidAmount;
-                
-                // Update display
-                document.getElementById('leviesDeducted').textContent = formatCurrency(ptaToDeduct + leviesToDeduct);
-                document.getElementById('newBalance').textContent = formatCurrency(newBalance);
-                
-                // Update status
-                let status = 'Partial Payment';
-                if (newBalance <= 0) {
-                    status = 'Fully Paid';
-                } else if (newPaidAmount === 0) {
-                    status = 'No Payment Applied';
-                }
-                document.getElementById('instalmentStatus').textContent = status;
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                dateElement.textContent = now.toLocaleDateString('en-US', options);
             }
         }
         
-        // Handle payment form submission
-        document.getElementById('paymentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const studentSelect = document.getElementById('studentSelect');
-            const paymentDate = document.getElementById('paymentDate').value;
-            const paymentType = document.getElementById('paymentType').value;
-            const paymentMethod = document.getElementById('paymentMethod').value;
-            const paymentAmount = parseFloat(document.getElementById('paymentAmount').value);
-            const paymentDescription = document.getElementById('paymentDescription').value;
-            const selectedCategory = document.getElementById('selectedCategory').value;
-            
-            if (!studentSelect.value) {
-                showAlert('error', 'Please select a student.');
-                return;
-            }
-            
-            if (!selectedCategory) {
-                showAlert('error', 'Please select a payment category.');
-                return;
-            }
-            
-            if (!paymentAmount || paymentAmount <= 0) {
-                showAlert('error', 'Please enter a valid payment amount.');
-                return;
-            }
-            
-            const studentData = JSON.parse(studentSelect.selectedOptions[0].dataset.data);
-            const receiptNumber = generateReceiptNumber();
-            
-            // Calculate payment breakdown
-            let tuitionPayment = 0;
-            let ptaPayment = 0;
-            let levyPayment = 0;
-            let remainingAmount = paymentAmount;
-            
-            // Apply payment logic based on payment type
-            if (paymentType === 'tuition') {
-                // First, pay PTA if not paid
-                if (!studentData.ptaPaid && remainingAmount > 0) {
-                    ptaPayment = Math.min(studentData.pta, remainingAmount);
-                    remainingAmount -= ptaPayment;
-                }
-                
-                // Then, pay levies if not paid
-                if (!studentData.leviesPaid && remainingAmount > 0) {
-                    levyPayment = Math.min(studentData.levies, remainingAmount);
-                    remainingAmount -= levyPayment;
-                }
-                
-                // Finally, apply to tuition
-                tuitionPayment = remainingAmount;
-            } else if (paymentType === 'pta') {
-                ptaPayment = paymentAmount;
-            } else if (paymentType === 'levy') {
-                levyPayment = paymentAmount;
-            } else {
-                // For other payment types
-                tuitionPayment = paymentAmount;
-            }
-            
-            // Calculate new totals
-            const newTuitionPaid = studentData.paid + tuitionPayment;
-            const newPTAPaid = studentData.ptaPaid ? studentData.ptaPaid : ptaPayment > 0;
-            const newLeviesPaid = studentData.leviesPaid ? studentData.leviesPaid : levyPayment > 0;
-            
-            const newBalance = studentData.fees - newTuitionPaid;
-            
-            // Create payment record
-            const paymentRecord = {
-                receiptNumber: receiptNumber,
-                studentId: studentSelect.value,
-                studentName: studentData.name,
-                studentLevel: studentData.level,
-                studentCategory: selectedCategory,
-                paymentDate: paymentDate || new Date().toISOString(),
-                paymentType: paymentType,
-                paymentMethod: paymentMethod,
-                paymentAmount: paymentAmount,
-                tuitionPayment: tuitionPayment,
-                ptaPayment: ptaPayment,
-                levyPayment: levyPayment,
-                description: paymentDescription || `${paymentType} payment`,
-                recordedBy: document.getElementById('currentUser').textContent,
-                recordedAt: new Date().toISOString(),
-                previousBalance: studentData.outstanding,
-                newBalance: newBalance
-            };
-            
-            // Update student record
-            const updatedStudentData = {
-                ...studentData,
-                paid: newTuitionPaid,
-                ptaPaid: newPTAPaid,
-                leviesPaid: newLeviesPaid,
-                outstanding: newBalance,
-                lastPaymentDate: new Date().toISOString(),
-                lastPaymentAmount: paymentAmount
-            };
-            
-            if (isFirebaseConnected) {
-                // Save to Firebase
-                const batch = db.batch();
-                
-                // Add payment record
-                const paymentRef = db.collection('payments').doc();
-                batch.set(paymentRef, paymentRecord);
-                
-                // Update student record
-                const studentRef = db.collection('students').doc(studentSelect.value);
-                batch.update(studentRef, updatedStudentData);
-                
-                batch.commit()
-                    .then(() => {
-                        showAlert('success', `Payment of ${formatCurrency(paymentAmount)} recorded successfully!`);
-                        currentPaymentId = paymentRef.id;
-                        
-                        // Show receipt
-                        showReceipt(paymentRecord, studentData, updatedStudentData);
-                        
-                        // Reload data
-                        loadPaymentData();
-                        
-                        // Reset form
-                        document.getElementById('paymentForm').reset();
-                        document.getElementById('instalmentInfo').style.display = 'none';
-                    })
-                    .catch(error => {
-                        console.error("Error saving payment:", error);
-                        showAlert('error', 'Failed to save payment. Please try again.');
-                    });
-            } else {
-                // Demo mode - save to localStorage
-                console.log("Payment record (demo):", paymentRecord);
-                console.log("Updated student (demo):", updatedStudentData);
-                
-                showAlert('success', `Payment of ${formatCurrency(paymentAmount)} recorded successfully! (Demo Mode)`);
-                currentPaymentId = 'demo_' + Date.now();
-                
-                // Show receipt
-                showReceipt(paymentRecord, studentData, updatedStudentData);
-                
-                // Reset form
-                document.getElementById('paymentForm').reset();
-                document.getElementById('instalmentInfo').style.display = 'none';
-                
-                // Update demo data
-                updateDemoStudent(studentSelect.value, updatedStudentData);
-                saveDemoPayment(paymentRecord);
-                
-                // Reload data
-                loadPaymentData();
-            }
-        });
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', updateCurrentDate);
         
-        // Update demo student
-        function updateDemoStudent(studentId, updatedData) {
-            // This would update the demo student data
-            console.log("Updating demo student:", studentId, updatedData);
-        }
-        
-        // Save demo payment
-        function saveDemoPayment(paymentRecord) {
-            // This would save the payment to demo storage
-            console.log("Saving demo payment:", paymentRecord);
-        }
-        
-        // Show receipt
-        function showReceipt(paymentRecord, studentData, updatedStudentData) {
-            const modal = document.getElementById('receiptModal');
-            const receiptContent = document.getElementById('receiptContent');
-            
-            // Populate receipt data
-            document.getElementById('receiptNumber').textContent = paymentRecord.receiptNumber;
-            document.getElementById('receiptDateTime').textContent = formatDate(paymentRecord.paymentDate);
-            document.getElementById('receiptStudent').textContent = paymentRecord.studentName;
-            document.getElementById('receiptClass').textContent = paymentRecord.studentLevel;
-            document.getElementById('receiptPaymentType').textContent = getPaymentTypeLabel(paymentRecord.paymentType);
-            document.getElementById('receiptPaymentMethod').textContent = getPaymentMethodLabel(paymentRecord.paymentMethod);
-            document.getElementById('receiptDescription').textContent = paymentRecord.description;
-            document.getElementById('receiptPreviousBalance').textContent = formatCurrency(paymentRecord.previousBalance);
-            document.getElementById('receiptAmountPaid').textContent = formatCurrency(paymentRecord.paymentAmount);
-            document.getElementById('receiptPTADeducted').textContent = formatCurrency(paymentRecord.ptaPayment);
-            document.getElementById('receiptLeviesDeducted').textContent = formatCurrency(paymentRecord.levyPayment);
-            document.getElementById('receiptNewBalance').textContent = formatCurrency(paymentRecord.newBalance);
-            document.getElementById('receiptTotalAmount').textContent = formatCurrency(paymentRecord.paymentAmount);
-            document.getElementById('receiptPrintedDate').textContent = new Date().toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric'
-            });
-            
-            // Show modal
-            modal.style.display = 'flex';
-        }
-        
-        // Get payment type label
-        function getPaymentTypeLabel(type) {
-            const labels = {
-                'tuition': 'Tuition Fees',
-                'pta': 'PTA Levy',
-                'levy': 'Other Levy',
-                'other': 'Other Payment'
-            };
-            return labels[type] || type;
-        }
-        
-        // Get payment method label
-        function getPaymentMethodLabel(method) {
-            const labels = {
-                'cash': 'Cash',
-                'bank_transfer': 'Bank Transfer',
-                'pos': 'POS',
-                'cheque': 'Cheque',
-                'online': 'Online Payment'
-            };
-            return labels[method] || method;
-        }
-        
-        // Print receipt
-        document.getElementById('printReceipt').addEventListener('click', function() {
-            window.print();
-        });
-        
-        // Download receipt as PDF
-        document.getElementById('downloadReceiptPDF').addEventListener('click', function() {
-            const receiptContent = document.getElementById('receiptContent');
-            
-            html2canvas(receiptContent).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
-                const imgWidth = 190;
-                const pageHeight = 295;
-                const imgHeight = canvas.height * imgWidth / canvas.width;
-                let heightLeft = imgHeight;
-                let position = 10;
-                
-                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-                
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                }
-                
-                pdf.save(`Receipt-${document.getElementById('receiptNumber').textContent}.pdf`);
-            });
-        });
-        
-        // Close receipt
-        document.getElementById('closeReceipt').addEventListener('click', function() {
-            document.getElementById('receiptModal').style.display = 'none';
-        });
-        
-        // Calculate instalment button
-        document.getElementById('calculateInstalment').addEventListener('click', calculateInstalment);
-        
-        // Load payment data
-        function loadPaymentData() {
-            loadOutstandingPayments();
-            loadPaymentHistory();
-        }
-        
-        // Load outstanding payments
-        function loadOutstandingPayments() {
-            if (isFirebaseConnected) {
-                // Load from Firebase
-                db.collection('students').where('outstanding', '>', 0).get()
-                    .then(snapshot => {
-                        const outstandingPayments = [];
-                        let broughtForwardTotal = 0;
-                        let currentOutstandingTotal = 0;
-                        
-                        snapshot.forEach(doc => {
-                            const student = { id: doc.id, ...doc.data() };
-                            outstandingPayments.push(student);
-                            
-                            // Calculate totals
-                            broughtForwardTotal += student.broughtForward || 0;
-                            currentOutstandingTotal += student.outstanding || 0;
-                        });
-                        
-                        updateOutstandingTable(outstandingPayments);
-                        updateOutstandingTotals(broughtForwardTotal, currentOutstandingTotal);
-                    })
-                    .catch(error => {
-                        console.error("Error loading outstanding payments:", error);
-                        showAlert('error', 'Failed to load outstanding payments.');
-                    });
-            } else {
-                // Load demo outstanding payments
-                loadDemoOutstandingPayments();
-            }
-        }
-        
-        // Load demo outstanding payments
-        function loadDemoOutstandingPayments() {
-            const outstandingPayments = [];
-            let broughtForwardTotal = 0;
-            let currentOutstandingTotal = 0;
-            
-            // Generate demo data for each category
-            paymentCategories.forEach(category => {
-                category.levels.forEach((level, index) => {
-                    const fees = getFeeByCategoryAndLevel(category.id, level);
-                    const paid = Math.floor(Math.random() * fees * 0.7);
-                    const outstanding = fees - paid;
-                    const broughtForward = Math.floor(Math.random() * 20000);
-                    
-                    if (outstanding > 0) {
-                        const student = {
-                            id: `${category.id}_${index + 1}`,
-                            name: `Demo Student ${index + 1}`,
-                            level: level,
-                            category: category.id,
-                            fees: fees,
-                            paid: paid,
-                            outstanding: outstanding,
-                            broughtForward: broughtForward
-                        };
-                        
-                        outstandingPayments.push(student);
-                        
-                        broughtForwardTotal += broughtForward;
-                        currentOutstandingTotal += outstanding;
-                    }
-                });
-            });
-            
-            updateOutstandingTable(outstandingPayments);
-            updateOutstandingTotals(broughtForwardTotal, currentOutstandingTotal);
-        }
-        
-        // Update outstanding table
-        function updateOutstandingTable(payments) {
-            const tableBody = document.getElementById('outstandingTableBody');
-            tableBody.innerHTML = '';
-            
-            payments.forEach(payment => {
-                const totalDue = (payment.broughtForward || 0) + payment.outstanding;
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${payment.name}</td>
-                    <td>${payment.level} (${payment.category})</td>
-                    <td>${formatCurrency(payment.broughtForward || 0)}</td>
-                    <td>${formatCurrency(payment.outstanding)}</td>
-                    <td>${formatCurrency(totalDue)}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-        
-        // Update outstanding totals
-        function updateOutstandingTotals(broughtForward, currentOutstanding) {
-            document.getElementById('broughtForwardTotal').textContent = formatCurrency(broughtForward);
-            document.getElementById('currentOutstandingTotal').textContent = formatCurrency(currentOutstanding);
-            document.getElementById('carryForwardTotal').textContent = formatCurrency(currentOutstanding);
-        }
-        
-        // Load payment history
-        function loadPaymentHistory() {
-            if (isFirebaseConnected) {
-                // Load from Firebase
-                db.collection('payments')
-                    .orderBy('paymentDate', 'desc')
-                    .limit(20)
-                    .get()
-                    .then(snapshot => {
-                        const payments = [];
-                        snapshot.forEach(doc => {
-                            payments.push({ id: doc.id, ...doc.data() });
-                        });
-                        
-                        updatePaymentHistoryTable(payments);
-                    })
-                    .catch(error => {
-                        console.error("Error loading payment history:", error);
-                        showAlert('error', 'Failed to load payment history.');
-                    });
-            } else {
-                // Load demo payment history
-                loadDemoPaymentHistory();
-            }
-        }
-        
-        // Load demo payment history
-        function loadDemoPaymentHistory() {
-            const payments = [];
-            const now = new Date();
-            
-            // Generate demo payment history
-            for (let i = 0; i < 15; i++) {
-                const date = new Date(now.getTime() - (i * 24 * 60 * 60 * 1000));
-                const category = paymentCategories[Math.floor(Math.random() * paymentCategories.length)];
-                const level = category.levels[Math.floor(Math.random() * category.levels.length)];
-                const amount = 5000 + Math.random() * 150000;
-                
-                payments.push({
-                    id: `demo_${i}`,
-                    receiptNumber: generateReceiptNumber(),
-                    studentName: `Student ${i + 1}`,
-                    studentLevel: level,
-                    studentCategory: category.id,
-                    paymentDate: date.toISOString(),
-                    paymentType: ['tuition', 'pta', 'levy'][Math.floor(Math.random() * 3)],
-                    paymentMethod: ['cash', 'bank_transfer', 'pos'][Math.floor(Math.random() * 3)],
-                    paymentAmount: Math.round(amount / 100) * 100,
-                    description: `Payment for ${category.name} - ${level}`
-                });
-            }
-            
-            updatePaymentHistoryTable(payments);
-        }
-        
-        // Update payment history table
-        function updatePaymentHistoryTable(payments) {
-            const tableBody = document.getElementById('historyTableBody');
-            tableBody.innerHTML = '';
-            
-            payments.forEach(payment => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${formatDate(payment.paymentDate)}</td>
-                    <td>${payment.receiptNumber}</td>
-                    <td>${payment.studentName}</td>
-                    <td>${payment.studentLevel} (${payment.studentCategory})</td>
-                    <td>${getPaymentTypeLabel(payment.paymentType)}</td>
-                    <td>${formatCurrency(payment.paymentAmount)}</td>
-                    <td><span class="payment-status status-paid">Paid</span></td>
-                    <td>
-                        <button class="btn btn-secondary btn-sm view-receipt" data-id="${payment.id}">
-                            <i class="fas fa-receipt"></i> Receipt
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-            
-            // Add event listeners to receipt buttons
-            document.querySelectorAll('.view-receipt').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const paymentId = this.dataset.id;
-                    // In a real app, you would fetch the payment details and show receipt
-                    showAlert('info', 'Receipt view functionality would open here in full implementation.');
-                });
-            });
-        }
-        
-        // Load demo data
-        function loadDemoData() {
-            // Set default payment date to now
-            const now = new Date();
-            const localDateTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-            document.getElementById('paymentDate').value = localDateTime;
-            
-            // Initialize categories
-            initPaymentCategories();
-            
-            // Load outstanding payments
-            loadOutstandingPayments();
-            
-            // Load payment history
-            loadPaymentHistory();
-            
-            showAlert('info', 'Running in demo mode. Connect to Firebase for real data.');
-        }
-        
-        // Initialize the application
+        // Add receipt modal close functionality
         document.addEventListener('DOMContentLoaded', function() {
-            // Try to initialize Firebase
-            initializeFirebase();
+            const modal = document.getElementById('receiptModal');
+            const closeBtn = document.getElementById('closeReceipt');
+            
+            if (modal && closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+                
+                // Close modal when clicking outside
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Print receipt functionality
+            const printBtn = document.getElementById('printReceipt');
+            if (printBtn) {
+                printBtn.addEventListener('click', function() {
+                    window.print();
+                });
+            }
         });
     </script>
 </body>
