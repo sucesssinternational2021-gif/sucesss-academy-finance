@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success Model International Academy - Settings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #1a4f8c;
+            --secondary: #f5a623;
+            --accent: #4caf50;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            --success: #2ecc71;
+            --sidebar-width: 250px;
+        }
+        
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary) 0%, #0d3a6e 100%);
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 3px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        
+        .logo-container {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            color: var(--secondary);
+            font-size: 2.2rem;
+        }
+        
+        .nav-links {
+            list-style: none;
+            padding: 0 15px;
+        }
+        
+        .nav-links li {
+            margin-bottom: 5px;
+        }
+        
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .nav-links a i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .nav-links a.active {
+            background-color: var(--secondary);
+            color: var(--primary);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .header h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--secondary);
+        }
+        
+        /* Settings Container */
+        .settings-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+        
+        /* Settings Sidebar */
+        .settings-sidebar {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 0;
+            height: fit-content;
+        }
+        
+        .settings-menu {
+            list-style: none;
+        }
+        
+        .settings-menu li {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .settings-menu li:last-child {
+            border-bottom: none;
+        }
+        
+        .settings-menu a {
+            display: flex;
+            align-items: center;
+            padding: 18px 20px;
+            color: var(--dark);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .settings-menu a i {
+            margin-right: 12px;
+            color: var(--primary);
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .settings-menu a:hover {
+            background-color: #f8f9fa;
+            color: var(--primary);
+        }
+        
+        .settings-menu a.active {
+            background-color: rgba(26, 79, 140, 0.1);
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+        
+        /* Settings Content */
+        .settings-content {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+        }
+        
+        .settings-section {
+            display: none;
+        }
+        
+        .settings-section.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            color: var(--secondary);
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 79, 140, 0.1);
+        }
+        
+        .form-text {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        /* Checkbox and Radio */
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 5px;
+        }
+        
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark);
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        /* Card Styles */
+        .card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        /* Term Reset Warning */
+        .reset-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .reset-warning h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .reset-warning p {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        
+        /* Alert Messages */
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--success);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+        
+        .slider.round {
+            border-radius: 34px;
+        }
+        
+        .slider.round:before {
+            border-radius: 50%;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 500px;
+            max-width: 90%;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6c757d;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            margin-bottom: 25px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+            
+            .logo span, .nav-links a span {
+                display: none;
+            }
+            
+            .nav-links a {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .nav-links a i {
+                margin-right: 0;
+                font-size: 1.4rem;
+            }
+            
+            .settings-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .settings-sidebar {
+                order: 2;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .button-group .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo-container">
+            <a href="dashboard.html" class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>SMIA</span>
+            </a>
+        </div>
+        
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="reports.html"><i class="fas fa-chart-bar"></i> <span>Reports</span></a></li>
+            <li><a href="#"><i class="fas fa-users"></i> <span>Students</span></a></li>
+            <li><a href="#"><i class="fas fa-user-graduate"></i> <span>Pupils</span></a></li>
+            <li><a href="#"><i class="fas fa-money-check-alt"></i> <span>Payments</span></a></li>
+            <li><a href="#"><i class="fas fa-file-invoice-dollar"></i> <span>Fees & Levies</span></a></li>
+            <li><a href="#"><i class="fas fa-receipt"></i> <span>Expenses</span></a></li>
+            <li><a href="#" class="active"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+        </ul>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-cog"></i> System Settings & Configuration</h1>
+                <p>Manage academy settings, configure terms, and reset values for new academic terms</p>
+            </div>
+            
+            <div class="user-info">
+                <div id="firebaseStatus" class="firebase-status disconnected">
+                    <i class="fas fa-circle"></i>
+                    <span>Firebase: Disconnected</span>
+                </div>
+                <div class="user-details">
+                    <span id="currentUser">Administrator</span>
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=1a4f8c&color=fff" alt="User">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Alert Messages -->
+        <div id="alertSuccess" class="alert alert-success">
+            <i class="fas fa-check-circle"></i> <span id="alertSuccessText">Settings saved successfully!</span>
+        </div>
+        
+        <div id="alertError" class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> <span id="alertErrorText">An error occurred. Please try again.</span>
+        </div>
+        
+        <!-- Settings Container -->
+        <div class="settings-container">
+            <!-- Settings Sidebar -->
+            <div class="settings-sidebar">
+                <ul class="settings-menu">
+                    <li><a href="#term" class="active" data-section="term"><i class="fas fa-calendar-alt"></i> Academic Term</a></li>
+                    <li><a href="#school" data-section="school"><i class="fas fa-school"></i> School Information</a></li>
+                    <li><a href="#fees" data-section="fees"><i class="fas fa-money-bill-wave"></i> Fees & Levies</a></li>
+                    <li><a href="#expenses" data-section="expenses"><i class="fas fa-receipt"></i> Expense Categories</a></li>
+                    <li><a href="#users" data-section="users"><i class="fas fa-user-shield"></i> User Management</a></li>
+                    <li><a href="#system" data-section="system"><i class="fas fa-tools"></i> System Settings</a></li>
+                    <li><a href="#reset" data-section="reset"><i class="fas fa-redo"></i> Term Reset</a></li>
+                </ul>
+            </div>
+            
+            <!-- Settings Content -->
+            <div class="settings-content">
+                <!-- Academic Term Section -->
+                <div id="term" class="settings-section active">
+                    <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Academic Term Configuration</h2>
+                    
+                    <div class="card">
+                        <div class="card-title">Current Academic Term</div>
+                        <p>Configure the current academic term settings. Changing these values will affect reports and fee calculations.</p>
+                    </div>
+                    
+                    <form id="termForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="currentTerm">Current Term</label>
+                                <select id="currentTerm" class="form-control" required>
+                                    <option value="">Select Term</option>
+                                    <option value="1">First Term</option>
+                                    <option value="2">Second Term</option>
+                                    <option value="3">Third Term</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="academicYear">Academic Year</label>
+                                <input type="text" id="academicYear" class="form-control" placeholder="e.g., 2023/2024" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="termStartDate">Term Start Date</label>
+                                <input type="date" id="termStartDate" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="termEndDate">Term End Date</label>
+                                <input type="date" id="termEndDate" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="feeDueDate">Fee Due Date</label>
+                                <input type="date" id="feeDueDate" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="latePaymentFee">Late Payment Fee (%)</label>
+                                <input type="number" id="latePaymentFee" class="form-control" min="0" max="100" step="0.5" value="5">
+                                <div class="form-text">Percentage added to outstanding fees after due date</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Term Status</label>
+                            <div class="radio-group">
+                                <div class="form-check">
+                                    <input type="radio" id="termActive" name="termStatus" value="active" checked>
+                                    <label for="termActive">Active (Current Term)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" id="termUpcoming" name="termStatus" value="upcoming">
+                                    <label for="termUpcoming">Upcoming (Next Term)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" id="termCompleted" name="termStatus" value="completed">
+                                    <label for="termCompleted">Completed (Previous Term)</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Term Settings
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="loadTermSettings">
+                                <i class="fas fa-sync"></i> Load Current Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- School Information Section -->
+                <div id="school" class="settings-section">
+                    <h2 class="section-title"><i class="fas fa-school"></i> School Information</h2>
+                    
+                    <form id="schoolForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="schoolName">School Name</label>
+                                <input type="text" id="schoolName" class="form-control" value="Success Model International Academy" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="schoolMotto">School Motto</label>
+                                <input type="text" id="schoolMotto" class="form-control" value="Excellence in Education">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="schoolAddress">Address</label>
+                                <textarea id="schoolAddress" class="form-control" rows="3">123 Education Avenue, Knowledge City</textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="schoolPhone">Phone Number</label>
+                                <input type="tel" id="schoolPhone" class="form-control" value="+234 801 234 5678">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="schoolEmail">Email Address</label>
+                                <input type="email" id="schoolEmail" class="form-control" value="info@smiacademy.edu.ng">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="schoolWebsite">Website</label>
+                                <input type="url" id="schoolWebsite" class="form-control" value="https://www.smiacademy.edu.ng">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="principalName">Principal/Headteacher Name</label>
+                                <input type="text" id="principalName" class="form-control" value="Dr. Adebayo Johnson">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="schoolLogo">School Logo URL</label>
+                                <input type="url" id="schoolLogo" class="form-control" value="https://example.com/logo.png">
+                                <div class="form-text">URL to the school logo image</div>
+                            </div>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save School Information
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Fees & Levies Section -->
+                <div id="fees" class="settings-section">
+                    <h2 class="section-title"><i class="fas fa-money-bill-wave"></i> Fees & Levies Configuration</h2>
+                    
+                    <div class="card">
+                        <div class="card-title">Configure Fee Structure</div>
+                        <p>Set up tuition fees and levies for different classes. These values will be used for the current academic term.</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Fee Structure Type</label>
+                        <div class="radio-group">
+                            <div class="form-check">
+                                <input type="radio" id="feeTypeUniform" name="feeType" value="uniform" checked>
+                                <label for="feeTypeUniform">Uniform (Same fee for all students in class)</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" id="feeTypeVariable" name="feeType" value="variable">
+                                <label for="feeTypeVariable">Variable (Different fees per student category)</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin: 25px 0 15px; color: var(--primary);">Tuition Fees by Class</h3>
+                    
+                    <div id="feeStructure">
+                        <!-- Fees will be dynamically generated here -->
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary" id="addFeeRow">
+                        <i class="fas fa-plus"></i> Add Another Class
+                    </button>
+                    
+                    <h3 style="margin: 25px 0 15px; color: var(--primary);">Additional Levies</h3>
+                    
+                    <div id="leviesStructure">
+                        <!-- Levies will be dynamically generated here -->
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary" id="addLevyRow">
+                        <i class="fas fa-plus"></i> Add Another Levy
+                    </button>
+                    
+                    <div class="button-group">
+                        <button type="button" class="btn btn-primary" id="saveFees">
+                            <i class="fas fa-save"></i> Save Fees & Levies
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="loadFees">
+                            <i class="fas fa-sync"></i> Load Current Fees
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Expense Categories Section -->
+                <div id="expenses" class="settings-section">
+                    <h2 class="section-title"><i class="fas fa-receipt"></i> Expense Categories</h2>
+                    
+                    <div class="card">
+                        <div class="card-title">Configure Expense Categories</div>
+                        <p>Set up categories for tracking expenses. These categories will appear in expense reports.</p>
+                    </div>
+                    
+                    <div id="expenseCategories">
+                        <!-- Expense categories will be dynamically generated here -->
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary" id="addExpenseCategory">
+                        <i class="fas fa-plus"></i> Add New Category
+                    </button>
+                    
+                    <div class="button-group">
+                        <button type="button" class="btn btn-primary" id="saveExpenseCategories">
+                            <i class="fas fa-save"></i> Save Expense Categories
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- User Management Section -->
+                <div id="users" class="settings-section">
+                    <h2 class="section-title"><i class="fas fa-user-shield"></i> User Management</h2>
+                    
+                    <div class="card">
+                        <div class="card-title">Manage System Users</div>
+                        <p>Add, edit, or remove users who can access the SMIA management system.</p>
+                    </div>
+                    
+                    <div id="usersList">
+                        <!-- Users will be dynamically generated here -->
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary" id="addUserBtn">
+                        <i class="fas fa-user-plus"></i> Add New User
+                    </button>
+                    
+                    <div class="button-group">
+                        <button type="button" class="btn btn-primary" id="saveUsers">
+                            <i class="fas fa-save"></i> Save User Changes
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- System Settings Section -->
+                <div id="system" class="settings-section">
+                    <h2 class="section-title"><i class="fas fa-tools"></i> System Settings</h2>
+                    
+                    <div class="card">
+                        <div class="card-title">System Configuration</div>
+                        <p>Configure system behavior and preferences.</p>
+                    </div>
+                    
+                    <form id="systemForm">
+                        <div class="form-group">
+                            <label for="currency">Currency</label>
+                            <select id="currency" class="form-control">
+                                <option value="NGN">Nigerian Naira (₦)</option>
+                                <option value="USD">US Dollar ($)</option>
+                                <option value="GBP">British Pound (£)</option>
+                                <option value="EUR">Euro (€)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dateFormat">Date Format</label>
+                            <select id="dateFormat" class="form-control">
+                                <option value="dd/mm/yyyy">DD/MM/YYYY</option>
+                                <option value="mm/dd/yyyy">MM/DD/YYYY</option>
+                                <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="timezone">Timezone</label>
+                            <select id="timezone" class="form-control">
+                                <option value="Africa/Lagos">West Africa Time (WAT)</option>
+                                <option value="UTC">UTC</option>
+                                <option value="America/New_York">Eastern Time (ET)</option>
+                                <option value="Europe/London">London Time</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>System Features</label>
+                            <div class="checkbox-group">
+                                <div class="form-check">
+                                    <input type="checkbox" id="autoBackup" checked>
+                                    <label for="autoBackup">Automatic Daily Backup</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" id="emailNotifications" checked>
+                                    <label for="emailNotifications">Email Notifications</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" id="smsNotifications">
+                                    <label for="smsNotifications">SMS Notifications</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" id="requireApproval">
+                                    <label for="requireApproval">Require Approval for Large Expenses</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Backup Frequency</label>
+                            <div class="radio-group">
+                                <div class="form-check">
+                                    <input type="radio" id="backupDaily" name="backupFrequency" value="daily" checked>
+                                    <label for="backupDaily">Daily</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" id="backupWeekly" name="backupFrequency" value="weekly">
+                                    <label for="backupWeekly">Weekly</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" id="backupMonthly" name="backupFrequency" value="monthly">
+                                    <label for="backupMonthly">Monthly</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save System Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Term Reset Section -->
+                <div id="reset" class="settings-section">
+                    <h2 class="section-title"><i class="fas fa-redo"></i> Term Reset & Data Management</h2>
+                    
+                    <div class="reset-warning">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Important Warning</h3>
+                        <p>Resetting term data is a critical operation that cannot be easily undone. This will archive current term data and prepare the system for a new academic term.</p>
+                        <p><strong>Before proceeding, ensure you have:</strong></p>
+                        <ul style="margin-left: 20px; margin-bottom: 15px;">
+                            <li>Backed up all important data</li>
+                            <li>Generated final reports for the current term</li>
+                            <li>Collected all outstanding fees</li>
+                            <li>Informed all staff about the term transition</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Current Term Status</div>
+                        <div id="termStatusInfo">
+                            <p><strong>Current Term:</strong> <span id="currentTermDisplay">Not Set</span></p>
+                            <p><strong>Academic Year:</strong> <span id="currentYearDisplay">Not Set</span></p>
+                            <p><strong>Students Enrolled:</strong> <span id="studentCount">0</span></p>
+                            <p><strong>Total Fees Collected:</strong> <span id="feesCollectedDisplay">₦0.00</span></p>
+                            <p><strong>Total Expenses:</strong> <span id="expensesTotalDisplay">₦0.00</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newTerm">New Term to Start</label>
+                        <select id="newTerm" class="form-control">
+                            <option value="">Select New Term</option>
+                            <option value="1">First Term</option>
+                            <option value="2">Second Term</option>
+                            <option value="3">Third Term</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newAcademicYear">New Academic Year</label>
+                        <input type="text" id="newAcademicYear" class="form-control" placeholder="e.g., 2024/2025">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Reset Options</label>
+                        <div class="checkbox-group">
+                            <div class="form-check">
+                                <input type="checkbox" id="resetFeeBalances" checked>
+                                <label for="resetFeeBalances">Reset fee balances for all students</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="archiveTermData" checked>
+                                <label for="archiveTermData">Archive current term data</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="clearExpenses">
+                                <label for="clearExpenses">Clear expense records (archived first)</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="resetAttendance">
+                                <label for="resetAttendance">Reset attendance records</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="button" class="btn btn-danger" id="resetTermBtn">
+                            <i class="fas fa-redo"></i> Reset for New Term
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="backupDataBtn">
+                            <i class="fas fa-download"></i> Backup Current Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Reset Confirmation Modal -->
+    <div id="resetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Confirm Term Reset</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>You are about to reset the system for a new academic term. This action will:</p>
+                <ul id="resetActionsList" style="margin: 15px 0 15px 20px;">
+                    <li>Archive current term data</li>
+                    <li>Reset fee balances for all students</li>
+                </ul>
+                <p><strong>This action cannot be undone.</strong></p>
+                <p>Please type <strong>CONFIRM RESET</strong> in the box below to proceed.</p>
+                <input type="text" id="confirmationInput" class="form-control" placeholder="Type CONFIRM RESET here" style="margin-top: 10px;">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal">Cancel</button>
+                <button class="btn btn-danger" id="confirmResetBtn" disabled>Proceed with Reset</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-user-plus"></i> Add New User</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newUserName">Full Name</label>
+                    <input type="text" id="newUserName" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="newUserEmail">Email Address</label>
+                    <input type="email" id="newUserEmail" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="newUserRole">User Role</label>
+                    <select id="newUserRole" class="form-control">
+                        <option value="admin">Administrator</option>
+                        <option value="bursar">Bursar</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="staff">Staff</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="newUserPassword">Initial Password</label>
+                    <input type="password" id="newUserPassword" class="form-control">
+                    <div class="form-text">User will be prompted to change password on first login</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal">Cancel</button>
+                <button class="btn btn-primary" id="saveNewUserBtn">Add User</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Firebase Configuration -->
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+              apiKey: "AIzaSyC-Xz6BftZJf96JDZu-fUUlR-ldGYG-2gI",
+  authDomain: "sucesss-academy.firebaseapp.com",
+  projectId: "sucesss-academy",
+  storageBucket: "sucesss-academy.firebasestorage.app",
+  messagingSenderId: "274982692906",
+  appId: "1:274982692906:web:5e39a38451725a3cd13b53",
+  measurementId: "G-QLX11V1YHQ"
+}
+    </script>
+    
+    <script>
+        // Initialize Firebase
+        let db, auth;
+        let isFirebaseConnected = false;
+        
+        function initializeFirebase() {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                auth = firebase.auth();
+                isFirebaseConnected = true;
+                updateFirebaseStatus(true);
+                console.log("Firebase initialized successfully");
+                
+                // Check if user is authenticated
+                auth.onAuthStateChanged(user => {
+                    if (user) {
+                        document.getElementById('currentUser').textContent = user.displayName || user.email;
+                        loadSettingsData();
+                    } else {
+                        // If not authenticated, redirect to login
+                        console.log("User not authenticated");
+                        // In a real app, redirect to login page
+                        // window.location.href = "login.html";
+                    }
+                });
+                
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                updateFirebaseStatus(false);
+                
+                // Load mock data if Firebase fails
+                loadMockSettingsData();
+            }
+        }
+        
+        function updateFirebaseStatus(connected) {
+            const statusElement = document.getElementById('firebaseStatus');
+            if (connected) {
+                statusElement.innerHTML = '<i class="fas fa-circle"></i> <span>Firebase: Connected</span>';
+                statusElement.className = 'firebase-status connected';
+                isFirebaseConnected = true;
+            } else {
+                statusElement.innerHTML = '<i class="fas fa-circle"></i> <span>Firebase: Disconnected (Using Demo Data)</span>';
+                statusElement.className = 'firebase-status disconnected';
+                isFirebaseConnected = false;
+            }
+        }
+        
+        // Settings navigation
+        document.querySelectorAll('.settings-menu a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links
+                document.querySelectorAll('.settings-menu a').forEach(l => {
+                    l.classList.remove('active');
+                });
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Get section to show
+                const sectionId = this.getAttribute('data-section');
+                
+                // Hide all sections
+                document.querySelectorAll('.settings-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Show selected section
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+        
+        // Show alert function
+        function showAlert(type, message) {
+            const alertElement = document.getElementById(`alert${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            const alertText = alertElement.querySelector('span');
+            
+            alertText.textContent = message;
+            alertElement.style.display = 'block';
+            
+            // Hide alert after 5 seconds
+            setTimeout(() => {
+                alertElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Save term settings
+        document.getElementById('termForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const termData = {
+                currentTerm: document.getElementById('currentTerm').value,
+                academicYear: document.getElementById('academicYear').value,
+                termStartDate: document.getElementById('termStartDate').value,
+                termEndDate: document.getElementById('termEndDate').value,
+                feeDueDate: document.getElementById('feeDueDate').value,
+                latePaymentFee: parseFloat(document.getElementById('latePaymentFee').value),
+                termStatus: document.querySelector('input[name="termStatus"]:checked').value,
+                updatedAt: new Date().toISOString()
+            };
+            
+            if (isFirebaseConnected) {
+                // Save to Firebase
+                db.collection('settings').doc('academicTerm').set(termData)
+                    .then(() => {
+                        showAlert('success', 'Term settings saved successfully!');
+                        updateTermStatusDisplay(termData);
+                    })
+                    .catch(error => {
+                        console.error("Error saving term settings:", error);
+                        showAlert('error', 'Failed to save term settings. Please try again.');
+                    });
+            } else {
+                // Mock save
+                console.log("Term settings to save:", termData);
+                showAlert('success', 'Term settings saved successfully! (Demo Mode)');
+                updateTermStatusDisplay(termData);
+                
+                // Save to localStorage for demo
+                localStorage.setItem('smia_termSettings', JSON.stringify(termData));
+            }
+        });
+        
+        // Load term settings
+        document.getElementById('loadTermSettings').addEventListener('click', function() {
+            loadTermSettings();
+        });
+        
+        function loadTermSettings() {
+            if (isFirebaseConnected) {
+                db.collection('settings').doc('academicTerm').get()
+                    .then(doc => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            populateTermForm(data);
+                            updateTermStatusDisplay(data);
+                            showAlert('success', 'Term settings loaded successfully!');
+                        } else {
+                            showAlert('info', 'No term settings found. Using default values.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error loading term settings:", error);
+                        showAlert('error', 'Failed to load term settings.');
+                    });
+            } else {
+                // Load from localStorage for demo
+                const savedSettings = localStorage.getItem('smia_termSettings');
+                if (savedSettings) {
+                    const data = JSON.parse(savedSettings);
+                    populateTermForm(data);
+                    updateTermStatusDisplay(data);
+                    showAlert('success', 'Term settings loaded from demo storage!');
+                } else {
+                    showAlert('info', 'No saved term settings found.');
+                }
+            }
+        }
+        
+        function populateTermForm(data) {
+            document.getElementById('currentTerm').value = data.currentTerm || '';
+            document.getElementById('academicYear').value = data.academicYear || '';
+            document.getElementById('termStartDate').value = data.termStartDate || '';
+            document.getElementById('termEndDate').value = data.termEndDate || '';
+            document.getElementById('feeDueDate').value = data.feeDueDate || '';
+            document.getElementById('latePaymentFee').value = data.latePaymentFee || 5;
+            
+            if (data.termStatus) {
+                document.querySelector(`input[name="termStatus"][value="${data.termStatus}"]`).checked = true;
+            }
+        }
+        
+        function updateTermStatusDisplay(data) {
+            const termNames = {
+                '1': 'First Term',
+                '2': 'Second Term',
+                '3': 'Third Term'
+            };
+            
+            document.getElementById('currentTermDisplay').textContent = termNames[data.currentTerm] || 'Not Set';
+            document.getElementById('currentYearDisplay').textContent = data.academicYear || 'Not Set';
+        }
+        
+        // Save school information
+        document.getElementById('schoolForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const schoolData = {
+                name: document.getElementById('schoolName').value,
+                motto: document.getElementById('schoolMotto').value,
+                address: document.getElementById('schoolAddress').value,
+                phone: document.getElementById('schoolPhone').value,
+                email: document.getElementById('schoolEmail').value,
+                website: document.getElementById('schoolWebsite').value,
+                principal: document.getElementById('principalName').value,
+                logo: document.getElementById('schoolLogo').value,
+                updatedAt: new Date().toISOString()
+            };
+            
+            if (isFirebaseConnected) {
+                db.collection('settings').doc('schoolInfo').set(schoolData)
+                    .then(() => {
+                        showAlert('success', 'School information saved successfully!');
+                    })
+                    .catch(error => {
+                        console.error("Error saving school info:", error);
+                        showAlert('error', 'Failed to save school information.');
+                    });
+            } else {
+                console.log("School info to save:", schoolData);
+                showAlert('success', 'School information saved successfully! (Demo Mode)');
+                localStorage.setItem('smia_schoolInfo', JSON.stringify(schoolData));
+            }
+        });
+        
+        // Initialize fee structure
+        function initFeeStructure() {
+            const feeStructureDiv = document.getElementById('feeStructure');
+            const defaultFees = [
+                { class: 'Nursery', amount: 50000 },
+                { class: 'Primary 1', amount: 75000 },
+                { class: 'Primary 2', amount: 80000 },
+                { class: 'Primary 3', amount: 85000 },
+                { class: 'Primary 4', amount: 90000 },
+                { class: 'Primary 5', amount: 95000 },
+                { class: 'Primary 6', amount: 100000 },
+                { class: 'JSS 1', amount: 120000 },
+                { class: 'JSS 2', amount: 125000 },
+                { class: 'JSS 3', amount: 130000 },
+                { class: 'SSS 1', amount: 150000 },
+                { class: 'SSS 2', amount: 155000 },
+                { class: 'SSS 3', amount: 160000 }
+            ];
+            
+            feeStructureDiv.innerHTML = '';
+            
+            defaultFees.forEach((fee, index) => {
+                const feeRow = document.createElement('div');
+                feeRow.className = 'form-row fee-row';
+                feeRow.innerHTML = `
+                    <div class="form-group">
+                        <label>Class/Category</label>
+                        <input type="text" class="form-control fee-class" value="${fee.class}" placeholder="e.g., Primary 1">
+                    </div>
+                    <div class="form-group">
+                        <label>Tuition Fee (₦)</label>
+                        <input type="number" class="form-control fee-amount" value="${fee.amount}" min="0" step="1000">
+                    </div>
+                    <div class="form-group" style="align-self: flex-end;">
+                        <button type="button" class="btn btn-secondary remove-fee-row" ${defaultFees.length <= 1 ? 'disabled' : ''}>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                feeStructureDiv.appendChild(feeRow);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-fee-row').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (document.querySelectorAll('.fee-row').length > 1) {
+                        this.closest('.fee-row').remove();
+                    }
+                });
+            });
+        }
+        
+        // Add new fee row
+        document.getElementById('addFeeRow').addEventListener('click', function() {
+            const feeStructureDiv = document.getElementById('feeStructure');
+            const feeRow = document.createElement('div');
+            feeRow.className = 'form-row fee-row';
+            feeRow.innerHTML = `
+                <div class="form-group">
+                    <label>Class/Category</label>
+                    <input type="text" class="form-control fee-class" placeholder="e.g., Primary 1">
+                </div>
+                <div class="form-group">
+                    <label>Tuition Fee (₦)</label>
+                    <input type="number" class="form-control fee-amount" min="0" step="1000">
+                </div>
+                <div class="form-group" style="align-self: flex-end;">
+                    <button type="button" class="btn btn-secondary remove-fee-row">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            feeStructureDiv.appendChild(feeRow);
+            
+            // Add event listener to remove button
+            feeRow.querySelector('.remove-fee-row').addEventListener('click', function() {
+                if (document.querySelectorAll('.fee-row').length > 1) {
+                    this.closest('.fee-row').remove();
+                }
+            });
+        });
+        
+        // Initialize levies structure
+        function initLeviesStructure() {
+            const leviesDiv = document.getElementById('leviesStructure');
+            const defaultLevies = [
+                { name: 'PTA Levy', amount: 5000, applicableTo: 'All Students' },
+                { name: 'Sports Levy', amount: 3000, applicableTo: 'All Students' },
+                { name: 'Examination Fee', amount: 8000, applicableTo: 'All Students' },
+                { name: 'ICT Levy', amount: 10000, applicableTo: 'JSS & SSS' }
+            ];
+            
+            leviesDiv.innerHTML = '';
+            
+            defaultLevies.forEach((levy, index) => {
+                const levyRow = document.createElement('div');
+                levyRow.className = 'form-row levy-row';
+                levyRow.innerHTML = `
+                    <div class="form-group">
+                        <label>Levy Name</label>
+                        <input type="text" class="form-control levy-name" value="${levy.name}" placeholder="e.g., PTA Levy">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount (₦)</label>
+                        <input type="number" class="form-control levy-amount" value="${levy.amount}" min="0" step="500">
+                    </div>
+                    <div class="form-group">
+                        <label>Applicable To</label>
+                        <input type="text" class="form-control levy-applicable" value="${levy.applicableTo}" placeholder="e.g., All Students">
+                    </div>
+                    <div class="form-group" style="align-self: flex-end;">
+                        <button type="button" class="btn btn-secondary remove-levy-row" ${defaultLevies.length <= 1 ? 'disabled' : ''}>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                leviesDiv.appendChild(levyRow);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-levy-row').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (document.querySelectorAll('.levy-row').length > 1) {
+                        this.closest('.levy-row').remove();
+                    }
+                });
+            });
+        }
+        
+        // Add new levy row
+        document.getElementById('addLevyRow').addEventListener('click', function() {
+            const leviesDiv = document.getElementById('leviesStructure');
+            const levyRow = document.createElement('div');
+            levyRow.className = 'form-row levy-row';
+            levyRow.innerHTML = `
+                <div class="form-group">
+                    <label>Levy Name</label>
+                    <input type="text" class="form-control levy-name" placeholder="e.g., PTA Levy">
+                </div>
+                <div class="form-group">
+                    <label>Amount (₦)</label>
+                    <input type="number" class="form-control levy-amount" min="0" step="500">
+                </div>
+                <div class="form-group">
+                    <label>Applicable To</label>
+                    <input type="text" class="form-control levy-applicable" placeholder="e.g., All Students">
+                </div>
+                <div class="form-group" style="align-self: flex-end;">
+                    <button type="button" class="btn btn-secondary remove-levy-row">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            leviesDiv.appendChild(levyRow);
+            
+            // Add event listener to remove button
+            levyRow.querySelector('.remove-levy-row').addEventListener('click', function() {
+                if (document.querySelectorAll('.levy-row').length > 1) {
+                    this.closest('.levy-row').remove();
+                }
+            });
+        });
+        
+        // Save fees and levies
+        document.getElementById('saveFees').addEventListener('click', function() {
+            // Collect fee data
+            const fees = [];
+            document.querySelectorAll('.fee-row').forEach(row => {
+                const feeClass = row.querySelector('.fee-class').value;
+                const feeAmount = row.querySelector('.fee-amount').value;
+                
+                if (feeClass && feeAmount) {
+                    fees.push({
+                        class: feeClass,
+                        amount: parseFloat(feeAmount)
+                    });
+                }
+            });
+            
+            // Collect levy data
+            const levies = [];
+            document.querySelectorAll('.levy-row').forEach(row => {
+                const levyName = row.querySelector('.levy-name').value;
+                const levyAmount = row.querySelector('.levy-amount').value;
+                const levyApplicable = row.querySelector('.levy-applicable').value;
+                
+                if (levyName && levyAmount) {
+                    levies.push({
+                        name: levyName,
+                        amount: parseFloat(levyAmount),
+                        applicableTo: levyApplicable
+                    });
+                }
+            });
+            
+            const feeType = document.querySelector('input[name="feeType"]:checked').value;
+            
+            const feeData = {
+                feeType: feeType,
+                fees: fees,
+                levies: levies,
+                updatedAt: new Date().toISOString()
+            };
+            
+            if (isFirebaseConnected) {
+                db.collection('settings').doc('feeStructure').set(feeData)
+                    .then(() => {
+                        showAlert('success', 'Fee structure saved successfully!');
+                    })
+                    .catch(error => {
+                        console.error("Error saving fee structure:", error);
+                        showAlert('error', 'Failed to save fee structure.');
+                    });
+            } else {
+                console.log("Fee structure to save:", feeData);
+                showAlert('success', 'Fee structure saved successfully! (Demo Mode)');
+                localStorage.setItem('smia_feeStructure', JSON.stringify(feeData));
+            }
+        });
+        
+        // Load fees
+        document.getElementById('loadFees').addEventListener('click', function() {
+            if (isFirebaseConnected) {
+                db.collection('settings').doc('feeStructure').get()
+                    .then(doc => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            // Here you would populate the fee form with the data
+                            showAlert('success', 'Fee structure loaded successfully!');
+                        } else {
+                            showAlert('info', 'No fee structure found. Using default values.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error loading fee structure:", error);
+                        showAlert('error', 'Failed to load fee structure.');
+                    });
+            } else {
+                // Load from localStorage for demo
+                const savedFees = localStorage.getItem('smia_feeStructure');
+                if (savedFees) {
+                    showAlert('success', 'Fee structure loaded from demo storage!');
+                } else {
+                    showAlert('info', 'No saved fee structure found. Using default values.');
+                }
+            }
+        });
+        
+        // Initialize expense categories
+        function initExpenseCategories() {
+            const categoriesDiv = document.getElementById('expenseCategories');
+            const defaultCategories = [
+                'Salaries & Wages',
+                'Utilities (Electricity, Water)',
+                'Academic Materials',
+                'Maintenance & Repairs',
+                'Transportation',
+                'Office Supplies',
+                'Security',
+                'Cleaning & Sanitation',
+                'Extracurricular Activities',
+                'Professional Development'
+            ];
+            
+            categoriesDiv.innerHTML = '';
+            
+            defaultCategories.forEach((category, index) => {
+                const categoryRow = document.createElement('div');
+                categoryRow.className = 'form-row expense-category-row';
+                categoryRow.innerHTML = `
+                    <div class="form-group" style="flex: 1;">
+                        <label>Category Name</label>
+                        <input type="text" class="form-control expense-category" value="${category}">
+                    </div>
+                    <div class="form-group" style="align-self: flex-end;">
+                        <button type="button" class="btn btn-secondary remove-expense-category" ${defaultCategories.length <= 1 ? 'disabled' : ''}>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                categoriesDiv.appendChild(categoryRow);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-expense-category').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (document.querySelectorAll('.expense-category-row').length > 1) {
+                        this.closest('.expense-category-row').remove();
+                    }
+                });
+            });
+        }
+        
+        // Add new expense category
+        document.getElementById('addExpenseCategory').addEventListener('click', function() {
+            const categoriesDiv = document.getElementById('expenseCategories');
+            const categoryRow = document.createElement('div');
+            categoryRow.className = 'form-row expense-category-row';
+            categoryRow.innerHTML = `
+                <div class="form-group" style="flex: 1;">
+                    <label>Category Name</label>
+                    <input type="text" class="form-control expense-category" placeholder="e.g., Equipment Purchase">
+                </div>
+                <div class="form-group" style="align-self: flex-end;">
+                    <button type="button" class="btn btn-secondary remove-expense-category">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            categoriesDiv.appendChild(categoryRow);
+            
+            // Add event listener to remove button
+            categoryRow.querySelector('.remove-expense-category').addEventListener('click', function() {
+                if (document.querySelectorAll('.expense-category-row').length > 1) {
+                    this.closest('.expense-category-row').remove();
+                }
+            });
+        });
+        
+        // Save expense categories
+        document.getElementById('saveExpenseCategories').addEventListener('click', function() {
+            const categories = [];
+            document.querySelectorAll('.expense-category-row').forEach(row => {
+                const category = row.querySelector('.expense-category').value;
+                if (category) {
+                    categories.push(category);
+                }
+            });
+            
+            if (isFirebaseConnected) {
+                db.collection('settings').doc('expenseCategories').set({
+                    categories: categories,
+                    updatedAt: new Date().toISOString()
+                })
+                .then(() => {
+                    showAlert('success', 'Expense categories saved successfully!');
+                })
+                .catch(error => {
+                    console.error("Error saving expense categories:", error);
+                    showAlert('error', 'Failed to save expense categories.');
+                });
+            } else {
+                console.log("Expense categories to save:", categories);
+                showAlert('success', 'Expense categories saved successfully! (Demo Mode)');
+                localStorage.setItem('smia_expenseCategories', JSON.stringify(categories));
+            }
+        });
+        
+        // Initialize users list
+        function initUsersList() {
+            const usersDiv = document.getElementById('usersList');
+            const defaultUsers = [
+                { name: 'Admin User', email: 'admin@smiacademy.edu.ng', role: 'admin', status: 'active' },
+                { name: 'John Bursar', email: 'bursar@smiacademy.edu.ng', role: 'bursar', status: 'active' },
+                { name: 'Sarah Teacher', email: 'teacher@smiacademy.edu.ng', role: 'teacher', status: 'active' },
+                { name: 'Michael Staff', email: 'staff@smiacademy.edu.ng', role: 'staff', status: 'inactive' }
+            ];
+            
+            usersDiv.innerHTML = '';
+            
+            defaultUsers.forEach((user, index) => {
+                const userRow = document.createElement('div');
+                userRow.className = 'form-row user-row';
+                userRow.innerHTML = `
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" class="form-control user-name" value="${user.name}">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control user-email" value="${user.email}">
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select class="form-control user-role">
+                            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Administrator</option>
+                            <option value="bursar" ${user.role === 'bursar' ? 'selected' : ''}>Bursar</option>
+                            <option value="teacher" ${user.role === 'teacher' ? 'selected' : ''}>Teacher</option>
+                            <option value="staff" ${user.role === 'staff' ? 'selected' : ''}>Staff</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select class="form-control user-status">
+                            <option value="active" ${user.status === 'active' ? 'selected' : ''}>Active</option>
+                            <option value="inactive" ${user.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="align-self: flex-end;">
+                        <button type="button" class="btn btn-secondary remove-user" ${defaultUsers.length <= 1 ? 'disabled' : ''}>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                usersDiv.appendChild(userRow);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-user').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (document.querySelectorAll('.user-row').length > 1) {
+                        this.closest('.user-row').remove();
+                    }
+                });
+            });
+        }
+        
+        // Add user modal
+        document.getElementById('addUserBtn').addEventListener('click', function() {
+            document.getElementById('addUserModal').style.display = 'flex';
+        });
+        
+        // Save new user
+        document.getElementById('saveNewUserBtn').addEventListener('click', function() {
+            const userName = document.getElementById('newUserName').value;
+            const userEmail = document.getElementById('newUserEmail').value;
+            const userRole = document.getElementById('newUserRole').value;
+            const userPassword = document.getElementById('newUserPassword').value;
+            
+            if (!userName || !userEmail || !userRole || !userPassword) {
+                showAlert('error', 'Please fill all fields to add a new user.');
+                return;
+            }
+            
+            // Add to users list
+            const usersDiv = document.getElementById('usersList');
+            const userRow = document.createElement('div');
+            userRow.className = 'form-row user-row';
+            userRow.innerHTML = `
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" class="form-control user-name" value="${userName}">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-control user-email" value="${userEmail}">
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select class="form-control user-role">
+                        <option value="admin" ${userRole === 'admin' ? 'selected' : ''}>Administrator</option>
+                        <option value="bursar" ${userRole === 'bursar' ? 'selected' : ''}>Bursar</option>
+                        <option value="teacher" ${userRole === 'teacher' ? 'selected' : ''}>Teacher</option>
+                        <option value="staff" ${userRole === 'staff' ? 'selected' : ''}>Staff</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select class="form-control user-status">
+                        <option value="active" selected>Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="form-group" style="align-self: flex-end;">
+                    <button type="button" class="btn btn-secondary remove-user">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            usersDiv.appendChild(userRow);
+            
+            // Add event listener to remove button
+            userRow.querySelector('.remove-user').addEventListener('click', function() {
+                if (document.querySelectorAll('.user-row').length > 1) {
+                    this.closest('.user-row').remove();
+                }
+            });
+            
+            // Clear modal form and close
+            document.getElementById('newUserName').value = '';
+            document.getElementById('newUserEmail').value = '';
+            document.getElementById('newUserRole').value = 'admin';
+            document.getElementById('newUserPassword').value = '';
+            document.getElementById('addUserModal').style.display = 'none';
+            
+            showAlert('success', 'New user added successfully!');
+        });
+        
+        // Save users
+        document.getElementById('saveUsers').addEventListener('click', function() {
+            const users = [];
+            document.querySelectorAll('.user-row').forEach(row => {
+                const userName = row.querySelector('.user-name').value;
+                const userEmail = row.querySelector('.user-email').value;
+                const userRole = row.querySelector('.user-role').value;
+                const userStatus = row.querySelector('.user-status').value;
+                
+                if (userName && userEmail) {
+                    users.push({
+                        name: userName,
+                        email: userEmail,
+                        role: userRole,
+                        status: userStatus
+                    });
+                }
+            });
+            
+            if (isFirebaseConnected) {
+                // In a real app, you would use Firebase Auth to manage users
+                db.collection('settings').doc('users').set({
+                    userList: users,
+                    updatedAt: new Date().toISOString()
+                })
+                .then(() => {
+                    showAlert('success', 'User list saved successfully!');
+                })
+                .catch(error => {
+                    console.error("Error saving user list:", error);
+                    showAlert('error', 'Failed to save user list.');
+                });
+            } else {
+                console.log("Users to save:", users);
+                showAlert('success', 'User list saved successfully! (Demo Mode)');
+                localStorage.setItem('smia_users', JSON.stringify(users));
+            }
+        });
+        
+        // Save system settings
+        document.getElementById('systemForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const systemData = {
+                currency: document.getElementById('currency').value,
+                dateFormat: document.getElementById('dateFormat').value,
+                timezone: document.getElementById('timezone').value,
+                autoBackup: document.getElementById('autoBackup').checked,
+                emailNotifications: document.getElementById('emailNotifications').checked,
+                smsNotifications: document.getElementById('smsNotifications').checked,
+                requireApproval: document.getElementById('requireApproval').checked,
+                backupFrequency: document.querySelector('input[name="backupFrequency"]:checked').value,
+                updatedAt: new Date().toISOString()
+            };
+            
+            if (isFirebaseConnected) {
+                db.collection('settings').doc('system').set(systemData)
+                    .then(() => {
+                        showAlert('success', 'System settings saved successfully!');
+                    })
+                    .catch(error => {
+                        console.error("Error saving system settings:", error);
+                        showAlert('error', 'Failed to save system settings.');
+                    });
+            } else {
+                console.log("System settings to save:", systemData);
+                showAlert('success', 'System settings saved successfully! (Demo Mode)');
+                localStorage.setItem('smia_systemSettings', JSON.stringify(systemData));
+            }
+        });
+        
+        // Reset term functionality
+        document.getElementById('resetTermBtn').addEventListener('click', function() {
+            const newTerm = document.getElementById('newTerm').value;
+            const newAcademicYear = document.getElementById('newAcademicYear').value;
+            
+            if (!newTerm || !newAcademicYear) {
+                showAlert('error', 'Please select a new term and enter the academic year.');
+                return;
+            }
+            
+            // Get reset options
+            const resetOptions = {
+                resetFeeBalances: document.getElementById('resetFeeBalances').checked,
+                archiveTermData: document.getElementById('archiveTermData').checked,
+                clearExpenses: document.getElementById('clearExpenses').checked,
+                resetAttendance: document.getElementById('resetAttendance').checked
+            };
+            
+            // Update modal content
+            const actionsList = document.getElementById('resetActionsList');
+            actionsList.innerHTML = '';
+            
+            if (resetOptions.resetFeeBalances) {
+                const li = document.createElement('li');
+                li.textContent = 'Reset fee balances for all students';
+                actionsList.appendChild(li);
+            }
+            
+            if (resetOptions.archiveTermData) {
+                const li = document.createElement('li');
+                li.textContent = 'Archive current term data';
+                actionsList.appendChild(li);
+            }
+            
+            if (resetOptions.clearExpenses) {
+                const li = document.createElement('li');
+                li.textContent = 'Clear expense records (archived first)';
+                actionsList.appendChild(li);
+            }
+            
+            if (resetOptions.resetAttendance) {
+                const li = document.createElement('li');
+                li.textContent = 'Reset attendance records';
+                actionsList.appendChild(li);
+            }
+            
+            // Show confirmation modal
+            document.getElementById('resetModal').style.display = 'flex';
+            document.getElementById('confirmationInput').value = '';
+            document.getElementById('confirmResetBtn').disabled = true;
+        });
+        
+        // Confirm reset input validation
+        document.getElementById('confirmationInput').addEventListener('input', function() {
+            const confirmBtn = document.getElementById('confirmResetBtn');
+            confirmBtn.disabled = this.value !== 'CONFIRM RESET';
+        });
+        
+        // Confirm reset
+        document.getElementById('confirmResetBtn').addEventListener('click', function() {
+            const newTerm = document.getElementById('newTerm').value;
+            const newAcademicYear = document.getElementById('newAcademicYear').value;
+            
+            // Close modal
+            document.getElementById('resetModal').style.display = 'none';
+            
+            // Show processing message
+            showAlert('info', 'Processing term reset... This may take a moment.');
+            
+            // Simulate reset process
+            setTimeout(() => {
+                // Update term settings
+                const termData = {
+                    currentTerm: newTerm,
+                    academicYear: newAcademicYear,
+                    termStartDate: '', // Would be set to new term start date
+                    termEndDate: '', // Would be set to new term end date
+                    feeDueDate: '', // Would be calculated
+                    latePaymentFee: 5, // Default
+                    termStatus: 'active',
+                    updatedAt: new Date().toISOString()
+                };
+                
+                if (isFirebaseConnected) {
+                    // Save new term settings
+                    db.collection('settings').doc('academicTerm').set(termData)
+                        .then(() => {
+                            // Here you would reset student balances, archive data, etc.
+                            showAlert('success', `Term reset successful! System is now configured for ${newAcademicYear} - Term ${newTerm}.`);
+                            
+                            // Update display
+                            updateTermStatusDisplay(termData);
+                            
+                            // Reset form
+                            document.getElementById('newTerm').value = '';
+                            document.getElementById('newAcademicYear').value = '';
+                        })
+                        .catch(error => {
+                            console.error("Error during term reset:", error);
+                            showAlert('error', 'Error during term reset. Please try again.');
+                        });
+                } else {
+                    // Mock reset
+                    console.log("Term reset data:", termData);
+                    showAlert('success', `Term reset successful! System is now configured for ${newAcademicYear} - Term ${newTerm}. (Demo Mode)`);
+                    
+                    // Update display
+                    updateTermStatusDisplay(termData);
+                    
+                    // Reset form
+                    document.getElementById('newTerm').value = '';
+                    document.getElementById('newAcademicYear').value = '';
+                    
+                    // Save to localStorage
+                    localStorage.setItem('smia_termSettings', JSON.stringify(termData));
+                }
+            }, 2000);
+        });
+        
+        // Backup data
+        document.getElementById('backupDataBtn').addEventListener('click', function() {
+            showAlert('info', 'Creating backup...');
+            
+            setTimeout(() => {
+                showAlert('success', 'Backup created successfully!');
+            }, 1500);
+        });
+        
+        // Modal close functionality
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            });
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+        
+        // Load mock data function
+        function loadMockSettingsData() {
+            // Set default dates
+            const today = new Date();
+            const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+            const threeMonthsLater = new Date(today.getFullYear(), today.getMonth() + 4, today.getDate());
+            
+            document.getElementById('termStartDate').valueAsDate = nextMonth;
+            document.getElementById('termEndDate').valueAsDate = threeMonthsLater;
+            document.getElementById('feeDueDate').valueAsDate = nextMonth;
+            
+            // Set academic year
+            const currentYear = today.getFullYear();
+            document.getElementById('academicYear').value = `${currentYear}/${currentYear + 1}`;
+            document.getElementById('newAcademicYear').value = `${currentYear + 1}/${currentYear + 2}`;
+            
+            // Initialize various sections
+            initFeeStructure();
+            initLeviesStructure();
+            initExpenseCategories();
+            initUsersList();
+            
+            // Update term status display
+            updateTermStatusDisplay({
+                currentTerm: '2',
+                academicYear: `${currentYear}/${currentYear + 1}`
+            });
+            
+            // Update stats
+            document.getElementById('studentCount').textContent = '245';
+            document.getElementById('feesCollectedDisplay').textContent = '₦12,450,000';
+            document.getElementById('expensesTotalDisplay').textContent = '₦8,230,500';
+            
+            showAlert('info', 'Using demo data. Connect Firebase to use real data.');
+        }
+        
+        // Load all settings data
+        function loadSettingsData() {
+            if (isFirebaseConnected) {
+                // Load term settings
+                loadTermSettings();
+                
+                // Load other settings as needed
+                // ...
+            } else {
+                loadMockSettingsData();
+            }
+        }
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Try to initialize Firebase
+            initializeFirebase();
+        });
+    </script>
+</body>
+</html>
