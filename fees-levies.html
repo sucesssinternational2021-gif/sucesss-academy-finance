@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fees & Levies Management - Success Academy</title>
+    <title>SMIA - Fees & Levies Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --success: #28a745;
-            --info: #17a2b8;
-            --warning: #ffc107;
-            --danger: #dc3545;
-            --light: #f8f9fa;
-            --dark: #343a40;
-        }
-        
         * {
             margin: 0;
             padding: 0;
@@ -24,1077 +22,863 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
+        :root {
+            --primary: #1a4f8c;
+            --secondary: #f5a623;
+            --accent: #4caf50;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            --success: #2ecc71;
+            --sidebar-width: 250px;
+        }
+        
         body {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
             min-height: 100vh;
+            background-color: #f0f2f5;
             color: #333;
         }
         
-        .container {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        /* Sidebar - Same as dashboard */
+        /* Sidebar Navigation */
         .sidebar {
-            width: 250px;
-            background: white;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary) 0%, #0d3a6e 100%);
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 3px 0 15px rgba(0, 0, 0, 0.1);
             z-index: 100;
         }
         
-        .logo {
-            padding: 25px;
+        .logo-container {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
             text-align: center;
-            border-bottom: 1px solid #eee;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .logo i {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 10px;
+            color: var(--secondary);
+            font-size: 2.2rem;
         }
         
-        .logo h1 {
-            color: var(--primary);
-            font-size: 1.5rem;
+        .nav-links {
+            list-style: none;
+            padding: 0 15px;
+        }
+        
+        .nav-links li {
             margin-bottom: 5px;
         }
         
-        .logo p {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .nav-menu {
-            flex: 1;
-            padding: 20px 0;
-        }
-        
-        .nav-item {
+        .nav-links a {
             display: flex;
             align-items: center;
-            padding: 15px 25px;
-            color: #555;
+            padding: 12px 15px;
+            color: rgba(255, 255, 255, 0.85);
             text-decoration: none;
+            border-radius: 8px;
             transition: all 0.3s;
-            border-left: 4px solid transparent;
-        }
-        
-        .nav-item:hover {
-            background: #f8f9fa;
-            color: var(--primary);
-        }
-        
-        .nav-item.active {
-            background: #f0f2ff;
-            color: var(--primary);
-            border-left: 4px solid var(--primary);
-        }
-        
-        .nav-item i {
-            width: 25px;
-            margin-right: 15px;
-            font-size: 1.1rem;
-        }
-        
-        .nav-item span {
             font-weight: 500;
+        }
+        
+        .nav-links a i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .nav-links a.active {
+            background-color: var(--secondary);
+            color: var(--primary);
         }
         
         /* Main Content */
         .main-content {
             flex: 1;
+            margin-left: var(--sidebar-width);
             padding: 20px;
-            overflow-y: auto;
         }
         
         .header {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
         }
         
-        .header-content h2 {
-            color: var(--dark);
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .header-content p {
-            color: #666;
-        }
-        
-        .header-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        /* Button Styles */
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
-        }
-        
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background: #218838;
-        }
-        
-        .btn-warning {
-            background: var(--warning);
-            color: #212529;
-        }
-        
-        .btn-warning:hover {
-            background: #e0a800;
-        }
-        
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #c82333;
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        
-        /* Tabs */
-        .tabs {
-            display: flex;
-            background: white;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            background: white;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-        
-        .tab:hover {
-            background: #f8f9fa;
-        }
-        
-        .tab.active {
-            background: #f0f2ff;
-            border-bottom: 3px solid var(--primary);
+        .header h1 {
             color: var(--primary);
+            font-size: 1.8rem;
         }
         
-        .tab-content {
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .date-display {
+            background-color: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--secondary);
+        }
+        
+        /* Alert Messages */
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
             display: none;
         }
         
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* Card Styles */
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .card h3 {
-            color: var(--dark);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f8f9fa;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        /* Form Styles */
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
-        }
-        
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-        
-        /* Fee Structure Card */
-        .fee-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--primary);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: all 0.3s;
-        }
-        
-        .fee-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .fee-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .fee-card-title {
-            font-weight: 600;
-            color: var(--dark);
-            font-size: 1.1rem;
-        }
-        
-        .fee-card-subtitle {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .fee-breakdown {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-        
-        .fee-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .fee-item:last-child {
-            border-bottom: none;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        
-        /* Table Styles */
-        .table-container {
-            overflow-x: auto;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-        
-        .data-table th {
-            background: var(--primary);
-            color: white;
-            padding: 15px;
-            text-align: left;
-            font-weight: 500;
-        }
-        
-        .data-table td {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .data-table tr:hover {
-            background: #f8f9fa;
-        }
-        
-        .data-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-        /* Alert */
-        .alert {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
         .alert-success {
-            background: #d4edda;
+            background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
         
-        .alert-error {
-            background: #f8d7da;
+        .alert-danger {
+            background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
         
-        /* Status Badges */
-        .badge {
-            padding: 5px 10px;
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        /* Firebase Status */
+        .firebase-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: 500;
         }
         
-        .badge-active {
-            background: #d4edda;
+        .firebase-status.connected {
+            background-color: #d4edda;
             color: #155724;
         }
         
-        .badge-inactive {
-            background: #f8d7da;
+        .firebase-status.disconnected {
+            background-color: #f8d7da;
             color: #721c24;
         }
         
-        .badge-pending {
-            background: #fff3cd;
-            color: #856404;
+        /* Main Content Layout */
+        .fees-main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
         }
         
-        /* Action Buttons */
-        .action-buttons {
-            display: flex;
-            gap: 5px;
+        @media (max-width: 1200px) {
+            .fees-main-content {
+                grid-template-columns: 1fr;
+            }
         }
         
-        .action-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 0.85rem;
+        .section-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 10px;
         }
         
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
+        .section-title i {
+            color: var(--secondary);
         }
         
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Form Styles */
+        .form-group {
             margin-bottom: 20px;
         }
         
-        .modal-header h3 {
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
             color: var(--dark);
         }
         
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #666;
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s;
         }
         
-        /* Mobile Menu Toggle */
-        .menu-toggle {
-            display: none;
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: white;
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 79, 140, 0.1);
+        }
+        
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+        
+        /* Fee Structure Table */
+        .fee-table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        
+        .fee-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .fee-table thead {
+            background-color: #f8f9fa;
+        }
+        
+        .fee-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid #eaeaea;
+            white-space: nowrap;
+        }
+        
+        .fee-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .fee-table tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .fee-table input[type="number"] {
+            width: 120px;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: right;
+        }
+        
+        /* Levies Section */
+        .levies-container {
+            margin-top: 20px;
+        }
+        
+        .levy-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 150px auto;
+            gap: 15px;
+            align-items: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .levy-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
             border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 5px;
-            font-size: 1.2rem;
-            color: var(--primary);
+            font-weight: 500;
             cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark);
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .summary-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-top: 5px solid var(--primary);
+        }
+        
+        .summary-card.nursery {
+            border-top-color: #9b59b6;
+        }
+        
+        .summary-card.primary {
+            border-top-color: #3498db;
+        }
+        
+        .summary-card.secondary {
+            border-top-color: #e74c3c;
+        }
+        
+        .summary-card.levies {
+            border-top-color: #f39c12;
+        }
+        
+        .summary-card.total {
+            border-top-color: #2ecc71;
+        }
+        
+        .summary-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .summary-detail {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
         }
         
         /* Responsive */
-        @media (max-width: 1024px) {
+        @media (max-width: 992px) {
             .sidebar {
-                position: fixed;
-                left: -250px;
-                transition: left 0.3s;
-                height: 100vh;
-            }
-            
-            .sidebar.active {
-                left: 0;
-            }
-            
-            .menu-toggle {
-                display: block;
+                width: 80px;
             }
             
             .main-content {
-                margin-left: 0;
+                margin-left: 80px;
             }
             
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
+            .logo span, .nav-links a span {
+                display: none;
             }
             
-            .header-actions {
-                width: 100%;
-                justify-content: flex-start;
+            .nav-links a {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .nav-links a i {
+                margin-right: 0;
+                font-size: 1.4rem;
             }
         }
         
         @media (max-width: 768px) {
+            .fees-main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
             .form-row {
                 grid-template-columns: 1fr;
             }
             
-            .tabs {
-                flex-direction: column;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .action-buttons {
+            .button-group {
                 flex-direction: column;
             }
             
-            .btn {
-                padding: 8px 15px;
-                font-size: 0.9rem;
+            .button-group .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .fee-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 15px;
+            }
+            
+            .header-info {
+                flex-direction: column;
+                gap: 10px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Mobile Menu Toggle -->
-    <button class="menu-toggle" id="menuToggle">
-        <i class="fas fa-bars"></i>
-    </button>
-    
-    <div class="container">
-        <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
-            <div class="logo">
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+        <div class="logo-container">
+            <a href="dashboard.html" class="logo">
                 <i class="fas fa-graduation-cap"></i>
-                <h1>Success Academy</h1>
-                <p>Fees & Levies</p>
+                <span>SMIA</span>
+            </a>
+        </div>
+        
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="payments.html"><i class="fas fa-money-check-alt"></i> <span>Payments</span></a></li>
+            <li><a href="#" class="active"><i class="fas fa-file-invoice-dollar"></i> <span>Fees & Levies</span></a></li>
+            <li><a href="pupils.html"><i class="fas fa-users"></i> <span>Pupils</span></a></li>
+            <li><a href="students.html"><i class="fas fa-user-graduate"></i> <span>Students</span></a></li>
+            <li><a href="expenses.html"><i class="fas fa-receipt"></i> <span>Expenses</span></a></li>
+            <li><a href="reports.html"><i class="fas fa-chart-bar"></i> <span>Reports</span></a></li>
+            <li><a href="settings.html"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+        </ul>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-file-invoice-dollar"></i> Fees & Levies Management</h1>
+                <p>Configure and manage tuition fees and levies for Sucesss Model International Academy</p>
             </div>
             
-            <div class="nav-menu">
-                <a href="index.html" class="nav-item">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
-                </a>
+            <div class="header-info">
+                <div class="date-display">
+                    <i class="far fa-calendar"></i> <span id="currentDate">Loading...</span>
+                </div>
                 
-                <a href="payment.html" class="nav-item">
-                    <i class="fas fa-credit-card"></i>
-                    <span>Payment System</span>
-                </a>
+                <div id="firebaseStatus" class="firebase-status disconnected">
+                    <i class="fas fa-circle"></i>
+                    <span>Firebase: Disconnected</span>
+                </div>
                 
-                <a href="fees-levies.html" class="nav-item active">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <span>Fees & Levies</span>
-                </a>
-                
-                <a href="pupils.html" class="nav-item">
-                    <i class="fas fa-child"></i>
-                    <span>Pupils (KG/Nursery)</span>
-                </a>
-                
-                <a href="students.html" class="nav-item">
-                    <i class="fas fa-user-graduate"></i>
-                    <span>Students (Primary)</span>
-                </a>
-                
-                <a href="expenses.html" class="nav-item">
-                    <i class="fas fa-receipt"></i>
-                    <span>Expenses</span>
-                </a>
-                
-                <a href="reports.html" class="nav-item">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Reports</span>
-                </a>
-                
-                <a href="settings.html" class="nav-item">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
-                </a>
+                <div class="user-info">
+                    <div class="user-details">
+                        <span id="currentUser">Bursar</span>
+                    </div>
+                    <img src="https://ui-avatars.com/api/?name=Bursar+User&background=1a4f8c&color=fff" alt="User">
+                </div>
             </div>
         </div>
         
-        <!-- Main Content -->
-        <div class="main-content">
-            <div id="alertContainer"></div>
+        <!-- Alert Messages -->
+        <div id="alertSuccess" class="alert alert-success">
+            <i class="fas fa-check-circle"></i> <span id="alertSuccessText">Settings saved successfully!</span>
+        </div>
+        
+        <div id="alertError" class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> <span id="alertErrorText">An error occurred. Please try again.</span>
+        </div>
+        
+        <div id="alertInfo" class="alert alert-info">
+            <i class="fas fa-info-circle"></i> <span id="alertInfoText">Information message</span>
+        </div>
+        
+        <!-- Term Selection -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Academic Term Configuration</h2>
             
-            <div class="header">
-                <div class="header-content">
-                    <h2><i class="fas fa-money-bill-wave"></i> Fees & Levies Management</h2>
-                    <p>Set and manage all school fees, PTA, and other levies</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="currentTerm">Current Term</label>
+                    <select id="currentTerm" class="form-control">
+                        <option value="1">First Term</option>
+                        <option value="2" selected>Second Term</option>
+                        <option value="3">Third Term</option>
+                    </select>
                 </div>
-                <div class="header-actions">
-                    <button class="btn btn-success" onclick="showAddFeeModal()">
-                        <i class="fas fa-plus-circle"></i> Add Fee Structure
+                
+                <div class="form-group">
+                    <label for="academicYear">Academic Year</label>
+                    <input type="text" id="academicYear" class="form-control" placeholder="e.g., 2023/2024" value="2023/2024">
+                </div>
+                
+                <div class="form-group">
+                    <label for="feeStructureType">Fee Structure Type</label>
+                    <select id="feeStructureType" class="form-control">
+                        <option value="uniform">Uniform (Same for all in class)</option>
+                        <option value="variable" selected>Variable (Based on category)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" id="saveTermSettings">
+                    <i class="fas fa-save"></i> Save Term Settings
+                </button>
+                <button class="btn btn-secondary" id="loadTermSettings">
+                    <i class="fas fa-sync"></i> Load Current Settings
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content Layout -->
+        <div class="fees-main-content">
+            <!-- Tuition Fees Configuration -->
+            <div class="section-card">
+                <h2 class="section-title"><i class="fas fa-money-bill-wave"></i> Tuition Fees Configuration</h2>
+                
+                <div class="form-group">
+                    <div class="button-group" style="margin: 0 0 20px 0;">
+                        <button class="btn btn-secondary btn-sm" id="addFeeRow">
+                            <i class="fas fa-plus"></i> Add Class
+                        </button>
+                        <button class="btn btn-secondary btn-sm" id="resetFees">
+                            <i class="fas fa-redo"></i> Reset to Default
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="fee-table-container">
+                    <table class="fee-table" id="tuitionFeesTable">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Class/Level</th>
+                                <th>Term Fee (₦)</th>
+                                <th>Annual Fee (₦)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tuitionFeesBody">
+                            <!-- Fee rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" id="saveTuitionFees">
+                        <i class="fas fa-save"></i> Save Tuition Fees
                     </button>
-                    <button class="btn btn-primary" onclick="window.location.href='payment.html'">
-                        <i class="fas fa-credit-card"></i> Collect Payment
+                </div>
+            </div>
+            
+            <!-- Levies Configuration -->
+            <div class="section-card">
+                <h2 class="section-title"><i class="fas fa-hand-holding-usd"></i> Levies Configuration</h2>
+                
+                <div class="form-group">
+                    <label for="levyType">Levy Type</label>
+                    <select id="levyType" class="form-control">
+                        <option value="per_head">Per Head (All Students)</option>
+                        <option value="by_category">By Category</option>
+                        <option value="by_class">By Class</option>
+                    </select>
+                </div>
+                
+                <div class="levies-container" id="leviesContainer">
+                    <!-- Levies will be populated by JavaScript -->
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="addLevy">
+                        <i class="fas fa-plus"></i> Add New Levy
+                    </button>
+                    <button class="btn btn-primary" id="saveLevies">
+                        <i class="fas fa-save"></i> Save Levies
                     </button>
                 </div>
-            </div>
-            
-            <!-- Tabs -->
-            <div class="tabs">
-                <div class="tab active" data-tab="structures">Fee Structures</div>
-                <div class="tab" data-tab="levies">Levies Management</div>
-                <div class="tab" data-tab="arrears">Fee Arrears</div>
-                <div class="tab" data-tab="reports">Fee Reports</div>
-            </div>
-            
-            <!-- Fee Structures Tab -->
-            <div class="tab-content active" id="structuresTab">
-                <div class="card">
-                    <h3><i class="fas fa-list"></i> Current Fee Structures</h3>
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Class</th>
-                                    <th>Term</th>
-                                    <th>Tuition</th>
-                                    <th>PTA</th>
-                                    <th>Exam</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="feeStructuresTable">
-                                <tr>
-                                    <td colspan="8" style="text-align: center; padding: 40px;">
-                                        <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; color: #667eea;"></i>
-                                        <p style="margin-top: 10px;">Loading fee structures...</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
                 
-                <div class="card">
-                    <h3><i class="fas fa-calculator"></i> Quick Fee Summary</h3>
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; text-align: center;">
-                            <div style="font-size: 1.2rem; font-weight: bold; color: #667eea;" id="totalStructures">0</div>
-                            <div style="color: #666; font-size: 0.9rem;">Fee Structures</div>
+                <!-- Special Levies Section -->
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eaeaea;">
+                    <h3 style="margin-bottom: 15px; color: var(--primary);">
+                        <i class="fas fa-star"></i> Special Levies
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ptaLevy">PTA Levy per Head (₦)</label>
+                            <input type="number" id="ptaLevy" class="form-control" value="5000" min="0" step="500">
                         </div>
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; text-align: center;">
-                            <div style="font-size: 1.2rem; font-weight: bold; color: #28a745;" id="totalFeesAmount">₦0</div>
-                            <div style="color: #666; font-size: 0.9rem;">Total Fees</div>
-                        </div>
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; text-align: center;">
-                            <div style="font-size: 1.2rem; font-weight: bold; color: #ffc107;" id="activeStructures">0</div>
-                            <div style="color: #666; font-size: 0.9rem;">Active</div>
-                        </div>
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; text-align: center;">
-                            <div style="font-size: 1.2rem; font-weight: bold; color: #dc3545;" id="inactiveStructures">0</div>
-                            <div style="color: #666; font-size: 0.9rem;">Inactive</div>
+                        
+                        <div class="form-group">
+                            <label for="ptaFrequency">PTA Frequency</label>
+                            <select id="ptaFrequency" class="form-control">
+                                <option value="per_term">Per Term</option>
+                                <option value="per_session">Per Session</option>
+                                <option value="one_time">One Time Payment</option>
+                            </select>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <!-- Levies Management Tab -->
-            <div class="tab-content" id="leviesTab">
-                <div class="card">
-                    <h3><i class="fas fa-percentage"></i> Levies Configuration</h3>
-                    <form id="leviesForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="levyName">Levy Name *</label>
-                                <input type="text" id="levyName" placeholder="e.g., PTA Levy, Sports Levy" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="levyAmount">Amount (₦) *</label>
-                                <input type="number" id="levyAmount" step="0.01" min="0" required>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="levyType">Levy Type *</label>
-                                <select id="levyType" required>
-                                    <option value="">Select Type</option>
-                                    <option value="mandatory">Mandatory</option>
-                                    <option value="optional">Optional</option>
-                                    <option value="one-time">One-time</option>
-                                    <option value="recurring">Recurring</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="levyFrequency">Frequency</label>
-                                <select id="levyFrequency">
-                                    <option value="per_term">Per Term</option>
-                                    <option value="per_session">Per Session</option>
-                                    <option value="monthly">Monthly</option>
-                                    <option value="once">Once</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group full-width">
-                            <label for="levyDescription">Description</label>
-                            <textarea id="levyDescription" rows="3" placeholder="Describe what this levy is for..."></textarea>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="levyApplicableTo">Applicable To</label>
-                                <select id="levyApplicableTo" multiple style="height: 120px;">
-                                    <option value="all">All Students</option>
-                                    <option value="kg">KG Only</option>
-                                    <option value="nursery1">Nursery 1 Only</option>
-                                    <option value="nursery2">Nursery 2 Only</option>
-                                    <option value="nursery3">Nursery 3 Only</option>
-                                    <option value="primary">Primary Only</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="levyStatus">Status</label>
-                                <select id="levyStatus">
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save"></i> Save Levy
+                    
+                    <div class="button-group" style="margin-top: 20px;">
+                        <button class="btn btn-success" id="saveSpecialLevies">
+                            <i class="fas fa-save"></i> Save Special Levies
                         </button>
-                    </form>
-                </div>
-                
-                <div class="card">
-                    <h3><i class="fas fa-list-ol"></i> Current Levies</h3>
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Levy Name</th>
-                                    <th>Amount</th>
-                                    <th>Type</th>
-                                    <th>Frequency</th>
-                                    <th>Applicable To</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="leviesTable">
-                                <tr>
-                                    <td colspan="7" style="text-align: center; padding: 40px;">
-                                        No levies configured yet. Add a levy above.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Fee Arrears Tab -->
-            <div class="tab-content" id="arrearsTab">
-                <div class="card">
-                    <h3><i class="fas fa-exclamation-circle"></i> Students with Fee Arrears</h3>
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Student Name</th>
-                                    <th>Class</th>
-                                    <th>Total Fee</th>
-                                    <th>Amount Paid</th>
-                                    <th>Balance</th>
-                                    <th>Days Overdue</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="arrearsTable">
-                                <tr>
-                                    <td colspan="7" style="text-align: center; padding: 40px;">
-                                        <i class="fas fa-check-circle" style="font-size: 1.5rem; color: #28a745;"></i>
-                                        <p style="margin-top: 10px;">No fee arrears found. All payments are up to date!</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h3><i class="fas fa-chart-line"></i> Arrears Summary</h3>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-                        <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; text-align: center;">
-                            <div style="font-size: 1.5rem; font-weight: bold; color: #dc3545;" id="totalArrears">₦0</div>
-                            <div style="color: #666;">Total Arrears</div>
-                        </div>
-                        <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; text-align: center;">
-                            <div style="font-size: 1.5rem; font-weight: bold; color: #ffc107;" id="studentsInArrears">0</div>
-                            <div style="color: #666;">Students in Arrears</div>
-                        </div>
-                        <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; text-align: center;">
-                            <div style="font-size: 1.5rem; font-weight: bold; color: #17a2b8;" id="oldestArrear">0 days</div>
-                            <div style="color: #666;">Oldest Arrear</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Fee Reports Tab -->
-            <div class="tab-content" id="reportsTab">
-                <div class="card">
-                    <h3><i class="fas fa-filter"></i> Generate Fee Report</h3>
-                    <form id="reportForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="reportType">Report Type</label>
-                                <select id="reportType">
-                                    <option value="fee_collection">Fee Collection Summary</option>
-                                    <option value="arrears_report">Arrears Report</option>
-                                    <option value="levy_collection">Levy Collection</option>
-                                    <option value="class_wise">Class-wise Collection</option>
-                                    <option value="term_wise">Term-wise Collection</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="reportTerm">Term</label>
-                                <select id="reportTerm">
-                                    <option value="all">All Terms</option>
-                                    <option value="Term 1 2024/2025">Term 1 2024/2025</option>
-                                    <option value="Term 2 2024/2025">Term 2 2024/2025</option>
-                                    <option value="Term 3 2024/2025">Term 3 2024/2025</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="startDate">Start Date</label>
-                                <input type="date" id="startDate">
-                            </div>
-                            <div class="form-group">
-                                <label for="endDate">End Date</label>
-                                <input type="date" id="endDate">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="reportClass">Class (Optional)</label>
-                                <select id="reportClass">
-                                    <option value="all">All Classes</option>
-                                    <option value="kg">KG</option>
-                                    <option value="nursery1">Nursery 1</option>
-                                    <option value="nursery2">Nursery 2</option>
-                                    <option value="nursery3">Nursery 3</option>
-                                    <option value="primary">Primary</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="reportFormat">Format</label>
-                                <select id="reportFormat">
-                                    <option value="html">Web View</option>
-                                    <option value="pdf">PDF</option>
-                                    <option value="excel">Excel</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-primary" onclick="generateReport()">
-                            <i class="fas fa-file-export"></i> Generate Report
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="printReport()">
-                            <i class="fas fa-print"></i> Print Report
-                        </button>
-                    </form>
-                </div>
-                
-                <div class="card">
-                    <h3><i class="fas fa-chart-pie"></i> Fee Collection Statistics</h3>
-                    <div id="reportResults" style="min-height: 300px; display: flex; align-items: center; justify-content: center;">
-                        <p style="color: #666;">Select report criteria and generate to see results</p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Add/Edit Fee Structure Modal -->
-    <div class="modal" id="feeModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Add Fee Structure</h3>
-                <button class="close-modal" onclick="closeFeeModal()">&times;</button>
+        
+        <!-- Summary Section -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-chart-bar"></i> Fee Structure Summary</h2>
+            
+            <div class="summary-cards">
+                <div class="summary-card nursery">
+                    <div class="summary-title">
+                        <i class="fas fa-baby-carriage"></i> Nursery Section
+                    </div>
+                    <div class="summary-value" id="nurseryTotal">₦0</div>
+                    <div class="summary-detail">
+                        <span id="nurseryClasses">0 classes</span> • Avg: <span id="nurseryAvg">₦0</span>
+                    </div>
+                </div>
+                
+                <div class="summary-card primary">
+                    <div class="summary-title">
+                        <i class="fas fa-school"></i> Primary Section
+                    </div>
+                    <div class="summary-value" id="primaryTotal">₦0</div>
+                    <div class="summary-detail">
+                        <span id="primaryClasses">0 classes</span> • Avg: <span id="primaryAvg">₦0</span>
+                    </div>
+                </div>
+                
+                <div class="summary-card secondary">
+                    <div class="summary-title">
+                        <i class="fas fa-university"></i> Secondary Section
+                    </div>
+                    <div class="summary-value" id="secondaryTotal">₦0</div>
+                    <div class="summary-detail">
+                        <span id="secondaryClasses">0 classes</span> • Avg: <span id="secondaryAvg">₦0</span>
+                    </div>
+                </div>
+                
+                <div class="summary-card levies">
+                    <div class="summary-title">
+                        <i class="fas fa-handshake"></i> Total Levies
+                    </div>
+                    <div class="summary-value" id="totalLevies">₦0</div>
+                    <div class="summary-detail">
+                        <span id="leviesCount">0 levies</span> • Per head: <span id="leviesPerHead">₦0</span>
+                    </div>
+                </div>
+                
+                <div class="summary-card total">
+                    <div class="summary-title">
+                        <i class="fas fa-calculator"></i> Total Expected
+                    </div>
+                    <div class="summary-value" id="totalExpected">₦0</div>
+                    <div class="summary-detail">
+                        Tuition + Levies • Per student: <span id="avgPerStudent">₦0</span>
+                    </div>
+                </div>
             </div>
-            <form id="feeStructureForm">
-                <input type="hidden" id="feeId">
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="className">Class *</label>
-                        <select id="className" required>
-                            <option value="">Select Class</option>
-                            <option value="kg">Kindergarten (KG)</option>
-                            <option value="nursery1">Nursery 1</option>
-                            <option value="nursery2">Nursery 2</option>
-                            <option value="nursery3">Nursery 3</option>
-                            <option value="primary1">Primary 1</option>
-                            <option value="primary2">Primary 2</option>
-                            <option value="primary3">Primary 3</option>
-                            <option value="primary4">Primary 4</option>
-                            <option value="primary5">Primary 5</option>
-                            <option value="primary6">Primary 6</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="term">Term *</label>
-                        <select id="term" required>
-                            <option value="">Select Term</option>
-                            <option value="Term 1 2024/2025">Term 1 2024/2025</option>
-                            <option value="Term 2 2024/2025">Term 2 2024/2025</option>
-                            <option value="Term 3 2024/2025">Term 3 2024/2025</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <h4 style="margin: 20px 0 10px 0; color: #667eea;">Fee Breakdown</h4>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="tuitionFee">Tuition Fee (₦) *</label>
-                        <input type="number" id="tuitionFee" step="0.01" min="0" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="ptaLevy">PTA Levy (₦)</label>
-                        <input type="number" id="ptaLevy" step="0.01" min="0" value="0">
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="examFee">Examination Fee (₦)</label>
-                        <input type="number" id="examFee" step="0.01" min="0" value="0">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="sportsFee">Sports Fee (₦)</label>
-                        <input type="number" id="sportsFee" step="0.01" min="0" value="0">
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="libraryFee">Library Fee (₦)</label>
-                        <input type="number" id="libraryFee" step="0.01" min="0" value="0">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="medicalFee">Medical Fee (₦)</label>
-                        <input type="number" id="medicalFee" step="0.01" min="0" value="0">
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="developmentLevy">Development Levy (₦)</label>
-                        <input type="number" id="developmentLevy" step="0.01" min="0" value="0">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="otherFees">Other Fees (₦)</label>
-                        <input type="number" id="otherFees" step="0.01" min="0" value="0">
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="status">Status *</label>
-                        <select id="status" required>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="dueDate">Due Date</label>
-                        <input type="date" id="dueDate">
-                    </div>
-                </div>
-                
-                <div class="form-group full-width">
-                    <label for="description">Description</label>
-                    <textarea id="description" rows="3" placeholder="Additional details about this fee structure..."></textarea>
-                </div>
-                
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <h4>Total Fee: <span id="totalFeeDisplay" style="color: #28a745; font-weight: bold;">₦0.00</span></h4>
-                    <p style="font-size: 0.9rem; color: #666; margin-top: 5px;">This total will be calculated automatically</p>
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="submit" class="btn btn-success" style="flex: 1;">
-                        <i class="fas fa-save"></i> Save Fee Structure
-                    </button>
-                    <button type="button" class="btn btn-secondary" onclick="closeFeeModal()" style="flex: 1;">
-                        <i class="fas fa-times"></i> Cancel
-                    </button>
-                </div>
-            </form>
+            
+            <!-- Chart -->
+            <div class="chart-container">
+                <canvas id="feesChart"></canvas>
+            </div>
         </div>
-    </div>
+        
+        <!-- Current Fee Structure -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-list-alt"></i> Current Fee Structure</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="exportFormat">Export Format</label>
+                    <select id="exportFormat" class="form-control">
+                        <option value="pdf">PDF Document</option>
+                        <option value="excel">Excel Spreadsheet</option>
+                        <option value="print">Print Preview</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="structureFor">Structure For</label>
+                    <select id="structureFor" class="form-control">
+                        <option value="all">All Categories</option>
+                        <option value="nursery">Nursery Only</option>
+                        <option value="primary">Primary Only</option>
+                        <option value="secondary">Secondary Only</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" id="exportStructure">
+                    <i class="fas fa-download"></i> Export Fee Structure
+                </button>
+                <button class="btn btn-secondary" id="printStructure">
+                    <i class="fas fa-print"></i> Print Structure
+                </button>
+                <button class="btn btn-success" id="applyToAll">
+                    <i class="fas fa-copy"></i> Apply to All Students
+                </button>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <h4 style="margin-bottom: 15px; color: var(--primary);">Fee Structure Details</h4>
+                <div id="structureDetails">
+                    <!-- Fee structure details will be populated here -->
+                </div>
+            </div>
+        </div>
+    </main>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { 
-            getFirestore, 
-            collection, 
-            doc, 
-            getDoc, 
-            setDoc, 
-            addDoc, 
-            updateDoc,
-            deleteDoc,
-            query, 
-            where, 
-            orderBy, 
-            limit,
-            getDocs,
-            serverTimestamp 
-        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged 
-        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyC-Xz6BftZJf96JDZu-fUUlR-ldGYG-2gI",
-            authDomain: "sucesss-academy.firebaseapp.com",
-            projectId: "sucesss-academy",
-            storageBucket: "sucesss-academy.firebasestorage.app",
-            messagingSenderId: "274982692906",
-            appId: "1:274982692906:web:5e39a38451725a3cd13b53",
-            measurementId: "G-QLX11V1YHQ"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // Make available globally
-        window.db = db;
-        window.auth = auth;
-        window.firestore = { 
-            collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
-            query, where, orderBy, limit, getDocs, serverTimestamp 
-        };
-
-        console.log("Firebase initialized for Fees & Levies!");
-    </script>
-    
-    <!-- Fees & Levies JavaScript -->
+    <!-- JavaScript Files -->
     <script src="fees-levies-system.js"></script>
+
+    <!-- Initialize Current Date -->
+    <script>
+        // Set current date
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                dateElement.textContent = now.toLocaleDateString('en-US', options);
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', updateCurrentDate);
+    </script>
 </body>
 </html>
