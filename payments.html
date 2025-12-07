@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMIA - Payments Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #1a4f8c;
+            --secondary: #f5a623;
+            --accent: #4caf50;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            --success: #2ecc71;
+            --sidebar-width: 250px;
+        }
+        
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary) 0%, #0d3a6e 100%);
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 3px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        
+        .logo-container {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            color: var(--secondary);
+            font-size: 2.2rem;
+        }
+        
+        .nav-links {
+            list-style: none;
+            padding: 0 15px;
+        }
+        
+        .nav-links li {
+            margin-bottom: 5px;
+        }
+        
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .nav-links a i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .nav-links a.active {
+            background-color: var(--secondary);
+            color: var(--primary);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .header h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--secondary);
+        }
+        
+        /* Payment Sections */
+        .payment-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .payment-sections {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .payment-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            color: var(--secondary);
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 79, 140, 0.1);
+        }
+        
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+        
+        /* Payment Summary */
+        .payment-summary {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .summary-row:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+        
+        .summary-label {
+            color: #6c757d;
+        }
+        
+        .summary-value {
+            font-weight: 600;
+        }
+        
+        /* Outstanding Payments Table */
+        .outstanding-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .outstanding-table thead {
+            background-color: #f8f9fa;
+        }
+        
+        .outstanding-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid #eaeaea;
+        }
+        
+        .outstanding-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .outstanding-table tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        /* Payment Status */
+        .payment-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-outstanding {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-overdue {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Payment History */
+        .payment-history {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .history-table thead {
+            background-color: #f8f9fa;
+        }
+        
+        .history-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid #eaeaea;
+        }
+        
+        .history-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        /* Receipt Modal */
+        .receipt-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .receipt-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+        
+        .school-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .school-address {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .receipt-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin: 20px 0;
+        }
+        
+        .receipt-details {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .receipt-details td {
+            padding: 10px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .receipt-details td:first-child {
+            font-weight: 600;
+            width: 40%;
+        }
+        
+        .receipt-total {
+            margin-top: 30px;
+            text-align: right;
+            border-top: 2px solid #333;
+            padding-top: 20px;
+        }
+        
+        .total-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark);
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        /* Alert Messages */
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        /* Firebase Status */
+        .firebase-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-left: 15px;
+        }
+        
+        .firebase-status.connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .firebase-status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Payment Categories */
+        .category-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .category-badge {
+            background-color: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .category-badge.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* Instalment Info */
+        .instalment-info {
+            background-color: #f0f8ff;
+            border-left: 4px solid var(--info);
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+        
+        .instalment-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .instalment-row:last-child {
+            margin-bottom: 0;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+            
+            .logo span, .nav-links a span {
+                display: none;
+            }
+            
+            .nav-links a {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .nav-links a i {
+                margin-right: 0;
+                font-size: 1.4rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .payment-sections {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .button-group .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .outstanding-table, .history-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo-container">
+            <a href="dashboard.html" class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>SMIA</span>
+            </a>
+        </div>
+        
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="#" class="active"><i class="fas fa-money-check-alt"></i> <span>Payments</span></a></li>
+            <li><a href="fees-levies.html"><i class="fas fa-file-invoice-dollar"></i> <span>Fees & Levies</span></a></li>
+            <li><a href="pupils.html"><i class="fas fa-users"></i> <span>Pupils</span></a></li>
+            <li><a href="students.html"><i class="fas fa-user-graduate"></i> <span>Students</span></a></li>
+            <li><a href="expenses.html"><i class="fas fa-receipt"></i> <span>Expenses</span></a></li>
+            <li><a href="reports.html"><i class="fas fa-chart-bar"></i> <span>Reports</span></a></li>
+            <li><a href="settings.html"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+        </ul>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-money-check-alt"></i> Payments Management</h1>
+                <p>Record and manage fee payments for Sucesss Model International Academy</p>
+            </div>
+            
+            <div class="user-info">
+                <div id="firebaseStatus" class="firebase-status disconnected">
+                    <i class="fas fa-circle"></i>
+                    <span>Firebase: Disconnected</span>
+                </div>
+                <div class="user-details">
+                    <span id="currentUser">Bursar</span>
+                    <img src="https://ui-avatars.com/api/?name=Bursar+User&background=1a4f8c&color=fff" alt="User">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Alert Messages -->
+        <div id="alertSuccess" class="alert alert-success">
+            <i class="fas fa-check-circle"></i> <span id="alertSuccessText">Payment recorded successfully!</span>
+        </div>
+        
+        <div id="alertError" class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> <span id="alertErrorText">An error occurred. Please try again.</span>
+        </div>
+        
+        <!-- Payment Sections -->
+        <div class="payment-sections">
+            <!-- Record New Payment -->
+            <div class="payment-card">
+                <h2 class="section-title"><i class="fas fa-plus-circle"></i> Record New Payment</h2>
+                
+                <form id="paymentForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentSelect">Select Student/Pupil</label>
+                            <select id="studentSelect" class="form-control" required>
+                                <option value="">Select a student/pupil</option>
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="paymentDate">Payment Date</label>
+                            <input type="datetime-local" id="paymentDate" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="paymentType">Payment Type</label>
+                            <select id="paymentType" class="form-control" required>
+                                <option value="tuition">Tuition Fees</option>
+                                <option value="pta">PTA Levy</option>
+                                <option value="levy">Other Levy</option>
+                                <option value="other">Other Payment</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="paymentMethod">Payment Method</label>
+                            <select id="paymentMethod" class="form-control" required>
+                                <option value="cash">Cash</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="pos">POS</option>
+                                <option value="cheque">Cheque</option>
+                                <option value="online">Online Payment</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Payment Category</label>
+                        <div class="category-badges" id="paymentCategories">
+                            <!-- Categories will be populated by JavaScript -->
+                        </div>
+                        <input type="hidden" id="selectedCategory" value="">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="paymentAmount">Payment Amount (₦)</label>
+                        <input type="number" id="paymentAmount" class="form-control" min="0" step="100" placeholder="Enter amount" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="paymentDescription">Description (Optional)</label>
+                        <textarea id="paymentDescription" class="form-control" rows="3" placeholder="Enter payment description"></textarea>
+                    </div>
+                    
+                    <!-- Instalment Information (Visible when payment type is tuition) -->
+                    <div id="instalmentInfo" class="instalment-info" style="display: none;">
+                        <h4><i class="fas fa-calendar-alt"></i> Instalment Payment Information</h4>
+                        <div class="instalment-row">
+                            <span>Total Term Fees:</span>
+                            <span id="totalTermFees">₦0.00</span>
+                        </div>
+                        <div class="instalment-row">
+                            <span>Previously Paid:</span>
+                            <span id="previouslyPaid">₦0.00</span>
+                        </div>
+                        <div class="instalment-row">
+                            <span>Current Payment:</span>
+                            <span id="currentPaymentDisplay">₦0.00</span>
+                        </div>
+                        <div class="instalment-row">
+                            <span>New Balance:</span>
+                            <span id="newBalance">₦0.00</span>
+                        </div>
+                        <div class="instalment-row">
+                            <span>PTA/Levies Deducted:</span>
+                            <span id="leviesDeducted">₦0.00</span>
+                        </div>
+                        <div class="instalment-row">
+                            <span>Status:</span>
+                            <span id="instalmentStatus">Not Calculated</span>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Record Payment
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="calculateInstalment">
+                            <i class="fas fa-calculator"></i> Calculate Instalment
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-redo"></i> Reset Form
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Outstanding Payments -->
+            <div class="payment-card">
+                <h2 class="section-title"><i class="fas fa-exclamation-circle"></i> Outstanding Payments</h2>
+                
+                <div class="form-group">
+                    <label for="filterCategory">Filter by Category</label>
+                    <select id="filterCategory" class="form-control">
+                        <option value="">All Categories</option>
+                        <option value="nursery">Nursery</option>
+                        <option value="primary">Primary</option>
+                        <option value="secondary">Secondary</option>
+                    </select>
+                </div>
+                
+                <div class="outstanding-summary">
+                    <div class="summary-row">
+                        <span class="summary-label">Brought Forward:</span>
+                        <span class="summary-value" id="broughtForwardTotal">₦0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Current Outstanding:</span>
+                        <span class="summary-value" id="currentOutstandingTotal">₦0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">To Carry Forward:</span>
+                        <span class="summary-value" id="carryForwardTotal">₦0.00</span>
+                    </div>
+                </div>
+                
+                <table class="outstanding-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Category</th>
+                            <th>Brought Forward</th>
+                            <th>Current Due</th>
+                            <th>Total Due</th>
+                        </tr>
+                    </thead>
+                    <tbody id="outstandingTableBody">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Payment History -->
+        <div class="payment-history">
+            <h2 class="section-title"><i class="fas fa-history"></i> Recent Payment History</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="searchStudent">Search Student</label>
+                    <input type="text" id="searchStudent" class="form-control" placeholder="Enter student name...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="dateRange">Date Range</label>
+                    <select id="dateRange" class="form-control">
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month" selected>This Month</option>
+                        <option value="term">This Term</option>
+                        <option value="all">All Time</option>
+                    </select>
+                </div>
+            </div>
+            
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Receipt No.</th>
+                        <th>Student</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+            
+            <div class="button-group">
+                <button class="btn btn-secondary" id="loadMorePayments">
+                    <i class="fas fa-sync"></i> Load More
+                </button>
+                <button class="btn btn-primary" id="exportPayments">
+                    <i class="fas fa-download"></i> Export to Excel
+                </button>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="receipt-modal">
+        <div class="receipt-content" id="receiptContent">
+            <div class="receipt-header">
+                <div class="school-name">Sucesss Model International Academy</div>
+                <div class="school-address">123 Education Avenue, Knowledge City</div>
+                <div class="school-address">Phone: +234 801 234 5678 | Email: info@smiacademy.edu.ng</div>
+                <div class="receipt-title">OFFICIAL RECEIPT</div>
+            </div>
+            
+            <table class="receipt-details">
+                <tr>
+                    <td>Receipt Number:</td>
+                    <td id="receiptNumber">SMIA-2023-00123</td>
+                </tr>
+                <tr>
+                    <td>Date & Time:</td>
+                    <td id="receiptDateTime">October 15, 2023 - 10:30 AM</td>
+                </tr>
+                <tr>
+                    <td>Student Name:</td>
+                    <td id="receiptStudent">John Adebayo</td>
+                </tr>
+                <tr>
+                    <td>Class:</td>
+                    <td id="receiptClass">SSS 3</td>
+                </tr>
+                <tr>
+                    <td>Payment Type:</td>
+                    <td id="receiptPaymentType">Tuition Fees</td>
+                </tr>
+                <tr>
+                    <td>Payment Method:</td>
+                    <td id="receiptPaymentMethod">Bank Transfer</td>
+                </tr>
+                <tr>
+                    <td>Description:</td>
+                    <td id="receiptDescription">Term 3 Fees - Instalment 2</td>
+                </tr>
+            </table>
+            
+            <table class="receipt-details">
+                <tr>
+                    <td>Previous Balance:</td>
+                    <td id="receiptPreviousBalance">₦0.00</td>
+                </tr>
+                <tr>
+                    <td>Amount Paid:</td>
+                    <td id="receiptAmountPaid">₦0.00</td>
+                </tr>
+                <tr>
+                    <td>PTA Deducted:</td>
+                    <td id="receiptPTADeducted">₦0.00</td>
+                </tr>
+                <tr>
+                    <td>Levies Deducted:</td>
+                    <td id="receiptLeviesDeducted">₦0.00</td>
+                </tr>
+                <tr>
+                    <td>New Balance:</td>
+                    <td id="receiptNewBalance">₦0.00</td>
+                </tr>
+            </table>
+            
+            <div class="receipt-total">
+                <div>Total Amount Received:</div>
+                <div class="total-amount" id="receiptTotalAmount">₦0.00</div>
+            </div>
+            
+            <div style="margin-top: 40px; text-align: center; font-size: 0.9rem; color: #666;">
+                <div>Thank you for your payment!</div>
+                <div>This receipt is computer generated and does not require a signature.</div>
+                <div style="margin-top: 20px;">
+                    <strong>Authorized By:</strong> School Bursar<br>
+                    <strong>Printed On:</strong> <span id="receiptPrintedDate">October 15, 2023</span>
+                </div>
+            </div>
+            
+            <div class="button-group" style="margin-top: 30px;">
+                <button class="btn btn-primary" id="printReceipt">
+                    <i class="fas fa-print"></i> Print Receipt
+                </button>
+                <button class="btn btn-secondary" id="closeReceipt">
+                    <i class="fas fa-times"></i> Close
+                </button>
+                <button class="btn btn-success" id="downloadReceiptPDF">
+                    <i class="fas fa-download"></i> Download PDF
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Firebase Configuration -->
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-Xz6BftZJf96JDZu-fUUlR-ldGYG-2gI",
+            authDomain: "sucesss-academy.firebaseapp.com",
+            projectId: "sucesss-academy",
+            storageBucket: "sucesss-academy.firebasestorage.app",
+            messagingSenderId: "274982692906",
+            appId: "1:274982692906:web:5e39a38451725a3cd13b53",
+            measurementId: "G-QLX11V1YHQ"
+        };
+    </script>
+    
+    <script>
+        // Initialize Firebase
+        let db, auth;
+        let isFirebaseConnected = false;
+        let currentPaymentId = null;
+        let lastReceiptNumber = 0;
+        
+        // Payment categories
+        const paymentCategories = [
+            { id: 'kg', name: 'KG (Kindergarten)', levels: ['KG 1', 'KG 2', 'KG 3'] },
+            { id: 'nursery', name: 'Nursery', levels: ['Nursery 1', 'Nursery 2', 'Nursery 3'] },
+            { id: 'primary', name: 'Primary', levels: ['Primary 1', 'Primary 2', 'Primary 3', 'Primary 4', 'Primary 5'] },
+            { id: 'secondary', name: 'Secondary', levels: ['JSS 1', 'JSS 2', 'JSS 3', 'SSS 1', 'SSS 2', 'SSS 3'] }
+        ];
+        
+        function initializeFirebase() {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                auth = firebase.auth();
+                isFirebaseConnected = true;
+                updateFirebaseStatus(true);
+                console.log("Firebase initialized successfully");
+                
+                // Check if user is authenticated
+                auth.onAuthStateChanged(user => {
+                    if (user) {
+                        document.getElementById('currentUser').textContent = user.displayName || user.email;
+                        loadPaymentData();
+                    } else {
+                        // If not authenticated, use demo data
+                        console.log("User not authenticated, using demo data");
+                        loadDemoData();
+                    }
+                });
+                
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                updateFirebaseStatus(false);
+                
+                // Load demo data if Firebase fails
+                loadDemoData();
+            }
+        }
+        
+        function updateFirebaseStatus(connected) {
+            const statusElement = document.getElementById('firebaseStatus');
+            if (connected) {
+                statusElement.innerHTML = '<i class="fas fa-circle"></i> <span>Firebase: Connected</span>';
+                statusElement.className = 'firebase-status connected';
+                isFirebaseConnected = true;
+            } else {
+                statusElement.innerHTML = '<i class="fas fa-circle"></i> <span>Firebase: Disconnected (Demo Mode)</span>';
+                statusElement.className = 'firebase-status disconnected';
+                isFirebaseConnected = false;
+            }
+        }
+        
+        // Show alert function
+        function showAlert(type, message) {
+            const alertElement = document.getElementById(`alert${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            const alertText = alertElement.querySelector('span');
+            
+            alertText.textContent = message;
+            alertElement.style.display = 'block';
+            
+            // Hide alert after 5 seconds
+            setTimeout(() => {
+                alertElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return '₦' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Generate receipt number
+        function generateReceiptNumber() {
+            const year = new Date().getFullYear();
+            const randomNum = Math.floor(Math.random() * 1000) + 1;
+            lastReceiptNumber++;
+            return `SMIA-${year}-${String(lastReceiptNumber).padStart(5, '0')}`;
+        }
+        
+        // Initialize payment categories
+        function initPaymentCategories() {
+            const categoriesContainer = document.getElementById('paymentCategories');
+            categoriesContainer.innerHTML = '';
+            
+            paymentCategories.forEach(category => {
+                const badge = document.createElement('div');
+                badge.className = 'category-badge';
+                badge.textContent = category.name;
+                badge.dataset.id = category.id;
+                badge.dataset.levels = JSON.stringify(category.levels);
+                
+                badge.addEventListener('click', function() {
+                    // Remove active class from all badges
+                    document.querySelectorAll('.category-badge').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked badge
+                    this.classList.add('active');
+                    
+                    // Set selected category
+                    document.getElementById('selectedCategory').value = this.dataset.id;
+                    
+                    // Load students for this category
+                    loadStudentsByCategory(this.dataset.id, JSON.parse(this.dataset.levels));
+                });
+                
+                categoriesContainer.appendChild(badge);
+            });
+        }
+        
+        // Load students by category
+        function loadStudentsByCategory(categoryId, levels) {
+            const studentSelect = document.getElementById('studentSelect');
+            
+            // Clear existing options except the first one
+            while (studentSelect.options.length > 1) {
+                studentSelect.remove(1);
+            }
+            
+            if (isFirebaseConnected) {
+                // Load students from Firebase
+                db.collection('students')
+                    .where('category', '==', categoryId)
+                    .get()
+                    .then(snapshot => {
+                        snapshot.forEach(doc => {
+                            const student = doc.data();
+                            const option = document.createElement('option');
+                            option.value = doc.id;
+                            option.textContent = `${student.name} - ${student.level || student.class} (${student.admissionNumber || 'N/A'})`;
+                            option.dataset.data = JSON.stringify(student);
+                            studentSelect.appendChild(option);
+                        });
+                        
+                        if (snapshot.empty) {
+                            showAlert('info', `No ${categoryId} students found in the database.`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error loading students:", error);
+                        showAlert('error', 'Failed to load students.');
+                    });
+            } else {
+                // Load demo students
+                loadDemoStudents(categoryId, levels);
+            }
+        }
+        
+        // Load demo students
+        function loadDemoStudents(categoryId, levels) {
+            const studentSelect = document.getElementById('studentSelect');
+            const demoStudents = getDemoStudents(categoryId, levels);
+            
+            demoStudents.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = `${student.name} - ${student.level} (${student.admissionNumber})`;
+                option.dataset.data = JSON.stringify(student);
+                studentSelect.appendChild(option);
+            });
+        }
+        
+        // Get demo students
+        function getDemoStudents(categoryId, levels) {
+            const names = [
+                'John Adebayo', 'Sarah Johnson', 'Michael Chukwu', 'Grace Okafor', 
+                'David Musa', 'Fatima Ahmed', 'Peter Okonkwo', 'Blessing Adeyemi',
+                'Emma Thompson', 'Daniel Williams', 'Sophia Garcia', 'James Brown'
+            ];
+            
+            const students = [];
+            levels.forEach((level, index) => {
+                const nameIndex = index % names.length;
+                students.push({
+                    id: `${categoryId}_${index + 1}`,
+                    name: names[nameIndex],
+                    level: level,
+                    admissionNumber: `${categoryId.toUpperCase()}${String(index + 1).padStart(3, '0')}`,
+                    category: categoryId,
+                    fees: getFeeByCategoryAndLevel(categoryId, level),
+                    paid: 0,
+                    pta: 5000,
+                    ptaPaid: false,
+                    levies: 8000,
+                    leviesPaid: false,
+                    broughtForward: 0,
+                    outstanding: 0
+                });
+            });
+            
+            return students;
+        }
+        
+        // Get fee by category and level
+        function getFeeByCategoryAndLevel(categoryId, level) {
+            const feeStructure = {
+                'kg': { 'KG 1': 45000, 'KG 2': 48000, 'KG 3': 50000 },
+                'nursery': { 'Nursery 1': 55000, 'Nursery 2': 58000, 'Nursery 3': 60000 },
+                'primary': { 
+                    'Primary 1': 75000, 'Primary 2': 78000, 'Primary 3': 80000,
+                    'Primary 4': 85000, 'Primary 5': 90000
+                },
+                'secondary': {
+                    'JSS 1': 120000, 'JSS 2': 125000, 'JSS 3': 130000,
+                    'SSS 1': 150000, 'SSS 2': 155000, 'SSS 3': 160000
+                }
+            };
+            
+            return feeStructure[categoryId]?.[level] || 0;
+        }
+        
+        // Calculate instalment
+        function calculateInstalment() {
+            const studentSelect = document.getElementById('studentSelect');
+            const paymentAmount = parseFloat(document.getElementById('paymentAmount').value) || 0;
+            const paymentType = document.getElementById('paymentType').value;
+            
+            if (!studentSelect.value) {
+                showAlert('error', 'Please select a student first.');
+                return;
+            }
+            
+            const studentData = JSON.parse(studentSelect.selectedOptions[0].dataset.data);
+            
+            // Show instalment info
+            const instalmentInfo = document.getElementById('instalmentInfo');
+            instalmentInfo.style.display = 'block';
+            
+            // Update instalment info
+            document.getElementById('totalTermFees').textContent = formatCurrency(studentData.fees);
+            document.getElementById('previouslyPaid').textContent = formatCurrency(studentData.paid);
+            document.getElementById('currentPaymentDisplay').textContent = formatCurrency(paymentAmount);
+            
+            // Calculate PTA and levies to deduct
+            let ptaToDeduct = 0;
+            let leviesToDeduct = 0;
+            let newPaidAmount = studentData.paid;
+            let newBalance = studentData.fees - studentData.paid;
+            
+            // If payment type is tuition and PTA/levies haven't been paid
+            if (paymentType === 'tuition') {
+                if (!studentData.ptaPaid && paymentAmount > 0) {
+                    ptaToDeduct = Math.min(studentData.pta, paymentAmount);
+                    newPaidAmount += ptaToDeduct;
+                    paymentAmount -= ptaToDeduct;
+                }
+                
+                if (!studentData.leviesPaid && paymentAmount > 0) {
+                    leviesToDeduct = Math.min(studentData.levies, paymentAmount);
+                    newPaidAmount += leviesToDeduct;
+                    paymentAmount -= leviesToDeduct;
+                }
+                
+                // Now apply the remaining payment to tuition
+                newPaidAmount += paymentAmount;
+                newBalance = studentData.fees - newPaidAmount;
+                
+                // Update display
+                document.getElementById('leviesDeducted').textContent = formatCurrency(ptaToDeduct + leviesToDeduct);
+                document.getElementById('newBalance').textContent = formatCurrency(newBalance);
+                
+                // Update status
+                let status = 'Partial Payment';
+                if (newBalance <= 0) {
+                    status = 'Fully Paid';
+                } else if (newPaidAmount === 0) {
+                    status = 'No Payment Applied';
+                }
+                document.getElementById('instalmentStatus').textContent = status;
+            }
+        }
+        
+        // Handle payment form submission
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const studentSelect = document.getElementById('studentSelect');
+            const paymentDate = document.getElementById('paymentDate').value;
+            const paymentType = document.getElementById('paymentType').value;
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const paymentAmount = parseFloat(document.getElementById('paymentAmount').value);
+            const paymentDescription = document.getElementById('paymentDescription').value;
+            const selectedCategory = document.getElementById('selectedCategory').value;
+            
+            if (!studentSelect.value) {
+                showAlert('error', 'Please select a student.');
+                return;
+            }
+            
+            if (!selectedCategory) {
+                showAlert('error', 'Please select a payment category.');
+                return;
+            }
+            
+            if (!paymentAmount || paymentAmount <= 0) {
+                showAlert('error', 'Please enter a valid payment amount.');
+                return;
+            }
+            
+            const studentData = JSON.parse(studentSelect.selectedOptions[0].dataset.data);
+            const receiptNumber = generateReceiptNumber();
+            
+            // Calculate payment breakdown
+            let tuitionPayment = 0;
+            let ptaPayment = 0;
+            let levyPayment = 0;
+            let remainingAmount = paymentAmount;
+            
+            // Apply payment logic based on payment type
+            if (paymentType === 'tuition') {
+                // First, pay PTA if not paid
+                if (!studentData.ptaPaid && remainingAmount > 0) {
+                    ptaPayment = Math.min(studentData.pta, remainingAmount);
+                    remainingAmount -= ptaPayment;
+                }
+                
+                // Then, pay levies if not paid
+                if (!studentData.leviesPaid && remainingAmount > 0) {
+                    levyPayment = Math.min(studentData.levies, remainingAmount);
+                    remainingAmount -= levyPayment;
+                }
+                
+                // Finally, apply to tuition
+                tuitionPayment = remainingAmount;
+            } else if (paymentType === 'pta') {
+                ptaPayment = paymentAmount;
+            } else if (paymentType === 'levy') {
+                levyPayment = paymentAmount;
+            } else {
+                // For other payment types
+                tuitionPayment = paymentAmount;
+            }
+            
+            // Calculate new totals
+            const newTuitionPaid = studentData.paid + tuitionPayment;
+            const newPTAPaid = studentData.ptaPaid ? studentData.ptaPaid : ptaPayment > 0;
+            const newLeviesPaid = studentData.leviesPaid ? studentData.leviesPaid : levyPayment > 0;
+            
+            const newBalance = studentData.fees - newTuitionPaid;
+            
+            // Create payment record
+            const paymentRecord = {
+                receiptNumber: receiptNumber,
+                studentId: studentSelect.value,
+                studentName: studentData.name,
+                studentLevel: studentData.level,
+                studentCategory: selectedCategory,
+                paymentDate: paymentDate || new Date().toISOString(),
+                paymentType: paymentType,
+                paymentMethod: paymentMethod,
+                paymentAmount: paymentAmount,
+                tuitionPayment: tuitionPayment,
+                ptaPayment: ptaPayment,
+                levyPayment: levyPayment,
+                description: paymentDescription || `${paymentType} payment`,
+                recordedBy: document.getElementById('currentUser').textContent,
+                recordedAt: new Date().toISOString(),
+                previousBalance: studentData.outstanding,
+                newBalance: newBalance
+            };
+            
+            // Update student record
+            const updatedStudentData = {
+                ...studentData,
+                paid: newTuitionPaid,
+                ptaPaid: newPTAPaid,
+                leviesPaid: newLeviesPaid,
+                outstanding: newBalance,
+                lastPaymentDate: new Date().toISOString(),
+                lastPaymentAmount: paymentAmount
+            };
+            
+            if (isFirebaseConnected) {
+                // Save to Firebase
+                const batch = db.batch();
+                
+                // Add payment record
+                const paymentRef = db.collection('payments').doc();
+                batch.set(paymentRef, paymentRecord);
+                
+                // Update student record
+                const studentRef = db.collection('students').doc(studentSelect.value);
+                batch.update(studentRef, updatedStudentData);
+                
+                batch.commit()
+                    .then(() => {
+                        showAlert('success', `Payment of ${formatCurrency(paymentAmount)} recorded successfully!`);
+                        currentPaymentId = paymentRef.id;
+                        
+                        // Show receipt
+                        showReceipt(paymentRecord, studentData, updatedStudentData);
+                        
+                        // Reload data
+                        loadPaymentData();
+                        
+                        // Reset form
+                        document.getElementById('paymentForm').reset();
+                        document.getElementById('instalmentInfo').style.display = 'none';
+                    })
+                    .catch(error => {
+                        console.error("Error saving payment:", error);
+                        showAlert('error', 'Failed to save payment. Please try again.');
+                    });
+            } else {
+                // Demo mode - save to localStorage
+                console.log("Payment record (demo):", paymentRecord);
+                console.log("Updated student (demo):", updatedStudentData);
+                
+                showAlert('success', `Payment of ${formatCurrency(paymentAmount)} recorded successfully! (Demo Mode)`);
+                currentPaymentId = 'demo_' + Date.now();
+                
+                // Show receipt
+                showReceipt(paymentRecord, studentData, updatedStudentData);
+                
+                // Reset form
+                document.getElementById('paymentForm').reset();
+                document.getElementById('instalmentInfo').style.display = 'none';
+                
+                // Update demo data
+                updateDemoStudent(studentSelect.value, updatedStudentData);
+                saveDemoPayment(paymentRecord);
+                
+                // Reload data
+                loadPaymentData();
+            }
+        });
+        
+        // Update demo student
+        function updateDemoStudent(studentId, updatedData) {
+            // This would update the demo student data
+            console.log("Updating demo student:", studentId, updatedData);
+        }
+        
+        // Save demo payment
+        function saveDemoPayment(paymentRecord) {
+            // This would save the payment to demo storage
+            console.log("Saving demo payment:", paymentRecord);
+        }
+        
+        // Show receipt
+        function showReceipt(paymentRecord, studentData, updatedStudentData) {
+            const modal = document.getElementById('receiptModal');
+            const receiptContent = document.getElementById('receiptContent');
+            
+            // Populate receipt data
+            document.getElementById('receiptNumber').textContent = paymentRecord.receiptNumber;
+            document.getElementById('receiptDateTime').textContent = formatDate(paymentRecord.paymentDate);
+            document.getElementById('receiptStudent').textContent = paymentRecord.studentName;
+            document.getElementById('receiptClass').textContent = paymentRecord.studentLevel;
+            document.getElementById('receiptPaymentType').textContent = getPaymentTypeLabel(paymentRecord.paymentType);
+            document.getElementById('receiptPaymentMethod').textContent = getPaymentMethodLabel(paymentRecord.paymentMethod);
+            document.getElementById('receiptDescription').textContent = paymentRecord.description;
+            document.getElementById('receiptPreviousBalance').textContent = formatCurrency(paymentRecord.previousBalance);
+            document.getElementById('receiptAmountPaid').textContent = formatCurrency(paymentRecord.paymentAmount);
+            document.getElementById('receiptPTADeducted').textContent = formatCurrency(paymentRecord.ptaPayment);
+            document.getElementById('receiptLeviesDeducted').textContent = formatCurrency(paymentRecord.levyPayment);
+            document.getElementById('receiptNewBalance').textContent = formatCurrency(paymentRecord.newBalance);
+            document.getElementById('receiptTotalAmount').textContent = formatCurrency(paymentRecord.paymentAmount);
+            document.getElementById('receiptPrintedDate').textContent = new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric'
+            });
+            
+            // Show modal
+            modal.style.display = 'flex';
+        }
+        
+        // Get payment type label
+        function getPaymentTypeLabel(type) {
+            const labels = {
+                'tuition': 'Tuition Fees',
+                'pta': 'PTA Levy',
+                'levy': 'Other Levy',
+                'other': 'Other Payment'
+            };
+            return labels[type] || type;
+        }
+        
+        // Get payment method label
+        function getPaymentMethodLabel(method) {
+            const labels = {
+                'cash': 'Cash',
+                'bank_transfer': 'Bank Transfer',
+                'pos': 'POS',
+                'cheque': 'Cheque',
+                'online': 'Online Payment'
+            };
+            return labels[method] || method;
+        }
+        
+        // Print receipt
+        document.getElementById('printReceipt').addEventListener('click', function() {
+            window.print();
+        });
+        
+        // Download receipt as PDF
+        document.getElementById('downloadReceiptPDF').addEventListener('click', function() {
+            const receiptContent = document.getElementById('receiptContent');
+            
+            html2canvas(receiptContent).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+                const imgWidth = 190;
+                const pageHeight = 295;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 10;
+                
+                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                pdf.save(`Receipt-${document.getElementById('receiptNumber').textContent}.pdf`);
+            });
+        });
+        
+        // Close receipt
+        document.getElementById('closeReceipt').addEventListener('click', function() {
+            document.getElementById('receiptModal').style.display = 'none';
+        });
+        
+        // Calculate instalment button
+        document.getElementById('calculateInstalment').addEventListener('click', calculateInstalment);
+        
+        // Load payment data
+        function loadPaymentData() {
+            loadOutstandingPayments();
+            loadPaymentHistory();
+        }
+        
+        // Load outstanding payments
+        function loadOutstandingPayments() {
+            if (isFirebaseConnected) {
+                // Load from Firebase
+                db.collection('students').where('outstanding', '>', 0).get()
+                    .then(snapshot => {
+                        const outstandingPayments = [];
+                        let broughtForwardTotal = 0;
+                        let currentOutstandingTotal = 0;
+                        
+                        snapshot.forEach(doc => {
+                            const student = { id: doc.id, ...doc.data() };
+                            outstandingPayments.push(student);
+                            
+                            // Calculate totals
+                            broughtForwardTotal += student.broughtForward || 0;
+                            currentOutstandingTotal += student.outstanding || 0;
+                        });
+                        
+                        updateOutstandingTable(outstandingPayments);
+                        updateOutstandingTotals(broughtForwardTotal, currentOutstandingTotal);
+                    })
+                    .catch(error => {
+                        console.error("Error loading outstanding payments:", error);
+                        showAlert('error', 'Failed to load outstanding payments.');
+                    });
+            } else {
+                // Load demo outstanding payments
+                loadDemoOutstandingPayments();
+            }
+        }
+        
+        // Load demo outstanding payments
+        function loadDemoOutstandingPayments() {
+            const outstandingPayments = [];
+            let broughtForwardTotal = 0;
+            let currentOutstandingTotal = 0;
+            
+            // Generate demo data for each category
+            paymentCategories.forEach(category => {
+                category.levels.forEach((level, index) => {
+                    const fees = getFeeByCategoryAndLevel(category.id, level);
+                    const paid = Math.floor(Math.random() * fees * 0.7);
+                    const outstanding = fees - paid;
+                    const broughtForward = Math.floor(Math.random() * 20000);
+                    
+                    if (outstanding > 0) {
+                        const student = {
+                            id: `${category.id}_${index + 1}`,
+                            name: `Demo Student ${index + 1}`,
+                            level: level,
+                            category: category.id,
+                            fees: fees,
+                            paid: paid,
+                            outstanding: outstanding,
+                            broughtForward: broughtForward
+                        };
+                        
+                        outstandingPayments.push(student);
+                        
+                        broughtForwardTotal += broughtForward;
+                        currentOutstandingTotal += outstanding;
+                    }
+                });
+            });
+            
+            updateOutstandingTable(outstandingPayments);
+            updateOutstandingTotals(broughtForwardTotal, currentOutstandingTotal);
+        }
+        
+        // Update outstanding table
+        function updateOutstandingTable(payments) {
+            const tableBody = document.getElementById('outstandingTableBody');
+            tableBody.innerHTML = '';
+            
+            payments.forEach(payment => {
+                const totalDue = (payment.broughtForward || 0) + payment.outstanding;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${payment.name}</td>
+                    <td>${payment.level} (${payment.category})</td>
+                    <td>${formatCurrency(payment.broughtForward || 0)}</td>
+                    <td>${formatCurrency(payment.outstanding)}</td>
+                    <td>${formatCurrency(totalDue)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Update outstanding totals
+        function updateOutstandingTotals(broughtForward, currentOutstanding) {
+            document.getElementById('broughtForwardTotal').textContent = formatCurrency(broughtForward);
+            document.getElementById('currentOutstandingTotal').textContent = formatCurrency(currentOutstanding);
+            document.getElementById('carryForwardTotal').textContent = formatCurrency(currentOutstanding);
+        }
+        
+        // Load payment history
+        function loadPaymentHistory() {
+            if (isFirebaseConnected) {
+                // Load from Firebase
+                db.collection('payments')
+                    .orderBy('paymentDate', 'desc')
+                    .limit(20)
+                    .get()
+                    .then(snapshot => {
+                        const payments = [];
+                        snapshot.forEach(doc => {
+                            payments.push({ id: doc.id, ...doc.data() });
+                        });
+                        
+                        updatePaymentHistoryTable(payments);
+                    })
+                    .catch(error => {
+                        console.error("Error loading payment history:", error);
+                        showAlert('error', 'Failed to load payment history.');
+                    });
+            } else {
+                // Load demo payment history
+                loadDemoPaymentHistory();
+            }
+        }
+        
+        // Load demo payment history
+        function loadDemoPaymentHistory() {
+            const payments = [];
+            const now = new Date();
+            
+            // Generate demo payment history
+            for (let i = 0; i < 15; i++) {
+                const date = new Date(now.getTime() - (i * 24 * 60 * 60 * 1000));
+                const category = paymentCategories[Math.floor(Math.random() * paymentCategories.length)];
+                const level = category.levels[Math.floor(Math.random() * category.levels.length)];
+                const amount = 5000 + Math.random() * 150000;
+                
+                payments.push({
+                    id: `demo_${i}`,
+                    receiptNumber: generateReceiptNumber(),
+                    studentName: `Student ${i + 1}`,
+                    studentLevel: level,
+                    studentCategory: category.id,
+                    paymentDate: date.toISOString(),
+                    paymentType: ['tuition', 'pta', 'levy'][Math.floor(Math.random() * 3)],
+                    paymentMethod: ['cash', 'bank_transfer', 'pos'][Math.floor(Math.random() * 3)],
+                    paymentAmount: Math.round(amount / 100) * 100,
+                    description: `Payment for ${category.name} - ${level}`
+                });
+            }
+            
+            updatePaymentHistoryTable(payments);
+        }
+        
+        // Update payment history table
+        function updatePaymentHistoryTable(payments) {
+            const tableBody = document.getElementById('historyTableBody');
+            tableBody.innerHTML = '';
+            
+            payments.forEach(payment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${formatDate(payment.paymentDate)}</td>
+                    <td>${payment.receiptNumber}</td>
+                    <td>${payment.studentName}</td>
+                    <td>${payment.studentLevel} (${payment.studentCategory})</td>
+                    <td>${getPaymentTypeLabel(payment.paymentType)}</td>
+                    <td>${formatCurrency(payment.paymentAmount)}</td>
+                    <td><span class="payment-status status-paid">Paid</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm view-receipt" data-id="${payment.id}">
+                            <i class="fas fa-receipt"></i> Receipt
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners to receipt buttons
+            document.querySelectorAll('.view-receipt').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const paymentId = this.dataset.id;
+                    // In a real app, you would fetch the payment details and show receipt
+                    showAlert('info', 'Receipt view functionality would open here in full implementation.');
+                });
+            });
+        }
+        
+        // Load demo data
+        function loadDemoData() {
+            // Set default payment date to now
+            const now = new Date();
+            const localDateTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            document.getElementById('paymentDate').value = localDateTime;
+            
+            // Initialize categories
+            initPaymentCategories();
+            
+            // Load outstanding payments
+            loadOutstandingPayments();
+            
+            // Load payment history
+            loadPaymentHistory();
+            
+            showAlert('info', 'Running in demo mode. Connect to Firebase for real data.');
+        }
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Try to initialize Firebase
+            initializeFirebase();
+        });
+    </script>
+</body>
+</html>
