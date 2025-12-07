@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success Model International Academy - Reports</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #1a4f8c;
+            --secondary: #f5a623;
+            --accent: #4caf50;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            --success: #2ecc71;
+            --sidebar-width: 250px;
+        }
+        
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary) 0%, #0d3a6e 100%);
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 3px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        
+        .logo-container {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            color: var(--secondary);
+            font-size: 2.2rem;
+        }
+        
+        .nav-links {
+            list-style: none;
+            padding: 0 15px;
+        }
+        
+        .nav-links li {
+            margin-bottom: 5px;
+        }
+        
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .nav-links a i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .nav-links a.active {
+            background-color: var(--secondary);
+            color: var(--primary);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .header h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--secondary);
+        }
+        
+        /* Report Cards */
+        .report-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card.payments {
+            border-left-color: var(--info);
+        }
+        
+        .card.pupils {
+            border-left-color: var(--success);
+        }
+        
+        .card.students {
+            border-left-color: var(--primary);
+        }
+        
+        .card.expenses {
+            border-left-color: var(--warning);
+        }
+        
+        .card.fees {
+            border-left-color: var(--accent);
+        }
+        
+        .card.levies {
+            border-left-color: var(--danger);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .card.payments .card-icon {
+            background-color: var(--info);
+        }
+        
+        .card.pupils .card-icon {
+            background-color: var(--success);
+        }
+        
+        .card.students .card-icon {
+            background-color: var(--primary);
+        }
+        
+        .card.expenses .card-icon {
+            background-color: var(--warning);
+        }
+        
+        .card.fees .card-icon {
+            background-color: var(--accent);
+        }
+        
+        .card.levies .card-icon {
+            background-color: var(--danger);
+        }
+        
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .card-change {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .card-change.positive {
+            color: var(--success);
+        }
+        
+        .card-change.negative {
+            color: var(--danger);
+        }
+        
+        /* Report Sections */
+        .report-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .section-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark);
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        /* Charts and Tables */
+        .chart-container {
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        thead {
+            background-color: #f8f9fa;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid #eaeaea;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status.paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status.pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.overdue {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Date Range Selector */
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        /* Firebase Connection Status */
+        .firebase-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-left: 15px;
+        }
+        
+        .firebase-status.connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .firebase-status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+            
+            .logo span, .nav-links a span {
+                display: none;
+            }
+            
+            .nav-links a {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .nav-links a i {
+                margin-right: 0;
+                font-size: 1.4rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .report-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .section-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo-container">
+            <a href="#" class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>SMIA</span>
+            </a>
+        </div>
+        
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="#" class="active"><i class="fas fa-chart-bar"></i> <span>Reports</span></a></li>
+            <li><a href="#"><i class="fas fa-users"></i> <span>Students</span></a></li>
+            <li><a href="#"><i class="fas fa-user-graduate"></i> <span>Pupils</span></a></li>
+            <li><a href="#"><i class="fas fa-money-check-alt"></i> <span>Payments</span></a></li>
+            <li><a href="#"><i class="fas fa-file-invoice-dollar"></i> <span>Fees & Levies</span></a></li>
+            <li><a href="#"><i class="fas fa-receipt"></i> <span>Expenses</span></a></li>
+            <li><a href="#"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+        </ul>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-chart-bar"></i> Reports Dashboard</h1>
+                <p>Comprehensive analytics and reports for Success Model International Academy</p>
+            </div>
+            
+            <div class="user-info">
+                <div id="firebaseStatus" class="firebase-status disconnected">
+                    <i class="fas fa-circle"></i>
+                    <span>Firebase: Disconnected</span>
+                </div>
+                <div class="user-details">
+                    <span>Admin User</span>
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=1a4f8c&color=fff" alt="User">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Date Range Selector -->
+        <div class="date-range">
+            <label for="startDate">From:</label>
+            <input type="date" id="startDate" class="date-input">
+            <label for="endDate">To:</label>
+            <input type="date" id="endDate" class="date-input">
+            <button id="applyDateRange" class="btn btn-primary">
+                <i class="fas fa-filter"></i> Apply Filter
+            </button>
+            <button id="resetDateRange" class="btn btn-secondary">
+                <i class="fas fa-redo"></i> Reset
+            </button>
+        </div>
+        
+        <!-- Report Cards -->
+        <div class="report-cards">
+            <div class="card payments">
+                <div class="card-header">
+                    <div class="card-title">Total Payments</div>
+                    <div class="card-icon">
+                        <i class="fas fa-money-check-alt"></i>
+                    </div>
+                </div>
+                <div class="card-value" id="totalPayments">₦0.00</div>
+                <div class="card-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>12.5% from last month</span>
+                </div>
+            </div>
+            
+            <div class="card pupils">
+                <div class="card-header">
+                    <div class="card-title">Total Pupils</div>
+                    <div class="card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="card-value" id="totalPupils">0</div>
+                <div class="card-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>8.2% from last term</span>
+                </div>
+            </div>
+            
+            <div class="card students">
+                <div class="card-header">
+                    <div class="card-title">Total Students</div>
+                    <div class="card-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                </div>
+                <div class="card-value" id="totalStudents">0</div>
+                <div class="card-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>5.7% from last term</span>
+                </div>
+            </div>
+            
+            <div class="card expenses">
+                <div class="card-header">
+                    <div class="card-title">Total Expenses</div>
+                    <div class="card-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                </div>
+                <div class="card-value" id="totalExpenses">₦0.00</div>
+                <div class="card-change negative">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>3.1% from last month</span>
+                </div>
+            </div>
+            
+            <div class="card fees">
+                <div class="card-header">
+                    <div class="card-title">Fees Collected</div>
+                    <div class="card-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                </div>
+                <div class="card-value" id="feesCollected">₦0.00</div>
+                <div class="card-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>15.3% from last term</span>
+                </div>
+            </div>
+            
+            <div class="card levies">
+                <div class="card-header">
+                    <div class="card-title">Levies Collected</div>
+                    <div class="card-icon">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                </div>
+                <div class="card-value" id="leviesCollected">₦0.00</div>
+                <div class="card-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>9.8% from last term</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payments Report Section -->
+        <div class="report-section">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-money-check-alt"></i> Payments Report</h2>
+                <div class="section-actions">
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button class="btn btn-primary" id="refreshPayments">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="paymentsChart"></canvas>
+            </div>
+            
+            <table id="paymentsTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Student/Pupil</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="paymentsTableBody">
+                    <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pupils & Students Report Section -->
+        <div class="report-section">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-user-graduate"></i> Pupils & Students Report</h2>
+                <div class="section-actions">
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button class="btn btn-primary" id="refreshStudents">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="studentsChart"></canvas>
+            </div>
+            
+            <table id="studentsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Class</th>
+                        <th>Category</th>
+                        <th>Enrollment Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Expenses Report Section -->
+        <div class="report-section">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-receipt"></i> Expenses Report</h2>
+                <div class="section-actions">
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button class="btn btn-primary" id="refreshExpenses">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="expensesChart"></canvas>
+            </div>
+            
+            <table id="expensesTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Approved By</th>
+                    </tr>
+                </thead>
+                <tbody id="expensesTableBody">
+                    <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Fees & Levies Report Section -->
+        <div class="report-section">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-file-invoice-dollar"></i> Fees & Levies Report</h2>
+                <div class="section-actions">
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button class="btn btn-primary" id="refreshFees">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="feesChart"></canvas>
+            </div>
+            
+            <table id="feesTable">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Class/Category</th>
+                        <th>Amount</th>
+                        <th>Due Date</th>
+                        <th>Paid</th>
+                        <th>Outstanding</th>
+                    </tr>
+                </thead>
+                <tbody id="feesTableBody">
+                    <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Firebase Configuration (Normally in separate file) -->
+        <script>
+            // Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyC-Xz6BftZJf96JDZu-fUUlR-ldGYG-2gI",
+  authDomain: "sucesss-academy.firebaseapp.com",
+  projectId: "sucesss-academy",
+  storageBucket: "sucesss-academy.firebasestorage.app",
+  messagingSenderId: "274982692906",
+  appId: "1:274982692906:web:5e39a38451725a3cd13b53",
+  measurementId: "G-QLX11V1YHQ"
+}
+        </script>
+    </main>
+    
+    <script>
+        // Initialize Firebase
+        let db;
+        let isFirebaseConnected = false;
+        
+        function initializeFirebase() {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                isFirebaseConnected = true;
+                updateFirebaseStatus(true);
+                console.log("Firebase initialized successfully");
+                
+                // Load initial data
+                loadReportData();
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                updateFirebaseStatus(false);
+                
+                // Load mock data if Firebase fails
+                loadMockData();
+            }
+        }
+        
+        function updateFirebaseStatus(connected) {
+            const statusElement = document.getElementById('firebaseStatus');
+            if (connected) {
+                statusElement.innerHTML = '<i class="fas fa-circle"></i> <span>Firebase: Connected</span>';
+                statusElement.className = 'firebase-status connected';
+                isFirebaseConnected = true;
+            } else {
+                statusElement.innerHTML = '<i class="fas fa-circle"></i> <span>Firebase: Disconnected (Using Demo Data)</span>';
+                statusElement.className = 'firebase-status disconnected';
+                isFirebaseConnected = false;
+            }
+        }
+        
+        // Date setup
+        const today = new Date();
+        const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+        
+        document.getElementById('startDate').valueAsDate = lastMonth;
+        document.getElementById('endDate').valueAsDate = today;
+        
+        // Apply date range filter
+        document.getElementById('applyDateRange').addEventListener('click', function() {
+            loadReportData();
+        });
+        
+        // Reset date range filter
+        document.getElementById('resetDateRange').addEventListener('click', function() {
+            document.getElementById('startDate').valueAsDate = lastMonth;
+            document.getElementById('endDate').valueAsDate = today;
+            loadReportData();
+        });
+        
+        // Refresh buttons
+        document.getElementById('refreshPayments').addEventListener('click', function() {
+            loadPaymentsData();
+        });
+        
+        document.getElementById('refreshStudents').addEventListener('click', function() {
+            loadStudentsData();
+        });
+        
+        document.getElementById('refreshExpenses').addEventListener('click', function() {
+            loadExpensesData();
+        });
+        
+        document.getElementById('refreshFees').addEventListener('click', function() {
+            loadFeesData();
+        });
+        
+        // Load all report data
+        function loadReportData() {
+            loadPaymentsData();
+            loadStudentsData();
+            loadExpensesData();
+            loadFeesData();
+        }
+        
+        // Load payments data
+        async function loadPaymentsData() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let payments = [];
+            
+            if (isFirebaseConnected) {
+                try {
+                    const paymentsRef = db.collection('payments')
+                        .where('date', '>=', startDate)
+                        .where('date', '<=', endDate);
+                    
+                    const snapshot = await paymentsRef.get();
+                    payments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                } catch (error) {
+                    console.error("Error fetching payments:", error);
+                    payments = getMockPayments();
+                }
+            } else {
+                payments = getMockPayments();
+            }
+            
+            // Update summary card
+            const total = payments.reduce((sum, payment) => sum + payment.amount, 0);
+            document.getElementById('totalPayments').textContent = `₦${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            
+            // Update payments table
+            const tableBody = document.getElementById('paymentsTableBody');
+            tableBody.innerHTML = '';
+            
+            payments.forEach(payment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${payment.date}</td>
+                    <td>${payment.studentName}</td>
+                    <td>${payment.type}</td>
+                    <td>₦${payment.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td>${payment.method}</td>
+                    <td><span class="status ${payment.status}">${payment.status}</span></td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Update payments chart
+            updatePaymentsChart(payments);
+        }
+        
+        // Load students data
+        async function loadStudentsData() {
+            let students = [];
+            let pupils = [];
+            
+            if (isFirebaseConnected) {
+                try {
+                    // Fetch students
+                    const studentsRef = db.collection('students').where('type', '==', 'student');
+                    const studentsSnapshot = await studentsRef.get();
+                    students = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    
+                    // Fetch pupils
+                    const pupilsRef = db.collection('students').where('type', '==', 'pupil');
+                    const pupilsSnapshot = await pupilsRef.get();
+                    pupils = pupilsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                } catch (error) {
+                    console.error("Error fetching students:", error);
+                    const mockData = getMockStudents();
+                    students = mockData.students;
+                    pupils = mockData.pupils;
+                }
+            } else {
+                const mockData = getMockStudents();
+                students = mockData.students;
+                pupils = mockData.pupils;
+            }
+            
+            // Update summary cards
+            document.getElementById('totalStudents').textContent = students.length;
+            document.getElementById('totalPupils').textContent = pupils.length;
+            
+            // Combine students and pupils for table display
+            const allStudents = [...students, ...pupils];
+            
+            // Update students table
+            const tableBody = document.getElementById('studentsTableBody');
+            tableBody.innerHTML = '';
+            
+            allStudents.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.class}</td>
+                    <td>${student.type}</td>
+                    <td>${student.enrollmentDate}</td>
+                    <td><span class="status ${student.status === 'active' ? 'paid' : 'pending'}">${student.status}</span></td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Update students chart
+            updateStudentsChart(students, pupils);
+        }
+        
+        // Load expenses data
+        async function loadExpensesData() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let expenses = [];
+            
+            if (isFirebaseConnected) {
+                try {
+                    const expensesRef = db.collection('expenses')
+                        .where('date', '>=', startDate)
+                        .where('date', '<=', endDate);
+                    
+                    const snapshot = await expensesRef.get();
+                    expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                } catch (error) {
+                    console.error("Error fetching expenses:", error);
+                    expenses = getMockExpenses();
+                }
+            } else {
+                expenses = getMockExpenses();
+            }
+            
+            // Update summary card
+            const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+            document.getElementById('totalExpenses').textContent = `₦${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            
+            // Update expenses table
+            const tableBody = document.getElementById('expensesTableBody');
+            tableBody.innerHTML = '';
+            
+            expenses.forEach(expense => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${expense.date}</td>
+                    <td>${expense.description}</td>
+                    <td>${expense.category}</td>
+                    <td>₦${expense.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td>${expense.approvedBy}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Update expenses chart
+            updateExpensesChart(expenses);
+        }
+        
+        // Load fees data
+        async function loadFeesData() {
+            let fees = [];
+            let levies = [];
+            
+            if (isFirebaseConnected) {
+                try {
+                    // Fetch fees
+                    const feesRef = db.collection('fees').where('type', '==', 'tuition');
+                    const feesSnapshot = await feesRef.get();
+                    fees = feesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    
+                    // Fetch levies
+                    const leviesRef = db.collection('fees').where('type', '==', 'levy');
+                    const leviesSnapshot = await leviesRef.get();
+                    levies = leviesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                } catch (error) {
+                    console.error("Error fetching fees:", error);
+                    const mockData = getMockFees();
+                    fees = mockData.fees;
+                    levies = mockData.levies;
+                }
+            } else {
+                const mockData = getMockFees();
+                fees = mockData.fees;
+                levies = mockData.levies;
+            }
+            
+            // Calculate totals
+            const feesTotal = fees.reduce((sum, fee) => sum + fee.amount, 0);
+            const feesPaid = fees.reduce((sum, fee) => sum + fee.paid, 0);
+            const leviesTotal = levies.reduce((sum, levy) => sum + levy.amount, 0);
+            const leviesPaid = levies.reduce((sum, levy) => sum + levy.paid, 0);
+            
+            // Update summary cards
+            document.getElementById('feesCollected').textContent = `₦${feesPaid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('leviesCollected').textContent = `₦${leviesPaid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            
+            // Combine fees and levies for table display
+            const allFees = [...fees, ...levies];
+            
+            // Update fees table
+            const tableBody = document.getElementById('feesTableBody');
+            tableBody.innerHTML = '';
+            
+            allFees.forEach(fee => {
+                const outstanding = fee.amount - fee.paid;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${fee.type === 'tuition' ? 'Tuition Fee' : 'Levy'}</td>
+                    <td>${fee.class}</td>
+                    <td>₦${fee.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td>${fee.dueDate}</td>
+                    <td>₦${fee.paid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td>₦${outstanding.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Update fees chart
+            updateFeesChart(fees, levies);
+        }
+        
+        // Chart functions
+        let paymentsChart, studentsChart, expensesChart, feesChart;
+        
+        function updatePaymentsChart(payments) {
+            const ctx = document.getElementById('paymentsChart').getContext('2d');
+            
+            // Group payments by day
+            const paymentsByDay = {};
+            payments.forEach(payment => {
+                const day = payment.date;
+                if (!paymentsByDay[day]) {
+                    paymentsByDay[day] = 0;
+                }
+                paymentsByDay[day] += payment.amount;
+            });
+            
+            const labels = Object.keys(paymentsByDay).sort();
+            const data = labels.map(label => paymentsByDay[label]);
+            
+            if (paymentsChart) {
+                paymentsChart.destroy();
+            }
+            
+            paymentsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Payments (₦)',
+                        data: data,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₦' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateStudentsChart(students, pupils) {
+            const ctx = document.getElementById('studentsChart').getContext('2d');
+            
+            // Group by class
+            const classCounts = {};
+            [...students, ...pupils].forEach(person => {
+                if (!classCounts[person.class]) {
+                    classCounts[person.class] = { students: 0, pupils: 0 };
+                }
+                if (person.type === 'student') {
+                    classCounts[person.class].students++;
+                } else {
+                    classCounts[person.class].pupils++;
+                }
+            });
+            
+            const classes = Object.keys(classCounts);
+            const studentData = classes.map(cls => classCounts[cls].students);
+            const pupilData = classes.map(cls => classCounts[cls].pupils);
+            
+            if (studentsChart) {
+                studentsChart.destroy();
+            }
+            
+            studentsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: classes,
+                    datasets: [
+                        {
+                            label: 'Students',
+                            data: studentData,
+                            backgroundColor: '#1a4f8c',
+                            borderColor: '#1a4f8c',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Pupils',
+                            data: pupilData,
+                            backgroundColor: '#4caf50',
+                            borderColor: '#4caf50',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateExpensesChart(expenses) {
+            const ctx = document.getElementById('expensesChart').getContext('2d');
+            
+            // Group by category
+            const expensesByCategory = {};
+            expenses.forEach(expense => {
+                if (!expensesByCategory[expense.category]) {
+                    expensesByCategory[expense.category] = 0;
+                }
+                expensesByCategory[expense.category] += expense.amount;
+            });
+            
+            const labels = Object.keys(expensesByCategory);
+            const data = labels.map(label => expensesByCategory[label]);
+            const backgroundColors = [
+                '#f39c12', '#e74c3c', '#9b59b6', '#1abc9c', '#34495e', '#f1c40f'
+            ];
+            
+            if (expensesChart) {
+                expensesChart.destroy();
+            }
+            
+            expensesChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateFeesChart(fees, levies) {
+            const ctx = document.getElementById('feesChart').getContext('2d');
+            
+            // Calculate totals
+            const feesTotal = fees.reduce((sum, fee) => sum + fee.amount, 0);
+            const feesPaid = fees.reduce((sum, fee) => sum + fee.paid, 0);
+            const feesOutstanding = feesTotal - feesPaid;
+            
+            const leviesTotal = levies.reduce((sum, levy) => sum + levy.amount, 0);
+            const leviesPaid = levies.reduce((sum, levy) => sum + levy.paid, 0);
+            const leviesOutstanding = leviesTotal - leviesPaid;
+            
+            if (feesChart) {
+                feesChart.destroy();
+            }
+            
+            feesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Tuition Fees', 'Levies'],
+                    datasets: [
+                        {
+                            label: 'Total Amount',
+                            data: [feesTotal, leviesTotal],
+                            backgroundColor: '#1a4f8c',
+                            borderColor: '#1a4f8c',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Amount Paid',
+                            data: [feesPaid, leviesPaid],
+                            backgroundColor: '#4caf50',
+                            borderColor: '#4caf50',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Outstanding',
+                            data: [feesOutstanding, leviesOutstanding],
+                            backgroundColor: '#e74c3c',
+                            borderColor: '#e74c3c',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₦' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Mock data functions (used when Firebase is not connected)
+        function loadMockData() {
+            loadPaymentsData();
+            loadStudentsData();
+            loadExpensesData();
+            loadFeesData();
+        }
+        
+        function getMockPayments() {
+            return [
+                { id: '1', date: '2023-10-05', studentName: 'John Adebayo', type: 'Tuition', amount: 150000, method: 'Bank Transfer', status: 'paid' },
+                { id: '2', date: '2023-10-06', studentName: 'Sarah Johnson', type: 'Levy', amount: 25000, method: 'Cash', status: 'paid' },
+                { id: '3', date: '2023-10-07', studentName: 'Michael Chukwu', type: 'Tuition', amount: 120000, method: 'Online', status: 'pending' },
+                { id: '4', date: '2023-10-08', studentName: 'Grace Okafor', type: 'Tuition', amount: 180000, method: 'Bank Transfer', status: 'paid' },
+                { id: '5', date: '2023-10-09', studentName: 'David Musa', type: 'Levy', amount: 30000, method: 'Cash', status: 'overdue' },
+                { id: '6', date: '2023-10-10', studentName: 'Fatima Ahmed', type: 'Tuition', amount: 160000, method: 'Online', status: 'paid' },
+                { id: '7', date: '2023-10-11', studentName: 'Peter Okonkwo', type: 'Tuition', amount: 140000, method: 'Bank Transfer', status: 'pending' },
+                { id: '8', date: '2023-10-12', studentName: 'Blessing Adeyemi', type: 'Levy', amount: 20000, method: 'Cash', status: 'paid' }
+            ];
+        }
+        
+        function getMockStudents() {
+            const students = [
+                { id: 'S001', name: 'John Adebayo', class: 'SS3', type: 'student', enrollmentDate: '2021-09-10', status: 'active' },
+                { id: 'S002', name: 'Sarah Johnson', class: 'SS2', type: 'student', enrollmentDate: '2022-01-15', status: 'active' },
+                { id: 'S003', name: 'Michael Chukwu', class: 'SS1', type: 'student', enrollmentDate: '2023-09-05', status: 'active' },
+                { id: 'S004', name: 'Grace Okafor', class: 'SS3', type: 'student', enrollmentDate: '2021-09-12', status: 'active' },
+                { id: 'S005', name: 'David Musa', class: 'JSS3', type: 'student', enrollmentDate: '2022-09-10', status: 'active' }
+            ];
+            
+            const pupils = [
+                { id: 'P001', name: 'Emma Thompson', class: 'Primary 5', type: 'pupil', enrollmentDate: '2023-09-03', status: 'active' },
+                { id: 'P002', name: 'Daniel Williams', class: 'Primary 4', type: 'pupil', enrollmentDate: '2022-09-10', status: 'active' },
+                { id: 'P003', name: 'Sophia Garcia', class: 'Primary 6', type: 'pupil', enrollmentDate: '2021-09-15', status: 'active' },
+                { id: 'P004', name: 'James Brown', class: 'Primary 3', type: 'pupil', enrollmentDate: '2023-09-05', status: 'active' },
+                { id: 'P005', name: 'Olivia Taylor', class: 'Primary 2', type: 'pupil', enrollmentDate: '2023-09-10', status: 'active' },
+                { id: 'P006', name: 'Liam Martinez', class: 'Primary 1', type: 'pupil', enrollmentDate: '2023-09-12', status: 'active' }
+            ];
+            
+            return { students, pupils };
+        }
+        
+        function getMockExpenses() {
+            return [
+                { id: 'E001', date: '2023-10-01', description: 'Staff Salaries', category: 'Salaries', amount: 1200000, approvedBy: 'Principal' },
+                { id: 'E002', date: '2023-10-02', description: 'Textbooks Purchase', category: 'Academic Materials', amount: 350000, approvedBy: 'Vice Principal' },
+                { id: 'E003', date: '2023-10-03', description: 'Electricity Bill', category: 'Utilities', amount: 85000, approvedBy: 'Bursar' },
+                { id: 'E004', date: '2023-10-04', description: 'Laboratory Equipment', category: 'Facilities', amount: 450000, approvedBy: 'Principal' },
+                { id: 'E005', date: '2023-10-05', description: 'Sports Equipment', category: 'Extracurricular', amount: 120000, approvedBy: 'Games Master' },
+                { id: 'E006', date: '2023-10-06', description: 'Internet Subscription', category: 'Utilities', amount: 65000, approvedBy: 'Bursar' },
+                { id: 'E007', date: '2023-10-07', description: 'Cleaning Supplies', category: 'Maintenance', amount: 45000, approvedBy: 'Admin' }
+            ];
+        }
+        
+        function getMockFees() {
+            const fees = [
+                { id: 'F001', type: 'tuition', class: 'SS3', amount: 200000, paid: 180000, dueDate: '2023-10-31' },
+                { id: 'F002', type: 'tuition', class: 'SS2', amount: 180000, paid: 150000, dueDate: '2023-10-31' },
+                { id: 'F003', type: 'tuition', class: 'SS1', amount: 160000, paid: 120000, dueDate: '2023-10-31' },
+                { id: 'F004', type: 'tuition', class: 'JSS3', amount: 140000, paid: 110000, dueDate: '2023-10-31' },
+                { id: 'F005', type: 'tuition', class: 'JSS2', amount: 120000, paid: 90000, dueDate: '2023-10-31' }
+            ];
+            
+            const levies = [
+                { id: 'L001', type: 'levy', class: 'All Classes', amount: 30000, paid: 25000, dueDate: '2023-10-15' },
+                { id: 'L002', type: 'levy', class: 'SS Only', amount: 15000, paid: 12000, dueDate: '2023-10-15' },
+                { id: 'L003', type: 'levy', class: 'Primary Only', amount: 10000, paid: 8000, dueDate: '2023-10-15' }
+            ];
+            
+            return { fees, levies };
+        }
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Try to initialize Firebase
+            initializeFirebase();
+        });
+    </script>
+</body>
+</html>
