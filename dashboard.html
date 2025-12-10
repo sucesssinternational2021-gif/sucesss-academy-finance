@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SMIA Financial System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="school-logo">SMIA Finance</div>
+                <small>Sucesss Model International Academy</small>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link active">
+                            <i class="fas fa-tachometer-alt nav-icon"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="payments.html" class="nav-link">
+                            <i class="fas fa-credit-card nav-icon"></i>
+                            Payments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fees-levies.html" class="nav-link">
+                            <i class="fas fa-money-bill-wave nav-icon"></i>
+                            Fees & Levies
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="pupils.html" class="nav-link">
+                            <i class="fas fa-child nav-icon"></i>
+                            Pupils
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="students.html" class="nav-link">
+                            <i class="fas fa-user-graduate nav-icon"></i>
+                            Students
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports.html" class="nav-link">
+                            <i class="fas fa-chart-bar nav-icon"></i>
+                            Reports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="settings.html" class="nav-link">
+                            <i class="fas fa-cog nav-icon"></i>
+                            Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt nav-icon"></i>
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer" style="padding: 20px; border-top: 1px solid #e2e8f0;">
+                <div id="schoolAddress" style="font-size: 0.8rem; color: var(--gray-color);"></div>
+                <div id="schoolContact" style="font-size: 0.8rem; color: var(--gray-color); margin-top: 10px;"></div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-title">
+                    <h1>Dashboard Overview</h1>
+                    <p>Welcome to School Financial Management System</p>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="user-profile">
+                        <div class="user-avatar">AD</div>
+                        <div class="user-info">
+                            <div class="user-name" id="userName">Admin User</div>
+                            <div class="user-role" style="font-size: 0.8rem; color: var(--gray-color);">Administrator</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Stats Cards -->
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Total Revenue</h3>
+                        <i class="fas fa-wallet card-icon"></i>
+                    </div>
+                    <div class="card-value" id="totalRevenue">₦ 0.00</div>
+                    <div class="card-footer">This month</div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Active Students</h3>
+                        <i class="fas fa-users card-icon"></i>
+                    </div>
+                    <div class="card-value" id="activeStudents">0</div>
+                    <div class="card-footer">Currently enrolled</div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Pending Fees</h3>
+                        <i class="fas fa-exclamation-circle card-icon"></i>
+                    </div>
+                    <div class="card-value" id="pendingFees">₦ 0.00</div>
+                    <div class="card-footer">Awaiting payment</div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Today's Payments</h3>
+                        <i class="fas fa-calendar-day card-icon"></i>
+                    </div>
+                    <div class="card-value" id="todayPayments">₦ 0.00</div>
+                    <div class="card-footer">Amount collected today</div>
+                </div>
+            </div>
+
+            <!-- Recent Payments Table -->
+            <div class="table-container">
+                <div style="padding: 20px; border-bottom: 1px solid #e2e8f0;">
+                    <h3>Recent Payments</h3>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Payment ID</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentPayments">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px;">
+                                No recent payments found
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Import JavaScript modules -->
+    <script type="module" src="js/main.js"></script>
+    <script type="module">
+        import { getCurrentUserData } from './js/auth.js';
+        
+        // Load user data
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userData = await getCurrentUserData();
+            if (userData) {
+                document.getElementById('userName').textContent = userData.name || 'Admin User';
+            }
+        });
+    </script>
+</body>
+</html>
