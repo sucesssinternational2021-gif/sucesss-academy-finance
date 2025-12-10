@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sucesss Model International Academy</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-container">
+                <div class="logo">SMIA</div>
+                <div class="logo-subtitle">Sucesss Model International Academy</div>
+                <p style="color: var(--gray-color); margin-top: 10px; font-size: 0.9rem;">
+                    School Financial Management System
+                </p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <p style="color: var(--gray-color);">
+                        Contact Admin for account creation
+                    </p>
+                </div>
+            </form>
+            
+            <div class="school-info" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                <p style="text-align: center; color: var(--gray-color); font-size: 0.9rem;">
+                    <i class="fas fa-map-marker-alt"></i> NO13 Behind COCIN Church Gura-Landoh Gyel, Plateau State<br>
+                    <i class="fas fa-phone"></i> 09020488851 | 
+                    <i class="fas fa-envelope"></i> sucesssinternational2021@gmail.com
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { signIn } from './js/auth.js';
+        
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            
+            // Show loading state
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+            loginBtn.disabled = true;
+            
+            const result = await signIn(email, password);
+            
+            if (result.success) {
+                // Redirect to dashboard on success
+                window.location.href = 'dashboard.html';
+            } else {
+                // Show error message
+                alert('Login failed: ' + result.error);
+                
+                // Reset button
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
